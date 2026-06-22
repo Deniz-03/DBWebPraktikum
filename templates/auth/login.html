@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+<!--die Sidebar wird hier nicht benötigt, also wird sie überschrieben-->
+{% block spezNav %}
+{% endblock %}
+
+
+<!--Dieser Block sorgt dafür, dass der contentDiv
+die gesamte Breite ausnutzt, wenn die Sidebar nicht verwendet wird-->
+{% block contentClass %}fullWidth{% endblock %}
+
+{% block content %}
+    <p>Bitte Anmelden</p>
+{% endblock %}
