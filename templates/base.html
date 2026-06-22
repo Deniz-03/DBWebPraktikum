@@ -3,9 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="author" content="Deniz Rahnefeld (409637)">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <title>Title</title>
 </head>
-<body>
+<body class="{% block body %}column baseBody{% endblock %}">
+
+    <div class="headerDiv">
+        <p class="greeting">
+            Startseite
+        </p>
+    </div>
+
+    <div class="mainContainer">
+
+        <div class="iconDiv column">
+            <img src="{{ url_for('static', filename='pictures/icon.png') }}" width="100px" height="45px">
+        </div>
+
+        <div class="navDiv row">
+            <!-- Mit url_for die links funktionsfähig machen
+            <a href="" class="link">Startseite</a>
+            <a href="" class="link">Profil</a>
+            <a href="" class="link">Ausloggen</a>
+            <a href="" class="link">Login</a>
+            <a href="" class="link">Registrieren</a>
+            <a href="" class="link">Produkte</a>
+            -->
+        </div>
+
+        <div class="spezDiv column">
+            <div class="text1">Navigation</div>
+        </div>
+
+        <div class="contentDiv column">
+            {% block content %}Hier könnte Ihre Werbung stehen{% endblock %}
+        </div>
+
+    </div>
 
 </body>
 </html>

@@ -1,0 +1,252 @@
+.baseBody {
+    background-color: #faf8f5; /*off-white*/
+
+    /*Graue Farbe, Farbverlauf der nach 1,5px direkt zu transparent wechselt -> es entsteht ein grauer Punkt*/
+    background-image: radial-gradient(#d3cbd2 1.5px, transparent 1.5px);
+
+    /*Kachelgröße für das background-image -> Punkte wiederholen sich*/
+    background-size: 24px 24px;
+
+    font-family: 'Courier New', Courier, monospace;
+
+    margin: 0; /*Entfernt den Rand*/
+    min-height: 100vh;/*Ganze Seite ist ausgefüllt mit dem Hintergrund*/
+
+    justify-content: flex-start;
+}
+
+.mainContainer {
+    display: grid;
+    grid-template-columns: 150px 1fr;
+    gap: 10px;
+
+    background-color: #ffffff;
+    border: 3px solid rgba(56, 5, 163, 0.4);
+    border-radius: 12px;
+
+    max-width: 1250px;
+    width: 100%;
+    margin: 5px auto;
+    padding: 40px 20px;
+    box-sizing: border-box;
+}
+
+.headerDiv {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+
+    background-color: #ffffff;
+    border: 3px solid rgba(56, 5, 163, 0.4);
+    border-radius: 12px;
+
+    max-width: 1250px;
+    width: 100%;
+    margin: 5px auto;
+    padding: 30px 20px;
+    box-sizing: border-box;
+}
+
+.row {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: stretch;
+    gap: 10px;
+}
+
+.column {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: stretch;
+    gap: 10px;
+}
+
+
+.navDiv {
+    background-color: #ffffff;
+    border: 1px solid rgba(211, 203, 210, 0.4); /* off-white 40% Deckkraft */
+    border-radius: 12px;
+
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04),
+    0 1px 4px rgba(0, 0, 0, 0.02);
+
+    min-height: 70px;
+    padding: 30px 20px;
+    box-sizing: border-box;
+
+    align-items: center;
+}
+
+
+.iconDiv {
+    background-color: #ffffff;
+    border: 1px solid rgba(211, 203, 210, 0.4);
+    border-radius: 12px;
+
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04),
+                0 1px 4px rgba(0, 0, 0, 0.02);
+
+    min-height: 70px;
+    box-sizing: border-box;
+    align-items: center;
+}
+
+.spezDiv {
+    background-color: #ffffff;
+    border: 1px solid rgba(211, 203, 210, 0.4);
+    border-radius: 12px;
+
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04),
+                0 1px 4px rgba(0, 0, 0, 0.02);
+
+    min-height: 100px;
+    padding: 32px;
+    box-sizing: border-box;
+    align-items: center;
+}
+
+.contentDiv {
+    background-color: #ffffff;
+    border: 1px solid rgba(211, 203, 210, 0.4);
+    border-radius: 12px;
+
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04),
+                0 1px 4px rgba(0, 0, 0, 0.02);
+
+    min-height: 100px;
+    padding: 30px 20px;
+    box-sizing: border-box;
+    align-items: center;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse; /* Verhindert doppelte Rahmenlinien */
+    margin: 20px 0;
+    font-size: 16px;
+}
+
+.table th, .table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1.5px solid rgba(56, 5, 163, 0.4);
+    color: #4a3e3d;
+}
+
+.table th {
+    background-color: #faf8f5;
+    font-weight: 600;
+    border-bottom: 2px solid rgba(56, 5, 163, 0.4); /* Etwas dickere Linie für den Header */
+}
+
+.link {
+    display: inline-block;
+    padding: 12px 28px;
+
+    font-size: 15px;
+    font-weight: 600;
+    text-decoration: none; /* Entfernt den typischen Unterstrich von Links */
+    letter-spacing: 0.5px;
+
+    color: #4a3e3d;            /* Dunkles Anthrazit/Braun */
+    background-color: #fff;
+    border: 1.5px solid rgba(56, 5, 163, 0.4);
+    border-radius: 4px;
+
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04),
+                0 1px 4px rgba(0, 0, 0, 0.02);
+
+    /* Sorgt für einen flüssigen Übergang beim Hover-Effekt */
+    transition: all 0.2s ease-in-out;
+    cursor: pointer;
+}
+
+.link:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.06),
+                0 2px 8px rgba(0, 0, 0, 0.03);
+}
+
+
+.titel {
+    color: #2c3e50;
+    font-size: 40px;
+    text-align: center;
+}
+
+.greeting {
+    color: #2c3e50;
+    font-size: 40px;
+    font-weight: bold;
+    text-align: center;
+}
+
+.text1 {
+    color: #2c3e50;
+    font-size: 18px;
+    text-align: center;
+}
+
+.inpt {
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+.inpt label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #4a3e3d;
+    margin-bottom: 8px;
+}
+
+.inpt input {
+    padding: 12px;
+    font-size: 15px;
+    border: 1.5px solid rgba(56, 5, 163, 0.4);
+    border-radius: 4px;
+    background-color: #faf8f5; /* off-white*/
+    color: #4a3e3d;
+    outline: none;
+    transition: all 0.2s ease-in-out;
+}
+
+.inpt input:focus {
+    border-color: #4a3e3d;
+    background-color: #ffffff;
+}
+
+.checkbox {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.checkbox input[type="checkbox"] {
+    margin-right: 10px;
+    accent-color: #4a3e3d; /* Färbt den Haken modern dunkel statt Blau */
+    cursor: pointer;
+}
+
+.checkbox label {
+    font-size: 14px;
+    color: #4a3e3d;
+    cursor: pointer;
+    user-select: none;
+}
+
+.submit {
+    width: 100%;
+    margin-top: 15px;
+    text-align: center;
+    box-sizing: border-box;
+}
+
+.errorMessage {
+    color: red;
+    font-weight: bold;
+    margin-bottom: 15px;
+}

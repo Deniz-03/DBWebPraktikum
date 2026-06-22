@@ -14,4 +14,4 @@ class Config:
 
         SECRET_KEY = os.environ.get('SECRET_KEY', 'extremly_secret_key')
     except Exception as e:
-        pass
+        print("Probleme beim Laden der Umgegbungvariablen")
