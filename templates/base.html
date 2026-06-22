@@ -25,17 +25,21 @@
             <a href="" class="link">Startseite</a>
             <a href="" class="link">Profil</a>
             <a href="" class="link">Ausloggen</a>
-            <a href="" class="link">Login</a>
+
             <a href="" class="link">Registrieren</a>
             <a href="" class="link">Produkte</a>
             -->
+            <a href="{{ url_for('auth.index') }}" class="link">Startseite</a>
+            <a href="{{ url_for('auth.login') }}" class="link">Login</a>
         </div>
 
+        {% block spezNav %}
         <div class="spezDiv column">
             <div class="text1">Navigation</div>
         </div>
+        {% endblock %}
 
-        <div class="contentDiv column">
+        <div class="contentDiv column {% block contentClass %}{% endblock %}">
             {% block content %}Hier könnte Ihre Werbung stehen{% endblock %}
         </div>
 
