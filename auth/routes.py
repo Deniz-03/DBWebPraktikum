@@ -25,5 +25,15 @@ def register():
     else:
         #TODO Registrierung abschließen und Nutzer anlegen
         pass
+@auth_bp.route('/profile', methods=['GET', 'POST'])
+def profile():
+    if request.method == 'GET':
+        #if logged in:
+        #else:
+        return redirect(url_for('auth.login'))
+    else:
+        #TODO Authentifikation hinzufügen
+        return render_template("auth/profile.html")
+
 
 
