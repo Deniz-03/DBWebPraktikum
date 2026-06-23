@@ -28,11 +28,12 @@
             <a href="" class="link">Profil</a>
             <a href="" class="link">Ausloggen</a>
 
-            <a href="" class="link">Registrieren</a>
+
             <a href="" class="link">Produkte</a>
             -->
             <a href="{{ url_for('auth.index') }}" class="link">Startseite</a>
             <a href="{{ url_for('auth.login') }}" class="link">Login</a>
+            <a href="{{ url_for('auth.register') }}" class="link">Registrieren</a>
         </div>
 
         {% block spezNav %}
