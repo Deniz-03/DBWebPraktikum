@@ -4,13 +4,15 @@
     <meta charset="UTF-8">
     <meta name="author" content="Deniz Rahnefeld (409637)">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <title>Title</title>
+    <title>{% block title %} Title {% endblock %}</title>
 </head>
 <body class="{% block body %}column baseBody{% endblock %}">
 
     <div class="headerDiv">
         <p class="greeting">
-            Startseite
+            {% block header %}
+                Base
+            {% endblock %}
         </p>
     </div>
 
