@@ -15,7 +15,15 @@ def login():
     if request.method == 'GET':
         return render_template("auth/login.html")
     else:
-        #TODO Angemeldeten Nutzer weiterleiten
+        #TODO Angemeldeten Nutzer weiterleiten bzw. Nutzer anmelden
+        pass
+
+@auth_bp.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'GET':
+        return render_template("auth/register.html")
+    else:
+        #TODO Registrierung abschließen und Nutzer anlegen
         pass
 
 
