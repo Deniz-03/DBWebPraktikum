@@ -58,3 +58,10 @@ cur.execute("CREATE TABLE dozierende (d_id INT PRIMARY KEY, "
             "FOREIGN KEY (d_id) REFERENCES account(id) ON DELETE CASCADE)")
 
 
+
+
+
+conn.commit()
+
+cur.close()
+conn.close()
