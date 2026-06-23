@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block title %}Profil{% endblock %}
+{% block header %}Profil{% endblock %}
+
+<!--die Sidebar wird hier nicht benötigt, also wird sie überschrieben-->
+{% block spezNav %}
+{% endblock %}
+
+<!--Dieser Block sorgt dafür, dass der contentDiv
+die gesamte Breite ausnutzt, wenn die Sidebar nicht verwendet wird-->
+{% block contentClass %}fullWidth{% endblock %}
+
