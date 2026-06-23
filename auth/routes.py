@@ -3,6 +3,23 @@
 from flask import Blueprint, render_template, request, redirect, url_for, session
 from auth.queries import *
 
+##############Hilfsmethoden######################
+def checkRegisterInput(data):
+    # TODO Input vom register Formular überpruefen
+    # Schritt 1: Ist jedes Pflichtfeld ausgefüllt?
+    # Schritt 2: Passen die Eingaben in die Regex Konventionen
+    pass
+
+def checkLoginInput(data):
+    # TODO Input vom login Formular überpruefen
+    # Schritt 1: Ist jedes Feld ausgefüllt?
+    # Schritt 2: Passen die Eingaben in die Regex Konventionen
+    pass
+
+def checkPassword(data):
+    # TODO gucken ob diese Email Passwort Kombination in Account vorhanden ist.
+    pass
+##############HilfsmethodenEnde######################
 
 auth_bp = Blueprint('auth', __name__, template_folder='templates')
 

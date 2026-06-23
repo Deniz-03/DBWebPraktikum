@@ -129,6 +129,24 @@
     grid-column: 1 / -1;
 }
 
+.formColumns {
+    display: flex;
+    flex-direction: row;
+    gap: 30px;
+}
+
+.formCol {
+    flex: 1;
+}
+
+.radioRow {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 5px;
+}
+
 .table {
     width: 100%;
     border-collapse: collapse; /* Verhindert doppelte Rahmenlinien */
@@ -177,13 +195,6 @@
                 0 2px 8px rgba(0, 0, 0, 0.03);
 }
 
-
-.titel {
-    color: #2c3e50;
-    font-size: 40px;
-    text-align: center;
-}
-
 .greeting {
     color: #2c3e50;
     font-size: 40px;
@@ -194,6 +205,13 @@
 .text1 {
     color: #2c3e50;
     font-size: 18px;
+    text-align: center;
+}
+
+.textBold {
+    color: #2c3e50;
+    font-size: 18px;
+    font-weight: bold;
     text-align: center;
 }
 
