@@ -13,40 +13,78 @@ die gesamte Breite ausnutzt, wenn die Sidebar nicht verwendet wird-->
 
 {% block content %}
     <form action="{{ url_for('auth.register') }}" method="POST">
-            <div class="inpt">
-                <label for="Vorname">Vorname</label>
-                <input type="text" name="Vorname" id="Vorname" value="" placeholder="Max" required>
-            </div>
-            <div class="inpt">
-                <label for="Nachname">Nachname</label>
-                <input type="text" name="Nachname" id="Nachname" value="" placeholder="Mustermann" required>
-            </div>
-            <div class="inpt">
-                <label for="Alter">Alter</label>
-                <input type="number" name="Alter" id="Alter" value="" placeholder="22" min="0" required>
-            </div>
-            <div class="inpt">
-                <label for="Email">E-Mail-Adresse</label>
-                <input type="email" name="Email" id="Email" value="" placeholder="Max@Mustermail.de" required>
-            </div>
-            <div class="inpt">
-                <label for="Passwort">Passwort</label>
-                <input type="password" name="Passwort" id="Passwort" value="" placeholder="...." required>
-            </div>
-            <div class="inpt">
-                <label for="Passwort wiederholen">Passwort wiederholen</label>
-                <input type="password" name="Passwort wiederholen" id="Passwort wiederholen" value="" placeholder="...." required>
-            </div>
-            <div class="checkbox">
-                <input type="checkbox" name="agb" id="agb" required>
-                <label for="agb">Ich akzeptiere die Geschäftsbedingungen *</label>
-            </div>
-            <div class="checkbox">
-                <input type="checkbox" name="newsletter" id="newsletter">
-                <label for="newsletter">Ich möchte den Newsletter abonnieren (optional)</label>
-            </div>
 
-            <button type="submit" class="link submit">Konto erstellen</button>
+        <div class="formColumns">
+            <!--Erste Spalte-->
+            <div class="formCol">
+                <div class="inpt">
+                    <label for="Vorname">Vorname</label>
+                    <input type="text" name="Vorname" id="Vorname" value="" placeholder="Max" required>
+                </div>
+                <div class="inpt">
+                    <label for="Nachname">Nachname</label>
+                    <input type="text" name="Nachname" id="Nachname" value="" placeholder="Mustermann" required>
+                </div>
+                <!--Hier verwende ich einen text Input, um auch Matrikelnummern die mit 0 beginnen zu ermöglichen.
+                Im Backend wird dann geprüft, ob es eine valide positive Zahl ist. -->
+                <div class="inpt">
+                    <label for="Matrikelnummer">Matrikelnummer</label>
+                    <input type="text" name="Matrikelnummer" id="Matrikelnummer" value="" placeholder="123456" required>
+                </div>
+            </div>
+            <!--Zweite Spalte-->
+            <div class="formCol">
+                <div class="inpt">
+                    <label for="Email">E-Mail-Adresse</label>
+                    <input type="email" name="Email" id="Email" value="" placeholder="Max@Mustermail.de" required>
+                </div>
+                <div class="inpt">
+                    <label for="Passwort">Passwort</label>
+                    <input type="password" name="Passwort" id="Passwort" value="" placeholder="...." required>
+                </div>
+                <div class="inpt">
+                    <label for="Passwort wiederholen">Passwort wiederholen</label>
+                    <input type="password" name="Passwort wiederholen" id="Passwort wiederholen" value="" placeholder="...." required>
+                </div>
+            </div>
+        </div>
+
+        <div class="radioRow">
+            <p class="textBold">Seminar:</p>
+
+            <input type="radio" id="IIS" name="seminar" value="IIS">
+            <label for="IIS">IIS</label>
+
+            <input type="radio" id="WBS" name="seminar" value="WBS">
+            <label for="WBS">WBS</label>
+        </div>
+
+        <div class="radioRow">
+            <p class="textBold">Studiengang:</p>
+
+            <input type="radio" id="WINF" name="studiengang_name" value="WINF">
+            <label for="WINF">WINF</label>
+
+            <input type="radio" id="IMIT" name="studiengang_name" value="IMIT">
+            <label for="IMIT">IMIT</label>
+
+            <input type="radio" id="AI" name="studiengang_name" value="AI">
+            <label for="AI">AI</label>
+
+            <input type="radio" id="IIM" name="studiengang_name" value="IIM">
+            <label for="IIM">IIM</label>
+
+            <input type="radio" id="IKU" name="studiengang_name" value="IKU">
+            <label for="IKU">IKU</label>
+        </div>
+
+        <div class="inpt">
+            <label for="seminar_thema">Seminar Thema (optional)</label>
+            <input type="text" name="seminar_thema" id="seminar_thema" placeholder="Retrieval-Augmented Generation" required>
+        </div>
+
+        <button type="submit" class="link submit">Konto erstellen</button>
+
     </form>
 {% endblock %}
 

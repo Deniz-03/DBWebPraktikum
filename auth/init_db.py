@@ -24,7 +24,7 @@ cur.execute('DROP TYPE IF EXISTS ROLLEN CASCADE')
 cur.execute('DROP TYPE IF EXISTS ANREDE_TYPE CASCADE')
 
 # language=PostgreSQL
-cur.execute("CREATE TYPE STUD_TYPE AS ENUM ('WINF', 'IMIT', 'IMIT-AI', 'IIM', 'IKU')")
+cur.execute("CREATE TYPE STUD_TYPE AS ENUM ('WINF', 'IMIT', 'AI', 'IIM', 'IKU')")
 # language=PostgreSQL
 cur.execute("CREATE TYPE ABSCHLUSS_TYPE AS ENUM ('B.Sc', 'M.Sc')")
 # language=PostgreSQL
