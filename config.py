@@ -1,4 +1,4 @@
-#author Deniz Rahnefeld (409637)
+#Author Deniz Rahnefeld (409637)
 
 
 #Hier werden einmal alle Umgebungsvariablen geladen.

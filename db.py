@@ -1,4 +1,4 @@
-#author: Deniz Rahnefeld (409637)
+#Author Deniz Rahnefeld (409637)
 
 import psycopg
 from config import Config
