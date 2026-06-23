@@ -1,4 +1,4 @@
-from xml.etree.ElementTree import QName
+#Author Deniz Rahnefeld (409637)
 
 from flask import Blueprint, render_template, request, redirect, url_for, session
 from auth.queries import *
