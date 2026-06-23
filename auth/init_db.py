@@ -37,7 +37,7 @@ cur.execute("CREATE TYPE ANREDE_TYPE AS ENUM ('Prof. Dr.', 'Dr.', '')")
 
 cur.execute("CREATE TABLE account (id SERIAL PRIMARY KEY, "
             "email VARCHAR(255) UNIQUE NOT NULL, "
-            "password VARCHAR(255) NOT NULL, "
+            "passwort VARCHAR(255) NOT NULL, "
             "rolle ROLLEN NOT NULL)")
 
 
@@ -59,7 +59,53 @@ cur.execute("CREATE TABLE dozierende (d_id INT PRIMARY KEY, "
 
 
 
+###################Dozierende#################################
+cur.execute('INSERT INTO account (email, passwort, rolle) '
+            'VALUES (%s, %s, %s) '
+            'RETURNING id',
+            ('althoff@uni-hildesheim.de',
+             'Passwort!123',
+             'doz'))
+acc_id = cur.fetchone()[0]
 
+cur.execute("INSERT INTO dozierende (d_id, anrede, vorname, nachname)"
+            "VALUES (%s, %s, %s, %s)",
+            (acc_id,
+             'Prof. Dr.',
+             'Klaus-Dieter',
+             'Althoff'))
+
+
+cur.execute('INSERT INTO account (email, passwort, rolle) '
+            'VALUES (%s, %s, %s) '
+            'RETURNING id',
+            ('reusspa@uni-hildesheim.de',
+             'Passwort!123',
+             'doz'))
+acc_id = cur.fetchone()[0]
+
+cur.execute("INSERT INTO dozierende (d_id, anrede, vorname, nachname)"
+            "VALUES (%s, %s, %s, %s)",
+            (acc_id,
+             'Dr.',
+             'Pascal',
+             'Reuss'))
+
+
+cur.execute('INSERT INTO account (email, passwort, rolle) '
+            'VALUES (%s, %s, %s) '
+            'RETURNING id',
+            ('schoenb@uni-hildesheim.de',
+             'Passwort!123',
+             'doz'))
+acc_id = cur.fetchone()[0]
+
+cur.execute("INSERT INTO dozierende (d_id, anrede, vorname, nachname)"
+            "VALUES (%s, %s, %s, %s)",
+            (acc_id,
+             '',
+             'Jakob Michael',
+             'Schönborn'))
 
 conn.commit()
 
