@@ -82,11 +82,13 @@ def validate_register(data)-> tuple[bool, list]:
 
     if not re.match(pass_pattern, passwort):                                    #Passwort
         valid_input = False
-        flash_messages.append("Passwort ist invalide.")
+        flash_messages.append("Passwort muss aus min. einem Groß- und Kleinbuchstaben "
+                              "und einem Sonderzeichen bestehen.")
 
     if not re.match(pass_pattern, passwort_wiederholen):                        #Passwort wiederholen
         valid_input = False
-        flash_messages.append("Passwort wiederholen ist invalide.")
+        flash_messages.append("Passwort muss aus min. einem Groß- und Kleinbuchstaben "
+                              "und einem Sonderzeichen bestehen.")
 
     if passwort != passwort_wiederholen:                                    #Passwörter vergleichen
         valid_input = False

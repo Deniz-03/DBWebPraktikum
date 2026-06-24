@@ -12,6 +12,14 @@ die gesamte Breite ausnutzt, wenn die Sidebar nicht verwendet wird-->
 {% block contentClass %}fullWidth{% endblock %}
 
 {% block content %}
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            {% for message in messages %}
+                <div class="errorMessage">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
     <form action="{{ url_for('auth.register') }}" method="POST">
 
         <div class="formColumns">
@@ -19,32 +27,34 @@ die gesamte Breite ausnutzt, wenn die Sidebar nicht verwendet wird-->
             <div class="formCol">
                 <div class="inpt">
                     <label for="vorname">Vorname</label>
-                    <input type="text" name="vorname" id="vorname" value="" placeholder="Max" required>
+                    <input type="text" name="vorname" id="vorname" value="{{ values.get('vorname') }}" placeholder="Max" required>
                 </div>
                 <div class="inpt">
                     <label for="nachname">Nachname</label>
-                    <input type="text" name="nachname" id="nachname" value="" placeholder="Mustermann" required>
+                    <input type="text" name="nachname" id="nachname" value="{{ values.get('nachname') }}" placeholder="Mustermann" required>
                 </div>
                 <!--Hier verwende ich einen text Input, um auch Matrikelnummern die mit 0 beginnen zu ermöglichen.
                 Im Backend wird dann geprüft, ob es eine valide positive Zahl ist. -->
                 <div class="inpt">
                     <label for="matr_nr">Matrikelnummer</label>
-                    <input type="text" name="matr_nr" id="matr_nr" value="" placeholder="123456" required>
+                    <input type="text" name="matr_nr" id="matr_nr" value="{{ values.get('matr_nr') }}" placeholder="123456" required>
                 </div>
             </div>
             <!--Zweite Spalte-->
             <div class="formCol">
                 <div class="inpt">
                     <label for="email">E-Mail-Adresse</label>
-                    <input type="email" name="email" id="email" value="" placeholder="Max@Mustermail.de" required>
+                    <input type="email" name="email" id="email" value="{{ values.get('email') }}" placeholder="max@mustermail.de" required>
                 </div>
+                <!--Hier entscheide ich mich bewusst dagegen die Passwörter mit zurückzugeben,
+                damit diese nicht wieder im HTML Code landen und abgefangen werden können.-->
                 <div class="inpt">
                     <label for="passwort">Passwort</label>
-                    <input type="password" name="passwort" id="passwort" value="" placeholder="...." required>
+                    <input type="password" name="passwort" id="passwort" placeholder="...." required>
                 </div>
                 <div class="inpt">
                     <label for="passwort_wiederholen">Passwort wiederholen</label>
-                    <input type="password" name="passwort_wiederholen" id="passwort_wiederholen" value="" placeholder="...." required>
+                    <input type="password" name="passwort_wiederholen" id="passwort_wiederholen" placeholder="...." required>
                 </div>
             </div>
         </div>
@@ -52,45 +62,54 @@ die gesamte Breite ausnutzt, wenn die Sidebar nicht verwendet wird-->
         <div class="radioRow">
             <p class="textBold">Seminar:</p>
 
-            <input type="radio" id="IIS" name="seminar" value="IIS">
+            <input type="radio" id="IIS" name="seminar" value="IIS"
+                {{ 'checked' if values.get('seminar') == 'IIS' else '' }}>
             <label for="IIS">IIS</label>
 
-            <input type="radio" id="WBS" name="seminar" value="WBS">
+            <input type="radio" id="WBS" name="seminar" value="WBS"
+                   {{ 'checked' if values.get('seminar') == 'WBS' else '' }}>
             <label for="WBS">WBS</label>
         </div>
 
         <div class="radioRow">
             <p class="textBold">Studiengang:</p>
 
-            <input type="radio" id="WINF" name="studiengang_name" value="WINF">
+            <input type="radio" id="WINF" name="studiengang_name" value="WINF"
+                   {{ 'checked' if values.get('studiengang_name') == 'WINF' else '' }}>
             <label for="WINF">WINF</label>
 
-            <input type="radio" id="IMIT" name="studiengang_name" value="IMIT">
+            <input type="radio" id="IMIT" name="studiengang_name" value="IMIT"
+                   {{ 'checked' if values.get('studiengang_name') == 'IMIT' else '' }}>
             <label for="IMIT">IMIT</label>
 
-            <input type="radio" id="AI" name="studiengang_name" value="AI">
+            <input type="radio" id="AI" name="studiengang_name" value="AI"
+                   {{ 'checked' if values.get('studiengang_name') == 'AI' else '' }}>
             <label for="AI">AI</label>
 
-            <input type="radio" id="IIM" name="studiengang_name" value="IIM">
+            <input type="radio" id="IIM" name="studiengang_name" value="IIM"
+                   {{ 'checked' if values.get('studiengang_name') == 'IIM' else '' }}>
             <label for="IIM">IIM</label>
 
-            <input type="radio" id="IKU" name="studiengang_name" value="IKU">
+            <input type="radio" id="IKU" name="studiengang_name" value="IKU"
+                    {{ 'checked' if values.get('studiengang_name') == 'IKU' else '' }}>
             <label for="IKU">IKU</label>
         </div>
 
-        <div class="inpt">
+        <div class="radioRow">
             <p class="textBold">Abschluss:</p>
 
-            <input type="radio" id="B.Sc" name="abschluss" value="B.Sc">
+            <input type="radio" id="B.Sc" name="abschluss" value="B.Sc"
+                   {{ 'checked' if values.get('abschluss') == 'B.Sc' else '' }}>
             <label for="B.Sc">B.Sc</label>
 
-            <input type="radio" id="M.Sc" name="abschluss" value="M.Sc">
+            <input type="radio" id="M.Sc" name="abschluss" value="M.Sc"
+                   {{ 'checked' if values.get('abschluss') == 'M.Sc' else '' }}>
             <label for="M.Sc">M.Sc</label>
         </div>
 
         <div class="inpt">
             <label for="seminar_thema">Seminar Thema (optional)</label>
-            <input type="text" name="seminar_thema" id="seminar_thema" placeholder="Retrieval-Augmented Generation" required>
+            <input type="text" name="seminar_thema" id="seminar_thema" value="{{ values.get('seminar_thema') }}" placeholder="Retrieval-Augmented Generation">
         </div>
 
         <button type="submit" class="link submit">Konto erstellen</button>

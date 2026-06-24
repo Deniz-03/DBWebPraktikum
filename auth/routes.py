@@ -25,15 +25,27 @@ def register():
     # Felder: Vorname, Nachname, Matrikelnummer, Email, Passwort, Passwort wiederholen
     #   seminar, studiengang_name, abschluss, seminar_thema
     if request.method == 'GET':
-        return render_template("auth/register.html")
+        return render_template("auth/register.html", values={})
     else:
         data = request.form
-        empty_input_found, leere_felder = check_register_input(data)
 
+
+        empty_input_found, leere_felder = check_register_input(data)
         if empty_input_found:
             for feld in leere_felder:
                 flash(f'Das Feld {feld} ist leer!', 'error')
             return render_template('auth/register.html', values=data)
+
+        valid_input, flash_messages = validate_register(data)
+        if not valid_input:
+            for message in flash_messages:
+                flash(message)
+            return render_template("auth/register.html", values=data)
+
+
+
+
+
 
 
 
