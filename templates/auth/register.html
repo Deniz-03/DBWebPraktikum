@@ -18,33 +18,33 @@ die gesamte Breite ausnutzt, wenn die Sidebar nicht verwendet wird-->
             <!--Erste Spalte-->
             <div class="formCol">
                 <div class="inpt">
-                    <label for="Vorname">Vorname</label>
-                    <input type="text" name="Vorname" id="Vorname" value="" placeholder="Max" required>
+                    <label for="vorname">Vorname</label>
+                    <input type="text" name="vorname" id="vorname" value="" placeholder="Max" required>
                 </div>
                 <div class="inpt">
-                    <label for="Nachname">Nachname</label>
-                    <input type="text" name="Nachname" id="Nachname" value="" placeholder="Mustermann" required>
+                    <label for="nachname">Nachname</label>
+                    <input type="text" name="nachname" id="nachname" value="" placeholder="Mustermann" required>
                 </div>
                 <!--Hier verwende ich einen text Input, um auch Matrikelnummern die mit 0 beginnen zu ermöglichen.
                 Im Backend wird dann geprüft, ob es eine valide positive Zahl ist. -->
                 <div class="inpt">
-                    <label for="Matrikelnummer">Matrikelnummer</label>
-                    <input type="text" name="Matrikelnummer" id="Matrikelnummer" value="" placeholder="123456" required>
+                    <label for="matr_nr">Matrikelnummer</label>
+                    <input type="text" name="matr_nr" id="matr_nr" value="" placeholder="123456" required>
                 </div>
             </div>
             <!--Zweite Spalte-->
             <div class="formCol">
                 <div class="inpt">
-                    <label for="Email">E-Mail-Adresse</label>
-                    <input type="email" name="Email" id="Email" value="" placeholder="Max@Mustermail.de" required>
+                    <label for="email">E-Mail-Adresse</label>
+                    <input type="email" name="email" id="email" value="" placeholder="Max@Mustermail.de" required>
                 </div>
                 <div class="inpt">
-                    <label for="Passwort">Passwort</label>
-                    <input type="password" name="Passwort" id="Passwort" value="" placeholder="...." required>
+                    <label for="passwort">Passwort</label>
+                    <input type="password" name="passwort" id="passwort" value="" placeholder="...." required>
                 </div>
                 <div class="inpt">
-                    <label for="Passwort wiederholen">Passwort wiederholen</label>
-                    <input type="password" name="Passwort wiederholen" id="Passwort wiederholen" value="" placeholder="...." required>
+                    <label for="passwort_wiederholen">Passwort wiederholen</label>
+                    <input type="password" name="passwort_wiederholen" id="passwort_wiederholen" value="" placeholder="...." required>
                 </div>
             </div>
         </div>
@@ -76,6 +76,16 @@ die gesamte Breite ausnutzt, wenn die Sidebar nicht verwendet wird-->
 
             <input type="radio" id="IKU" name="studiengang_name" value="IKU">
             <label for="IKU">IKU</label>
+        </div>
+
+        <div class="inpt">
+            <p class="textBold">Abschluss:</p>
+
+            <input type="radio" id="B.Sc" name="abschluss" value="B.Sc">
+            <label for="B.Sc">B.Sc</label>
+
+            <input type="radio" id="M.Sc" name="abschluss" value="M.Sc">
+            <label for="M.Sc">M.Sc</label>
         </div>
 
         <div class="inpt">
