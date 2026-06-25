@@ -1,3 +1,5 @@
+<!--Auhtor Deniz Rahnefeld (409637)-->
+
 {% extends 'base.html' %}
 
 {% block title %}Registrierung{% endblock %}
@@ -12,10 +14,10 @@ die gesamte Breite ausnutzt, wenn die Sidebar nicht verwendet wird-->
 {% block contentClass %}fullWidth{% endblock %}
 
 {% block content %}
-    {% with messages = get_flashed_messages() %}
+    {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
-            {% for message in messages %}
-                <div class="errorMessage">{{ message }}</div>
+            {% for category, message in messages %}
+                <div class="{{ category }}Message">{{ message }}</div>
             {% endfor %}
         {% endif %}
     {% endwith %}
@@ -27,24 +29,24 @@ die gesamte Breite ausnutzt, wenn die Sidebar nicht verwendet wird-->
             <div class="formCol">
                 <div class="inpt">
                     <label for="vorname">Vorname</label>
-                    <input type="text" name="vorname" id="vorname" value="{{ values.get('vorname') }}" placeholder="Max" required>
+                    <input type="text" name="vorname" id="vorname" value="{{ values.get('vorname', '') }}" placeholder="Max" required>
                 </div>
                 <div class="inpt">
                     <label for="nachname">Nachname</label>
-                    <input type="text" name="nachname" id="nachname" value="{{ values.get('nachname') }}" placeholder="Mustermann" required>
+                    <input type="text" name="nachname" id="nachname" value="{{ values.get('nachname', '') }}" placeholder="Mustermann" required>
                 </div>
                 <!--Hier verwende ich einen text Input, um auch Matrikelnummern die mit 0 beginnen zu ermöglichen.
                 Im Backend wird dann geprüft, ob es eine valide positive Zahl ist. -->
                 <div class="inpt">
                     <label for="matr_nr">Matrikelnummer</label>
-                    <input type="text" name="matr_nr" id="matr_nr" value="{{ values.get('matr_nr') }}" placeholder="123456" required>
+                    <input type="text" name="matr_nr" id="matr_nr" value="{{ values.get('matr_nr', '') }}" placeholder="123456" required>
                 </div>
             </div>
             <!--Zweite Spalte-->
             <div class="formCol">
                 <div class="inpt">
                     <label for="email">E-Mail-Adresse</label>
-                    <input type="email" name="email" id="email" value="{{ values.get('email') }}" placeholder="max@mustermail.de" required>
+                    <input type="email" name="email" id="email" value="{{ values.get('email', '') }}" placeholder="max@mustermail.de" required>
                 </div>
                 <!--Hier entscheide ich mich bewusst dagegen die Passwörter mit zurückzugeben,
                 damit diese nicht wieder im HTML Code landen und abgefangen werden können.-->
@@ -62,12 +64,12 @@ die gesamte Breite ausnutzt, wenn die Sidebar nicht verwendet wird-->
         <div class="radioRow">
             <p class="textBold">Seminar:</p>
 
-            <input type="radio" id="IIS" name="seminar" value="IIS"
-                {{ 'checked' if values.get('seminar') == 'IIS' else '' }}>
+            <input type="radio" id="IIS" name="bel_seminar" value="IIS"
+                {{ 'checked' if values.get('bel_seminar') == 'IIS' else '' }}>
             <label for="IIS">IIS</label>
 
-            <input type="radio" id="WBS" name="seminar" value="WBS"
-                   {{ 'checked' if values.get('seminar') == 'WBS' else '' }}>
+            <input type="radio" id="WBS" name="bel_seminar" value="WBS"
+                   {{ 'checked' if values.get('bel_seminar') == 'WBS' else '' }}>
             <label for="WBS">WBS</label>
         </div>
 
@@ -109,7 +111,7 @@ die gesamte Breite ausnutzt, wenn die Sidebar nicht verwendet wird-->
 
         <div class="inpt">
             <label for="seminar_thema">Seminar Thema (optional)</label>
-            <input type="text" name="seminar_thema" id="seminar_thema" value="{{ values.get('seminar_thema') }}" placeholder="Retrieval-Augmented Generation">
+            <input type="text" name="seminar_thema" id="seminar_thema" value="{{ values.get('seminar_thema', '') }}" placeholder="Retrieval-Augmented Generation">
         </div>
 
         <button type="submit" class="link submit">Konto erstellen</button>
