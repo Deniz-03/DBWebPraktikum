@@ -195,6 +195,39 @@
                 0 2px 8px rgba(0, 0, 0, 0.03);
 }
 
+.sidebarLinks {
+    display: inline-block;
+
+    width: 80px;
+    height: 45px;
+    line-height: 45px;
+    padding: 0 12px;
+
+    text-align: center;
+
+    font-size: 15px;
+    font-weight: 600;
+    text-decoration: none;
+    letter-spacing: 0.5px;
+
+    color: #4a3e3d;            /* Dunkles Anthrazit/Braun */
+    background-color: #fff;
+    border: 1.0px solid rgba(56, 5, 163, 0.4);
+    border-radius: 4px;
+
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04),
+                0 1px 4px rgba(0, 0, 0, 0.02);
+
+    transition: all 0.2s ease-in-out;
+    cursor: pointer;
+}
+
+.sidebarLinks:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.06),
+                0 2px 8px rgba(0, 0, 0, 0.03);
+}
+
 .greeting {
     color: #2c3e50;
     font-size: 40px;

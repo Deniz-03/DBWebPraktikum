@@ -1,5 +1,5 @@
 #Author Deniz Rahnefeld (409637)
-from flask import Blueprint, render_template, request, redirect, url_for, flash
+from flask import Blueprint, render_template, request, redirect, url_for, flash, session
 from auth.queries import *
 from auth.utils import *
 
@@ -65,7 +65,8 @@ def profile():
     if request.method == 'GET':
         #if logged in:
         #else:
-        return redirect(url_for('auth.login'))
+        session['logged_in'] = True
+        return render_template("auth/profile.html")
     else:
         #TODO Authentifikation hinzufügen
         return render_template("auth/profile.html")

@@ -40,6 +40,14 @@
         {% block spezNav %}
         <div class="spezDiv column">
             <div class="text1">Navigation</div>
+         {% if session.get('logged_in') %}
+            <div class="column">
+                <a href="" class="sidebarLinks">Funktion1</a>
+                <a href="" class="sidebarLinks">Funktion2</a>
+                <a href="" class="sidebarLinks">Funktion3</a>
+                <a href="" class="sidebarLinks">Funktion4</a>
+            </div>
+        {% endif %}
         </div>
         {% endblock %}
 
