@@ -1,3 +1,4 @@
+#Author Deniz Rahnefeld (409637)
 import re
 
 def check_register_input(data) -> tuple[bool, list]:
@@ -66,33 +67,32 @@ def validate_register(data)-> tuple[bool, list]:
 
     if not re.match(name_pattern, vorname):                                     #Vorname
         valid_input = False
-        flash_messages.append("Vorname ist invalide.")
+        flash_messages.append("Vorname  beginnt mit einem Großbuchstaben, gefolgt von beliebig vielen Kleinbuchstaben. Optional "
+                                "sind auch je ein Bindestrich oder ein Leerzeichen möglich (z. B. Ann-Kathrin oder Jakob Michael)")
 
     if not re.match(name_pattern, nachname):                                    #Nachname
         valid_input = False
-        flash_messages.append("Nachname ist invalide.")
+        flash_messages.append("Nachname beginnt mit einem Großbuchstaben, gefolgt von beliebig vielen Kleinbuchstaben. Optional "
+                                "sind auch je ein Bindestrich oder ein Leerzeichen möglich (z. B. Ann-Kathrin oder Jakob Michael)")
 
     if not re.match(matr_nr_pattern, matr_nr):                                  #Matrikelnummer
         valid_input = False
-        flash_messages.append("Matrikelnummer ist invalide.")
+        flash_messages.append("Matrikelnummer ist min. 6, maximal 8 Zahlen lang")
 
     if not re.match(email_pattern, email):                                      #Email
         valid_input = False
-        flash_messages.append("E-Mail ist invalide.")
+        flash_messages.append("E-Mail besteht aus zwei Teilen, mit @ getrennt. Erlaubte Zeichen sind Kleinbuchstaben, Punkte, Plus und "
+                                "Minus. Sie ist nicht beliebig lang: Der lokale Teil (vor dem @) ist nicht länger als 63 Zeichen, und "
+                                "die E-Mail Adresse insgesamt ist nicht länger als 254 Zeichen.")
 
-    if not re.match(pass_pattern, passwort):                                    #Passwort
-        valid_input = False
-        flash_messages.append("Passwort muss aus min. einem Groß- und Kleinbuchstaben "
-                              "und einem Sonderzeichen bestehen.")
-
-    if not re.match(pass_pattern, passwort_wiederholen):                        #Passwort wiederholen
-        valid_input = False
-        flash_messages.append("Passwort muss aus min. einem Groß- und Kleinbuchstaben "
-                              "und einem Sonderzeichen bestehen.")
-
-    if passwort != passwort_wiederholen:                                    #Passwörter vergleichen
+    if passwort != passwort_wiederholen:                                        #Passwörter vergleichen
         valid_input = False
         flash_messages.append("Passwörter stimmen nicht überein!")
+
+    if not re.match(pass_pattern, passwort) or not re.match(pass_pattern, passwort_wiederholen):       #Passwörter                             #Passwort
+        valid_input = False
+        flash_messages.append("Passwort muss aus min. einem Groß- und Kleinbuchstaben "
+                              "und einem Sonderzeichen bestehen.")
 
     if seminar not in valid_seminare:                                           #Seminare
         valid_input = False

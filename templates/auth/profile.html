@@ -1,20 +1,33 @@
+<!--Auhtor Deniz Rahnefeld (409637)-->
+
 {% extends 'base.html' %}
 
 {% block title %}Profil{% endblock %}
 {% block header %}Profil{% endblock %}
 
-<!--die Sidebar wird hier nicht benötigt, also wird sie überschrieben-->
-{% block spezNav %}
-{% endblock %}
-
-<!--Dieser Block sorgt dafür, dass der contentDiv
-die gesamte Breite ausnutzt, wenn die Sidebar nicht verwendet wird-->
-{% block contentClass %}fullWidth{% endblock %}
 
 {% block content %}
-            Hallo!    <br/>
-            Dein Name:  <br/>
-            Dein Alter:  <br/>
-            Deine Email: <br/>
-            AGB: akzeptiert <br/>
+            <!--Knopf für Bearbeitung bereitstellen.
+                Dieser öffnet einen Dialog, in dem man sein Passwort eingeben muss.
+                Danach wird dieses validiert und authentifiziert.
+                Als Nächstes wird man auf eine Version der Seite weitergeleitet, wo man seine Daten
+                bearbeiten kann und speichern kann.-->
+
+
+            <!--Version 1 der Seite: Nicht angemeldet:
+            Nutzer wird aufgefordert sich anzumelden
+            -->
+
+            <!--Version 2 der Seite: Angemeldet:
+            Nutzer bekommt seine Daten aufgelistet.
+            -->
+
+            <!--Version 3 der Seite: Angemeldet und im Bearbeitungsmodus
+            -->
+
+            <!--Version 2 und 3 gibt es auch als Dozierende Version:
+            Sidebar mit Dozierenden Funktionalität:
+                -Alle Studierenden Profile Listen und besuchen.
+                -Anf 7
+            -->
 {% endblock %}

@@ -1,6 +1,5 @@
 #Author Deniz Rahnefeld (409637)
-
-from flask import Blueprint, render_template, request, redirect, url_for, flash
+from flask import Blueprint, render_template, request, redirect, url_for, flash, session
 from auth.queries import *
 from auth.utils import *
 
@@ -16,7 +15,7 @@ def login():
         return render_template("auth/login.html")
     else:
         #TODO Angemeldeten Nutzer weiterleiten bzw. Nutzer anmelden
-        pass
+        return render_template("auth/login.html")
 
 
 
@@ -39,10 +38,20 @@ def register():
         valid_input, flash_messages = validate_register(data)
         if not valid_input:
             for message in flash_messages:
-                flash(message)
+                flash(message, 'error')
             return render_template("auth/register.html", values=data)
 
+        #Ab hier ist der Input validiert.
 
+        #Jetzt wird geprüft, ob der Account bereits existiert
+        # und ansonsten wird er erstellt.
+        if check_account(data):
+            flash('Account existiert bereits!', 'error')
+            return render_template("auth/register.html", values=data)
+        else:
+            create_user(data)
+            flash('Account erfolgreich erstellt!', 'success')
+        return render_template("auth/register.html", values={})
 
 
 
@@ -56,7 +65,8 @@ def profile():
     if request.method == 'GET':
         #if logged in:
         #else:
-        return redirect(url_for('auth.login'))
+        session['logged_in'] = True
+        return render_template("auth/profile.html")
     else:
         #TODO Authentifikation hinzufügen
         return render_template("auth/profile.html")
