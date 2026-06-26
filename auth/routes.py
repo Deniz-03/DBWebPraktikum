@@ -9,15 +9,48 @@ auth_bp = Blueprint('auth', __name__, template_folder='templates')
 def index():
     return render_template("index.html")
 
+#Um zu prüfen, ob ein Nutzer angemeldet ist, wird geschaut,
+# ob eine user_id in der Session enthalten ist.
+#Ein User ist angemeldet genau dann, wenn eine user_id in der Session vermerkt ist.
+#Diese user_id kann dann verwendet werden, um userspezifische Informationen aus der DB
+# abzufragen.
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'GET':
-        return render_template("auth/login.html")
+        if 'user_id' in session:
+            return redirect(url_for('auth.profile'))
+        else:
+            return render_template('auth/login.html', values={})
+
     else:
-        #TODO Angemeldeten Nutzer weiterleiten bzw. Nutzer anmelden
-        return render_template("auth/login.html")
+        data = request.form
 
+        empty_input_found, leere_felder = check_login_input(data)
+        if empty_input_found:
+            for feld in leere_felder:
+                flash(f'Das Feld {feld} ist leer!', 'error')
+            return render_template('auth/login.html', values=data)
 
+        valid_input, flash_messages = validate_login(data)
+        if not valid_input:
+            for message in flash_messages:
+                flash(message, 'error')
+            return render_template("auth/login.html", values=data)
+
+        #Ab hier ist der Input geprüft.
+
+        if check_account(data):
+            if user_id := check_password(data):
+                session.clear()
+                session['user_id'] = user_id
+                session['rolle'] = get_user_role(user_id)
+                return redirect(url_for('auth.profile'))
+            else:
+                flash('Das Passwort ist falsch!', 'error')
+                return render_template("auth/login.html", values=data)
+        else:
+            flash('Der Account existiert nicht!', 'error')
+            return render_template("auth/login.html", values=data)
 
 @auth_bp.route('/register', methods=['GET', 'POST'])
 def register():
@@ -65,7 +98,6 @@ def profile():
     if request.method == 'GET':
         #if logged in:
         #else:
-        session['logged_in'] = True
         return render_template("auth/profile.html")
     else:
         #TODO Authentifikation hinzufügen

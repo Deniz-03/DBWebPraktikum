@@ -1,5 +1,6 @@
 #Author Deniz Rahnefeld (409637)
 import db
+from auth.utils import hash_passwort
 
 with db.connect_to_db() as conn:
     with conn.cursor() as cur:
@@ -38,8 +39,8 @@ with db.connect_to_db() as conn:
                     "rolle ROLLEN NOT NULL)")
 
 
-        cur.execute("CREATE TABLE studierende (matr_nr VARCHAR(8) PRIMARY KEY, "
-                    "s_id INT UNIQUE, "
+        cur.execute("CREATE TABLE studierende (s_id INT PRIMARY KEY, "
+                    "matr_nr VARCHAR(8) UNIQUE, "
                     "vorname VARCHAR(255) NOT NULL, "
                     "nachname VARCHAR(255) NOT NULL, "
                     "studiengang_name STUD_TYPE NOT NULL, "
@@ -61,7 +62,7 @@ with db.connect_to_db() as conn:
                     'VALUES (%s, %s, %s) '
                     'RETURNING id',
                     ('althoff@uni-hildesheim.de',
-                     'Passwort!123',
+                     hash_passwort('Passwort!123'),
                      'doz'))
         acc_id = cur.fetchone()[0]
 
@@ -77,7 +78,7 @@ with db.connect_to_db() as conn:
                     'VALUES (%s, %s, %s) '
                     'RETURNING id',
                     ('reusspa@uni-hildesheim.de',
-                     'Passwort!123',
+                      hash_passwort('Passwort!123'),
                      'doz'))
         acc_id = cur.fetchone()[0]
 
@@ -93,7 +94,7 @@ with db.connect_to_db() as conn:
                     'VALUES (%s, %s, %s) '
                     'RETURNING id',
                     ('schoenb@uni-hildesheim.de',
-                     'Passwort!123',
+                      hash_passwort('Passwort!123'),
                      'doz'))
         acc_id = cur.fetchone()[0]
 
