@@ -1,10 +1,11 @@
 #Author Deniz Rahnefeld (409637)
 import re
+import hashlib #TODO Fragen ob es erlaubt ist.
 
-def check_register_input(data) -> tuple[bool, list]:
+def check_register_input(data)-> tuple[bool, list]:
     pflicht_felder = ['vorname', 'nachname', 'matr_nr',
                      'email', 'passwort', 'passwort_wiederholen',
-                     'seminar', 'studiengang_name', 'abschluss']
+                     'bel_seminar', 'studiengang_name', 'abschluss']
     leere_felder = []
     empty_input_found = False
     for feld in pflicht_felder:
@@ -59,7 +60,7 @@ def validate_register(data)-> tuple[bool, list]:
     email = data.get("email", '').strip()
     passwort = data.get("passwort", '').strip()
     passwort_wiederholen = data.get("passwort_wiederholen", '').strip()
-    seminar = data.get("seminar", '').strip()
+    seminar = data.get("bel_seminar", '').strip()
     studiengang_name = data.get("studiengang_name", '').strip()
     abschluss = data.get("abschluss", '').strip()
     seminar_thema = data.get("seminar_thema", '').strip()
@@ -89,7 +90,7 @@ def validate_register(data)-> tuple[bool, list]:
         valid_input = False
         flash_messages.append("Passwörter stimmen nicht überein!")
 
-    if not re.match(pass_pattern, passwort) or not re.match(pass_pattern, passwort_wiederholen):       #Passwörter                             #Passwort
+    if not re.match(pass_pattern, passwort) or not re.match(pass_pattern, passwort_wiederholen):       #Passwörter
         valid_input = False
         flash_messages.append("Passwort muss aus min. einem Groß- und Kleinbuchstaben "
                               "und einem Sonderzeichen bestehen.")
@@ -116,12 +117,45 @@ def validate_register(data)-> tuple[bool, list]:
 
 
 
-def check_login_input(data):
-    # TODO Input vom login Formular überpruefen
-    # Schritt 1: Ist jedes Feld ausgefüllt?
-    # Schritt 2: Passen die Eingaben in die Regex Konventionen
-    pass
+def check_login_input(data)-> tuple[bool, list]:
+    pflicht_felder = ['email', 'passwort']
+    leere_felder = []
+    empty_input_found = False
+    for feld in pflicht_felder:
+        val = data.get(feld, '').strip()
+        if not val:
+            empty_input_found = True
+            leere_felder.append(feld)
 
-def check_account(data):
-    # TODO gucken ob diese Email Passwort Kombination in Account vorhanden ist.
-    pass
+    return empty_input_found, leere_felder
+
+
+def validate_login(data)-> tuple[bool, list]:
+    email_pattern = r"^(?=.{1,254}$)[a-z.+\-]{1,63}@[a-z.+\-]+$"
+    pass_pattern = (
+        r"^(?=.*[A-ZÄÖÜ])" #Mindestens ein Großbuchstabe
+        r"(?=.*[a-zäöüß])" #Mindestens ein Kleinbuchstabe
+        r"(?=.*[.,!?@#$%&*+\-/\\])" #Mindestens ein Sonderzeichen
+        r"[A-ZÄÖÜa-zäöüß0-9.,!?@#$%&*+\-/\\]+$" #Besteht nur aus diesen Zeichen + Zahlen
+    )
+
+    email = data.get("email", '').strip()
+    passwort = data.get("passwort", '').strip()
+
+    valid_input = True
+    flash_messages = []
+
+    #Hier gebe ich aus Sicherheitsgründen nicht an wie das richtige Format aussieht.
+    if not re.match(email_pattern, email):                                      #Email
+        valid_input = False
+        flash_messages.append("E-Mail ist nicht im passenden Format.")
+
+    if not re.match(pass_pattern, passwort):                                    #Passwort
+        valid_input = False
+        flash_messages.append("Passwort ist nicht im passenden Format.")
+
+    return valid_input, flash_messages
+
+#TODO Fragen ob erlaubt ist.
+def hash_passwort(passwort)-> str:
+    return hashlib.sha256(passwort.encode('utf-8')).hexdigest()

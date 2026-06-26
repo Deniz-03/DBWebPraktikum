@@ -66,11 +66,11 @@ die gesamte Breite ausnutzt, wenn die Sidebar nicht verwendet wird-->
             <p class="textBold">Seminar:</p>
 
             <input type="radio" id="IIS" name="bel_seminar" value="IIS"
-                {{ 'checked' if values.get('bel_seminar') == 'IIS' else '' }}>
+                {{ 'checked' if values.get('bel_seminar') == 'IIS' else '' }} required>
             <label for="IIS">IIS</label>
 
             <input type="radio" id="WBS" name="bel_seminar" value="WBS"
-                   {{ 'checked' if values.get('bel_seminar') == 'WBS' else '' }}>
+                   {{ 'checked' if values.get('bel_seminar') == 'WBS' else '' }} required>
             <label for="WBS">WBS</label>
         </div>
 
@@ -78,23 +78,23 @@ die gesamte Breite ausnutzt, wenn die Sidebar nicht verwendet wird-->
             <p class="textBold">Studiengang:</p>
 
             <input type="radio" id="WINF" name="studiengang_name" value="WINF"
-                   {{ 'checked' if values.get('studiengang_name') == 'WINF' else '' }}>
+                   {{ 'checked' if values.get('studiengang_name') == 'WINF' else '' }} required>
             <label for="WINF">WINF</label>
 
             <input type="radio" id="IMIT" name="studiengang_name" value="IMIT"
-                   {{ 'checked' if values.get('studiengang_name') == 'IMIT' else '' }}>
+                   {{ 'checked' if values.get('studiengang_name') == 'IMIT' else '' }} required>
             <label for="IMIT">IMIT</label>
 
             <input type="radio" id="AI" name="studiengang_name" value="AI"
-                   {{ 'checked' if values.get('studiengang_name') == 'AI' else '' }}>
+                   {{ 'checked' if values.get('studiengang_name') == 'AI' else '' }} required>
             <label for="AI">AI</label>
 
             <input type="radio" id="IIM" name="studiengang_name" value="IIM"
-                   {{ 'checked' if values.get('studiengang_name') == 'IIM' else '' }}>
+                   {{ 'checked' if values.get('studiengang_name') == 'IIM' else '' }} required>
             <label for="IIM">IIM</label>
 
             <input type="radio" id="IKU" name="studiengang_name" value="IKU"
-                    {{ 'checked' if values.get('studiengang_name') == 'IKU' else '' }}>
+                    {{ 'checked' if values.get('studiengang_name') == 'IKU' else '' }} required>
             <label for="IKU">IKU</label>
         </div>
 
@@ -102,11 +102,11 @@ die gesamte Breite ausnutzt, wenn die Sidebar nicht verwendet wird-->
             <p class="textBold">Abschluss:</p>
 
             <input type="radio" id="B.Sc" name="abschluss" value="B.Sc"
-                   {{ 'checked' if values.get('abschluss') == 'B.Sc' else '' }}>
+                   {{ 'checked' if values.get('abschluss') == 'B.Sc' else '' }} required>
             <label for="B.Sc">B.Sc</label>
 
             <input type="radio" id="M.Sc" name="abschluss" value="M.Sc"
-                   {{ 'checked' if values.get('abschluss') == 'M.Sc' else '' }}>
+                   {{ 'checked' if values.get('abschluss') == 'M.Sc' else '' }} required>
             <label for="M.Sc">M.Sc</label>
         </div>
 

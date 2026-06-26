@@ -1,5 +1,6 @@
 #Author Deniz Rahnefeld (409637)
 import db
+from auth.utils import hash_passwort
 
 
 def check_account(data) -> bool:
@@ -21,11 +22,12 @@ def create_user(data):
     with db.connect_to_db() as conn:
         with conn.cursor() as cur:
 
+            passwort_hash = hash_passwort(data.get("passwort", ''))
             cur.execute('INSERT INTO account (email, passwort, rolle) '
                         'VALUES (%s, %s, %s) '
                         'RETURNING id',
                         (data.get("email", ''),
-                         data.get("passwort", ''),
+                         passwort_hash,
                          'stud'))
             acc_id = cur.fetchone()[0]
 
@@ -49,7 +51,32 @@ def create_user(data):
                          seminar_thema,))
             conn.commit()
 
-            cur.close()
-            conn.close()
+#Diese Funktion gibt bei richtigem Passwort die User_ID zurück, um diese in der
+#   Session zu speichern und später mit der DB abzugleichen.
+#TODO Dieser Version funtkioniert mit gehashten Passwörtern -> Fragen ob erlaubt ist.
+def check_password(data)-> int | None:
+    with db.connect_to_db() as conn:
+        with conn.cursor() as cur:
+            user_id = None
+            email = data.get("email", '').strip()
+            inp_passwort = data.get("passwort", '')
 
+            cur.execute("SELECT passwort FROM account WHERE email = %s", (email,))
+            passwort = cur.fetchone()[0]
+
+
+            #Nur wenn das Passwort übereinstimmt, wird die user_id zurückgegeben.
+            # Ohne user_id merkt sich die Session nicht, dass man eingeloggt ist.
+            if hash_passwort(inp_passwort) == passwort:
+                cur.execute("SELECT id FROM account WHERE email = %s", (email,))
+                user_id = cur.fetchone()[0]
+
+            return user_id #Kann None sein und somit False in If-Abfragen
+
+def get_user_role(user_id):
+    with db.connect_to_db() as conn:
+        with conn.cursor() as cur:
+            cur.execute("SELECT rolle FROM account WHERE id = %s", (user_id,))
+            user_role = cur.fetchone()[0]
+            return user_role
 

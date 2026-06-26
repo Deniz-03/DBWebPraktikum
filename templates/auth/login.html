@@ -17,14 +17,23 @@ die gesamte Breite ausnutzt, wenn die Sidebar nicht verwendet wird-->
 {% block contentClass %}fullWidth{% endblock %}
 
 {% block content %}
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="{{ category }}Message">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+
     <form action="{{ url_for('auth.login') }}" method="POST">
         <div class="inpt">
             <label for="Email">E-Mail-Adresse</label>
-            <input type="email" name="Email" id="Email" value="" placeholder="Max@Mustermail.de" required>
+            <input type="email" name="email" id="email" value="{{ values.get('email', '') }}" placeholder="max@mustermail.de" required>
         </div>
         <div class="inpt">
             <label for="Passwort">Passwort</label>
-            <input type="password" name="Passwort" id="Passwort" value="" placeholder="...." required>
+            <input type="password" name="passwort" id="passwort" placeholder="...." required>
         </div>
         <button type="submit" class="link submit">Anmelden</button>
     </form>

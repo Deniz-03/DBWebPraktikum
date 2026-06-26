@@ -40,13 +40,24 @@
         {% block spezNav %}
         <div class="spezDiv column">
             <div class="text1">Navigation</div>
-         {% if session.get('logged_in') %}
-            <div class="column">
-                <a href="" class="sidebarLinks">Funktion1</a>
-                <a href="" class="sidebarLinks">Funktion2</a>
-                <a href="" class="sidebarLinks">Funktion3</a>
-                <a href="" class="sidebarLinks">Funktion4</a>
-            </div>
+         {% if 'user_id' in session %}
+             {% if session.get('rolle', '') == 'doz' %}
+                 <!--Hier kommen die spezifischen Funktionen für Dozierende hin-->
+                <div class="column">
+                    <a href="" class="sidebarLinks">Funktion1</a>
+                    <a href="" class="sidebarLinks">Funktion2</a>
+                    <a href="" class="sidebarLinks">Funktion3</a>
+                    <a href="" class="sidebarLinks">Funktion4</a>
+                </div>
+             {% elif session.get('rolle', '') == 'stud' %}
+                 <!--Hier kommen die spezifischen Funktionen für Studierende hin-->
+                <div class="column">
+                    <a href="" class="sidebarLinks">Funktion1</a>
+                    <a href="" class="sidebarLinks">Funktion2</a>
+                    <a href="" class="sidebarLinks">Funktion3</a>
+                    <a href="" class="sidebarLinks">Funktion4</a>
+                </div>
+             {% endif %}
         {% endif %}
         </div>
         {% endblock %}
