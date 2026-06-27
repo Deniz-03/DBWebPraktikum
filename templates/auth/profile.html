@@ -1,6 +1,10 @@
 <!--Auhtor Deniz Rahnefeld (409637)-->
 
 {% extends 'base.html' %}
+{% if 'user_id' in session %}
+    {% set user_rolle = rolle %}
+    {% set view_mode = True %} <!--Nur zu Testzwecken-->
+{% endif %}
 
 {% block title %}Profil{% endblock %}
 {% block header %}Profil{% endblock %}
@@ -17,13 +21,34 @@
             <!--Version 1 der Seite: Nicht angemeldet:
             Nutzer wird aufgefordert sich anzumelden
             -->
-
-            <!--Version 2 der Seite: Angemeldet:
-            Nutzer bekommt seine Daten aufgelistet.
-            -->
-
-            <!--Version 3 der Seite: Angemeldet und im Bearbeitungsmodus
-            -->
+            {% if 'user_id' not in session %}
+                <p>Bitte melde dich an, um fortzufahren.</p>
+            {% elif user_rolle == 'stud' %}
+                {% if view_mode == True %}
+                    <!--Nur Inhalte anzeigen-->
+                    <div>
+                        <p class="textBold"> Details: </p>
+                        <p>Vorname: {{ user_info.get('vorname', 'Max') }}</p>
+                        <p>Nachname: {{ user_info.get('nachname', 'Mustermann') }}</p>
+                        <p>Rolle: Student</p>
+                        <p>Matrikelnummer: {{ user_info.get('matr_nr', '123456') }}</p>
+                        <p>Studiengang: {{ user_info.get('studiengang_name', 'AI') }}</p>
+                        <p>Angestrebter Abschluss: {{ user_info.get('abschluss', 'B.Sc') }}</p>
+                        <p>Belegtes Seminar: {{ user_info.get('bel_seminar', 'IIS') }}</p>
+                        {% if user_info.get('titel') is not none %}
+                            <p>Seminarthema: {{ user.get('titel') }}</p>
+                        {% endif %}
+                    </div>
+                {% else %}
+                    <!--Inhalte bearbeiten !Erst Nach Passworteingabe!-->
+                {% endif %}
+            {% elif user_rolle == 'doz' %}
+                {% if view_mode == True %}
+                    <!--Nur Inhalte anzeigen-->
+                {% else %}
+                    <!--Inhalte bearbeiten !Erst Nach Passworteingabe!-->
+                {% endif %}
+            {% endif %}
 
             <!--Version 2 und 3 gibt es auch als Dozierende Version:
             Sidebar mit Dozierenden Funktionalität:

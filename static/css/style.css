@@ -255,8 +255,8 @@
 }
 
 .inpt label {
-    font-size: 14px;
-    font-weight: 600;
+    font-size: 16px;
+    font-weight: bold;
     color: #4a3e3d;
     margin-bottom: 8px;
 }
@@ -275,6 +275,35 @@
 .inpt input:focus {
     border-color: #4a3e3d;
     background-color: #ffffff;
+}
+
+.inpt select {
+    padding: 12px;
+    font-size: 15px;
+    border: 1.5px solid rgba(56, 5, 163, 0.4);
+    border-radius: 4px;
+    background-color: #faf8f5;
+    color: #4a3e3d;
+    outline: none;
+
+    transition: all 0.2s ease-in-out;
+
+    width: 100%;
+    box-sizing: border-box;
+    appearance: none;
+
+    padding-right: 40px;
+}
+
+.inpt select:hover {
+    border-color: rgba(56, 5, 163, 0.7);
+    background-color: #ffffff;
+}
+
+.inpt select:focus {
+    border-color: rgba(56, 5, 163, 0.9);
+    background-color: #ffffff;
+    box-shadow: 0 0 4px rgba(56, 5, 163, 0.2);
 }
 
 .checkbox {

@@ -111,8 +111,14 @@ die gesamte Breite ausnutzt, wenn die Sidebar nicht verwendet wird-->
         </div>
 
         <div class="inpt">
-            <label for="seminar_thema">Seminar Thema (optional)</label>
-            <input type="text" name="seminar_thema" id="seminar_thema" value="{{ values.get('seminar_thema', '') }}" placeholder="Retrieval-Augmented Generation">
+            <label for="seminar_thema">Seminarthema (optional):</label>
+            <select name="seminar_thema" id="seminar_thema">
+                <option value="">-- Bitte wählen --</option>
+                {% for thema in seminarthemen %}
+                    <option value="{{ thema.get('themen_id')  }}" {% if values.get('seminar_thema') == thema.get('themen_id')|string %}selected{% endif %}>
+                        {{ thema.get('titel') }}</option>
+                {% endfor %}
+            </select>
         </div>
 
         <button type="submit" class="link submit">Konto erstellen</button>
