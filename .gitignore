@@ -8,4 +8,7 @@ venv/
 
 static/uploads/
 
+uv.lock
+pyproject.toml
+
 *.log
