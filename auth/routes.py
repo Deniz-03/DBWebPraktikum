@@ -7,7 +7,14 @@ auth_bp = Blueprint('auth', __name__, template_folder='templates')
 
 @auth_bp.route('/')
 def index():
-    return render_template("index.html")
+    if 'user_id' in session:
+        user_id = int(session.get('user_id', '-1'))
+        rolle = get_user_role(user_id)
+        if rolle is None:
+            flash('Fehler beim laden der Session', 'error')
+        return render_template('index.html', rolle=rolle)
+    else:
+        return render_template("index.html")
 
 #Um zu prüfen, ob ein Nutzer angemeldet ist, wird geschaut,
 # ob eine user_id in der Session enthalten ist.
@@ -43,7 +50,6 @@ def login():
             if user_id := check_password(data):
                 session.clear()
                 session['user_id'] = user_id
-                session['rolle'] = get_user_role(user_id)
                 return redirect(url_for('auth.profile'))
             else:
                 flash('Das Passwort ist falsch!', 'error')
@@ -51,6 +57,10 @@ def login():
         else:
             flash('Der Account existiert nicht!', 'error')
             return render_template("auth/login.html", values=data)
+@auth_bp.route('/logout')
+def logout():
+    session.clear()
+    return redirect(url_for('auth.login'))
 
 @auth_bp.route('/register', methods=['GET', 'POST'])
 def register():
