@@ -67,11 +67,11 @@ def register():
     # Felder: Vorname, Nachname, Matrikelnummer, Email, Passwort, Passwort wiederholen
     #   seminar, studiengang_name, abschluss, seminar_thema
     if request.method == 'GET':
-        seminarthemen = get_seminarthemen()
+        seminarthemen = get_free_seminarthemen()
         return render_template("auth/register.html", values={}, seminarthemen=seminarthemen)
     else:
         data = request.form
-        seminarthemen = get_seminarthemen()
+        seminarthemen = get_free_seminarthemen()
 
 
         empty_input_found, leere_felder = check_register_input(data)
@@ -117,9 +117,10 @@ def profile():
         if 'user_id' in session:
             user_id = int(session.get('user_id', '-1'))
             rolle = get_user_role(user_id)
-            return render_template("auth/profile.html", values={}, rolle=rolle)
+            user_info = get_user_info(user_id)
+            return render_template("auth/profile.html", user_info=user_info, rolle=rolle)
         else:
-            return render_template("auth/profile.html", values={})
+            return render_template("auth/profile.html", user_info={})
 
     else:
         #TODO Authentifikation hinzufügen

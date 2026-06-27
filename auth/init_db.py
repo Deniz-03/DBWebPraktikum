@@ -5,9 +5,9 @@ from auth.utils import hash_passwort
 with db.connect_to_db() as conn:
     with conn.cursor() as cur:
 
-        cur.execute('DROP TABLE IF EXISTS studierende')
-        cur.execute('DROP TABLE IF EXISTS dozierende')
-        cur.execute('DROP TABLE IF EXISTS account')
+        cur.execute('DROP TABLE IF EXISTS studierende CASCADE')
+        cur.execute('DROP TABLE IF EXISTS dozierende CASCADE')
+        cur.execute('DROP TABLE IF EXISTS account CASCADE')
 
 
         # language=PostgreSQL
@@ -63,7 +63,7 @@ with db.connect_to_db() as conn:
                     ('althoff@uni-hildesheim.de',
                      hash_passwort('Passwort!123'),
                      'doz'))
-        acc_id = cur.fetchone()[0]
+        acc_id = cur.fetchone()['id']
 
         cur.execute("INSERT INTO dozierende (d_id, anrede, vorname, nachname)"
                     "VALUES (%s, %s, %s, %s)",
@@ -79,7 +79,7 @@ with db.connect_to_db() as conn:
                     ('reusspa@uni-hildesheim.de',
                       hash_passwort('Passwort!123'),
                      'doz'))
-        acc_id = cur.fetchone()[0]
+        acc_id = cur.fetchone()['id']
 
         cur.execute("INSERT INTO dozierende (d_id, anrede, vorname, nachname)"
                     "VALUES (%s, %s, %s, %s)",
@@ -95,7 +95,7 @@ with db.connect_to_db() as conn:
                     ('schoenb@uni-hildesheim.de',
                       hash_passwort('Passwort!123'),
                      'doz'))
-        acc_id = cur.fetchone()[0]
+        acc_id = cur.fetchone()['id']
 
         cur.execute("INSERT INTO dozierende (d_id, anrede, vorname, nachname)"
                     "VALUES (%s, %s, %s, %s)",

@@ -3,6 +3,7 @@
 {% extends 'base.html' %}
 {% if 'user_id' in session %}
     {% set user_rolle = rolle %}
+    {% set view_mode = True %} <!--Nur zu Testzwecken-->
 {% endif %}
 
 {% block title %}Profil{% endblock %}
@@ -25,6 +26,19 @@
             {% elif user_rolle == 'stud' %}
                 {% if view_mode == True %}
                     <!--Nur Inhalte anzeigen-->
+                    <div>
+                        <p class="textBold"> Details: </p>
+                        <p>Vorname: {{ user_info.get('vorname', 'Max') }}</p>
+                        <p>Nachname: {{ user_info.get('nachname', 'Mustermann') }}</p>
+                        <p>Rolle: Student</p>
+                        <p>Matrikelnummer: {{ user_info.get('matr_nr', '123456') }}</p>
+                        <p>Studiengang: {{ user_info.get('studiengang_name', 'AI') }}</p>
+                        <p>Angestrebter Abschluss: {{ user_info.get('abschluss', 'B.Sc') }}</p>
+                        <p>Belegtes Seminar: {{ user_info.get('bel_seminar', 'IIS') }}</p>
+                        {% if user_info.get('titel') is not none %}
+                            <p>Seminarthema: {{ user.get('titel') }}</p>
+                        {% endif %}
+                    </div>
                 {% else %}
                     <!--Inhalte bearbeiten !Erst Nach Passworteingabe!-->
                 {% endif %}
