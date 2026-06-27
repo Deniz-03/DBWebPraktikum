@@ -1,6 +1,9 @@
 <!--Auhtor Deniz Rahnefeld (409637)-->
 
 {% extends 'base.html' %}
+{% if 'user_id' in session %}
+    {% set user_rolle = rolle %}
+{% endif %}
 
 {% block title %}Profil{% endblock %}
 {% block header %}Profil{% endblock %}
@@ -17,13 +20,21 @@
             <!--Version 1 der Seite: Nicht angemeldet:
             Nutzer wird aufgefordert sich anzumelden
             -->
-
-            <!--Version 2 der Seite: Angemeldet:
-            Nutzer bekommt seine Daten aufgelistet.
-            -->
-
-            <!--Version 3 der Seite: Angemeldet und im Bearbeitungsmodus
-            -->
+            {% if 'user_id' not in session %}
+                <p>Bitte melde dich an, um fortzufahren.</p>
+            {% elif user_rolle == 'stud' %}
+                {% if view_mode == True %}
+                    <!--Nur Inhalte anzeigen-->
+                {% else %}
+                    <!--Inhalte bearbeiten !Erst Nach Passworteingabe!-->
+                {% endif %}
+            {% elif user_rolle == 'doz' %}
+                {% if view_mode == True %}
+                    <!--Nur Inhalte anzeigen-->
+                {% else %}
+                    <!--Inhalte bearbeiten !Erst Nach Passworteingabe!-->
+                {% endif %}
+            {% endif %}
 
             <!--Version 2 und 3 gibt es auch als Dozierende Version:
             Sidebar mit Dozierenden Funktionalität:

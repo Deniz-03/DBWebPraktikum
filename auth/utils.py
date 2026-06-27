@@ -2,6 +2,7 @@
 import re
 import hashlib #TODO Fragen ob es erlaubt ist.
 
+
 def check_register_input(data)-> tuple[bool, list]:
     pflicht_felder = ['vorname', 'nachname', 'matr_nr',
                      'email', 'passwort', 'passwort_wiederholen',
@@ -19,6 +20,9 @@ def check_register_input(data)-> tuple[bool, list]:
 
 
 def validate_register(data)-> tuple[bool, list]:
+    #Der Import wird lokal gesetzt, um zirkulare Abhängigkeiten zu vermeiden.
+    from auth.queries import check_seminarthema
+
     #Hier verwende ich bewusst ein + statt einem * für die Kleinbuchstaben,
     # da es eigentlich keine Namen mit nur einem Buchstaben gibt.
     #Der Name muss also aus mindestens einem Groß- und einem Kleinbuchstaben bestehen.
@@ -42,11 +46,6 @@ def validate_register(data)-> tuple[bool, list]:
     #Es wird geschaut, ob die Matrikelnummer aus 6-8 Ziffern besteht.
     matr_nr_pattern = r"^\d{6,8}$"
 
-    #Dies steht zwar nicht in den Anforderungen, sollte aber auch geprüft werden,
-    # um sich zusätzlich neben dem Jinja2 Autoescaping gegen XSS Angriffe zu schützen.
-    #Ich prüfe das Thema auf normale Satzzeichen.
-    seminar_thema_pattern = r"^[A-ZÄÖÜa-zäöüß0-9\s.,!?()\-]+$"
-
     valid_seminare = {'IIS', 'WBS'}
     valid_s_name = {'WINF', 'IMIT', 'AI', 'IIM', 'IKU'}
     valid_abschluss = {'B.Sc', 'M.Sc'}
@@ -64,6 +63,7 @@ def validate_register(data)-> tuple[bool, list]:
     studiengang_name = data.get("studiengang_name", '').strip()
     abschluss = data.get("abschluss", '').strip()
     seminar_thema = data.get("seminar_thema", '').strip()
+
 
 
     if not re.match(name_pattern, vorname):                                     #Vorname
@@ -107,14 +107,12 @@ def validate_register(data)-> tuple[bool, list]:
         valid_input = False
         flash_messages.append("Abschluss ist invalide.")
 
-    if seminar_thema and not re.match(seminar_thema_pattern, seminar_thema):    #Seminarthema
-        valid_input = False
-        flash_messages.append("Seminarthema ist invalide.")
+    if seminar_thema:
+        if not seminar_thema.isdigit() or not check_seminarthema(seminar_thema):    #Seminarthema
+            valid_input = False
+            flash_messages.append("Seminarthema ist invalide.")
 
     return valid_input, flash_messages
-
-
-
 
 
 def check_login_input(data)-> tuple[bool, list]:

@@ -46,7 +46,6 @@ with db.connect_to_db() as conn:
                     "studiengang_name STUD_TYPE NOT NULL, "
                     "abschluss ABSCHLUSS_TYPE NOT NULL, "
                     "bel_seminar SEMINARE NOT NULL, "
-                    "seminar_thema VARCHAR(255) NULL, "
                     "FOREIGN KEY (s_id) REFERENCES account(id) ON DELETE CASCADE)")
 
         cur.execute("CREATE TABLE dozierende (d_id INT PRIMARY KEY, "
