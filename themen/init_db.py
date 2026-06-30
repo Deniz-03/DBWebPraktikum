@@ -21,6 +21,7 @@ with db.connect_to_db() as conn:
                     "s_id INT NULL,"
                     "semester INT,"
                     "pdf_pfad VARCHAR(255),"
+                    "vorgetragen BOOLEAN NOT NULL DEFAULT false,"
                     "FOREIGN KEY (d_id) REFERENCES dozierende(d_id) ON DELETE CASCADE,"
                     "FOREIGN KEY (s_id) REFERENCES studierende(s_id) ON DELETE SET NULL)")
 

@@ -5,7 +5,7 @@ import db
 def get_dozierenden():
     with db.connect_to_db() as conn:
         with conn.cursor() as cur:
-            cur.execute("SELECT d_id, vorname || ' ' || nachname FROM dozierende ORDER BY nachname")
+            cur.execute("SELECT d_id, vorname, nachname FROM dozierende ORDER BY nachname")
             return cur.fetchall()
 
 # Datenbank eintrag für ein neues Seminarthema
@@ -52,7 +52,7 @@ def student_hinzufuegen(themen_id, s_id):
 def get_student_by_id(s_id):
     with db.connect_to_db() as conn:
         with conn.cursor() as cur:
-            cur.execute("SELECT s_id, vorname || ' ' || nachname FROM Studierende WHERE s_id=%s",
+            cur.execute("SELECT s_id, vorname, nachname FROM studierende WHERE s_id=%s",
                         (s_id,))
             return cur.fetchone()
 

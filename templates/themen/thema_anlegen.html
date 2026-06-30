@@ -1,82 +1,94 @@
-<!DOCTYPE html>
-<html lang="de">
-<head>
-    <meta charset="UTF-8">
-    <title>Seminarthema erstellen</title>
-</head>
-<body>
-    <h1>Seminarthema anlegen</h1>
+<!--Author Peer Schulze (410246)-->
+
+{% extends 'base.html' %}
+
+{% block title %}Seminarthema anlegen{% endblock %}
+{% block header %}Seminarthema anlegen{% endblock %}
+
+<!--Sidebar wird hier nicht benötigt-->
+{% block spezNav %}
+{% endblock %}
+
+<!--Sorgt dafür, dass der contentDiv die gesamte Breite ausnutzt, wenn die Sidebar nicht verwendet wird-->
+{% block contentClass %}fullWidth{% endblock %}
+
+{% block content %}
 
     <!-- Fehlermeldung wird nur angezeigt wenn Flask eine fehler-Variable mitgibt,
          z.B. wenn Pflichtfelder leer gelassen wurden -->
     {% if fehler %}
-        <p>{{ fehler }}</p>
+        <div class="errorMessage">{{ fehler }}</div>
     {% endif %}
 
     <!-- method="POST" schickt die Daten im HTTP-Body, nicht in der URL
          enctype="multipart/form-data" ist Pflicht wenn Dateien (PDF) mitgeschickt werden -->
     <form method="POST" enctype="multipart/form-data">
 
-        <!-- Pflichtfeld: Titel des Seminarthemas
-             name="titel" → Flask greift per request.form.get('titel') darauf zu
-             id="titel" → verknüpft das Feld mit dem Label oben -->
-        <label for="titel">Titel</label>
-        <input type="text" name="titel" id="titel" placeholder="Titel des Themas">
+        <div class="formColumns">
+            <!--Erste Spalte-->
+            <div class="formCol">
 
-        <br><br>
+                <!-- Pflichtfeld: Titel des Seminarthemas
+                     name="titel" → Flask greift per request.form.get('titel') darauf zu -->
+                <div class="inpt">
+                    <label for="titel">Titel</label>
+                    <input type="text" name="titel" id="titel" placeholder="Titel des Themas" required>
+                </div>
 
-        <!-- Pflichtfeld: Oberbegriff des Seminarthemas -->
-        <label for="oberbegriff">Oberbegriff</label>
-        <input type="text" name="oberbegriff" id="oberbegriff" placeholder="Oberbegriff des Themas">
+                <!-- Pflichtfeld: Oberbegriff des Seminarthemas -->
+                <div class="inpt">
+                    <label for="oberbegriff">Oberbegriff</label>
+                    <input type="text" name="oberbegriff" id="oberbegriff" placeholder="Oberbegriff des Themas" required>
+                </div>
 
-        <br><br>
+                <!-- Pflichtfeld: Dozent-Dropdown wird dynamisch aus der DB befüllt
+                     dozent[0] = d_id (wird in DB gespeichert), dozent[1] = Name (wird angezeigt) -->
+                <div class="inpt">
+                    <label for="d_id">Dozent</label>
+                    <select id="d_id" name="d_id">
+                        {% for dozent in dozierenden %}
+                            <option value="{{ dozent.d_id }}"
+                                    {% if dozent.d_id == eingeloggter_dozent %}selected{% endif %}>
+                                {{ dozent.vorname }} {{ dozent.nachname }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
 
-        <!-- Pflichtfeld: Beschreibung als mehrzeiliges Textfeld
-             rows="5" legt die sichtbare Höhe des Feldes fest -->
-        <label for="beschreibung">Beschreibung</label>
-        <textarea name="beschreibung" id="beschreibung" rows="5" placeholder="Beschreibung des Themas"></textarea>
+            </div>
 
-        <br><br>
+            <!--Zweite Spalte-->
+            <div class="formCol">
 
-        <!-- Pflichtfeld: Dozent-Dropdown wird dynamisch aus der DB befüllt
-             Flask gibt die dozierenden-Liste ans Template weiter
-             dozent[0] = d_id (wird in DB gespeichert), dozent[1] = Name (wird angezeigt) -->
-        <label for="d_id">Dozent</label>
-        <select id="d_id" name="d_id">
-            {% for dozent in dozierenden %}
-                <option
-                        value="{{ dozent[0] }}"
-                        {% if dozent[0] == eingeloggter_dozent %}selected{% endif %}>
-                        {{ dozent[1] }}
-                </option>
-            {% endfor %}
-        </select>
+                <!-- Optionales Feld: Semester als Zahl, z.B. 20251 für SoSe 2025 -->
+                <div class="inpt">
+                    <label for="semester">Semester</label>
+                    <input type="number" name="semester" id="semester" placeholder="3">
+                </div>
 
-        <br><br>
+                <!-- Status wird beim Anlegen automatisch auf Frei gesetzt (Default in DB) -->
+                <div class="inpt">
+                    <label>Status</label>
+                    <p>Frei</p>
+                </div>
 
-        <!-- Optionales Feld: Semester als Zahl, z.B. 20251 für SoSe 2025 -->
-        <label for="semester">Semester</label>
-        <input type="number" name="semester" id="semester" placeholder="3">
+                <!-- Optionaler PDF-Upload: accept=".pdf" beschränkt die Dateiauswahl auf PDFs -->
+                <div class="inpt">
+                    <label for="pdf">PDF Upload</label>
+                    <input type="file" name="pdf" id="pdf" accept=".pdf">
+                </div>
 
-        <br><br>
+            </div>
+        </div>
 
-        <!-- Status wird beim anlegen automatisch auf Frei gesetzt (Default in DB) -->
-        <label>Status</label>
-        <p>Frei</p>
+        <!-- Pflichtfeld: Beschreibung als mehrzeiliges Textfeld -->
+        <div class="inpt">
+            <label for="beschreibung">Beschreibung</label>
+            <textarea name="beschreibung" id="beschreibung" rows="5" placeholder="Beschreibung des Themas" required></textarea>
+        </div>
 
-        <br><br>
-
-        <!-- Optionaler PDF-Upload: accept=".pdf" beschränkt die Dateiauswahl auf PDFs
-             Flask empfängt die Datei über request.files.get('pdf') -->
-        <label for="pdf">PDF Upload</label>
-        <input type="file" name="pdf" id="pdf" accept=".pdf">
-
-        <br><br>
-
-        <!-- Formular absenden → löst den POST-Request an Flask aus -->
-        <button type="submit">Seminarthema anlegen</button>
+        <button type="submit" class="link submit">Seminarthema anlegen</button>
 
     </form>
 
-</body>
-</html>
+{% endblock %}

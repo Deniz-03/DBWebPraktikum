@@ -3,6 +3,8 @@
 import os
 from werkzeug.utils import secure_filename
 from flask import Blueprint, render_template, request, redirect, url_for, session
+
+from auth.queries import get_user_role
 from themen.queries import get_dozierenden, thema_anlegen, thema_bearbeiten, get_seminarthema, get_student_by_id
 
 themen_bp = Blueprint('themen', __name__)
@@ -10,13 +12,22 @@ themen_bp = Blueprint('themen', __name__)
 # Post und Get Methode zum Anlegen eines Seminarthemas
 @themen_bp.route('/themen/neu', methods=['GET', 'POST'])
 def themen_neu():
+    # Abfangen von Nutzern die keine Dozenten sind oder wenn keiner User_id in der Session ist
+    if 'user_id' not in session:
+        return redirect(url_for('auth.index'))
+
+    user_id = int(session.get('user_id', '-1'))
+    rolle = get_user_role(user_id)
+    if rolle != 'doz':
+        return redirect(url_for('auth.index'))
+
     # Lädt die Thema anlegen Seite, füllt das Dropdown für die Dozierenden
     # und hat den eingeloggten Dozenten vorausgewählt
     if request.method == 'GET':
         dozierenden = get_dozierenden()
-        eingeloggter_dozent = session.get('user_id')
+        eingeloggter_dozent = int(session.get('user_id', '-1'))
         return render_template('themen/thema_anlegen.html',
-                                dozierende = dozierenden,
+                                dozierenden = dozierenden,
                                 eingeloggter_dozent = eingeloggter_dozent,)
 
     # Auslesen des Formulars und Speichern des Seminarthemas in der DB
@@ -29,13 +40,13 @@ def themen_neu():
         semester = data.get('semester')
 
         dozierenden = get_dozierenden()
-        eingeloggter_dozent = session.get('user_id')
+        eingeloggter_dozent = int(session.get('user_id', '-1'))
 
         # Prüfen der Pflichtfelder und das der Dozent ausgewählt wurde (Vorauswahl oder manuel geändert)
         if not titel or not oberbegriff or not beschreibung or not d_id:
             return render_template('themen/thema_anlegen.html',
                                    fehler = 'Bitte alle Pflichtfelder ausfüllen',
-                                   dozierende = dozierenden,
+                                   dozierenden = dozierenden,
                                    eingeloggter_dozent = eingeloggter_dozent,)
 
         # request.files.get('pdf') holt die hochgeladene Datei aus dem Formular
@@ -61,17 +72,27 @@ def themen_neu():
 # Post und Get Methode zum Bearbeiten eines Seminarthemas
 @themen_bp.route('/themen/<int:themen_id>/bearbeiten', methods=['GET', 'POST'])
 def themen_bearbeiten(themen_id):
+    # Abfangen von Nutzern die keine Dozenten sind oder wenn keiner User_id in der Session ist
+    if 'user_id' not in session:
+        return redirect(url_for('auth.index'))
+
+    user_id = int(session.get('user_id', '-1'))
+    rolle = get_user_role(user_id)
+    if rolle != 'doz':
+        return redirect(url_for('auth.index'))
+
     # Get Methode zum laden der Bearbeitungsseite mit vorausgefüllten Feldern
     if request.method == 'GET':
         data = get_seminarthema(themen_id)
-        # data[x] da es in einem Tupel gespeichert ist
-        titel = data[1]
-        d_id = data[2]
-        oberbegriff = data[4]
-        beschreibung = data[5]
-        s_id = data[6]
-        semester = data[7]
-        pdf = data[8]
+        # data ist jetzt ein Dictionary, kein Tupel mehr
+        titel = data['titel']
+        d_id = data['d_id']
+        status = data['status']
+        oberbegriff = data['oberbegriff']
+        beschreibung = data['beschreibung']
+        s_id = data['s_id']
+        semester = data['semester']
+        pdf = data['pdf_pfad']
 
         # Namen des Studenten holen, wenn er eingetragem ist
         if s_id:
@@ -84,6 +105,7 @@ def themen_bearbeiten(themen_id):
         return render_template('themen/thema_bearbeiten.html',
                         titel=titel,
                         d_id=d_id,
+                        status=status,
                         oberbegriff=oberbegriff,
                         beschreibung=beschreibung,
                         student=student,
@@ -116,7 +138,7 @@ def themen_bearbeiten(themen_id):
         if not titel or not oberbegriff or not beschreibung or not d_id:
             return render_template('themen/thema_bearbeiten.html',
                                     fehler='Bitte alle Pflichtfelder ausfüllen',
-                                    dozierende=dozierenden,
+                                    dozierenden=dozierenden,
                                     eingeloggter_dozent=eingeloggter_dozent, )
 
         # Neue Daten werden gespeichert
