@@ -1,0 +1,72 @@
+<!-- Author Peer Schulze (410246) -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Seminarthema bearbeiten</title>
+</head>
+<body>
+    <h1>{{ titel }} bearbeiten</h1>
+
+    <!-- Gibt Fehler aus falls eines der Pflichtfelder nicht ausgefüllt/Inhalt entfernt wurde -->
+    {% if fehler %}
+        <p>{{ fehler }}</p>
+    {% endif %}
+
+    <!-- Alle Felder werden mit bereits gesetzten Attributen geladen -->
+    <form method="POST" enctype="multipart/form-data">
+
+        <label for="titel">Titel</label>
+        <input type="text" id="titel" name="titel" value="{{ titel }}">
+
+        <br><br>
+
+        <label for="oberbegriff">Oberbegriff</label>
+        <input type="text" id="oberbegriff" name="oberbegriff" value="{{ oberbegriff }}">
+
+        <br><br>
+
+        <label for="beschreibung">Beschreibung</label>
+        <textarea id="beschreibung" name="beschreibung" rows="5">{{ beschreibung }}</textarea>
+
+        <br><br>
+
+        <label for="d_id">Dozent</label>
+        <!-- Erstellt ein Dropdown Menü -->
+        <select id="d_id" name="d_id">
+            <!-- Für jeden Dozenten wird eine Option im Dropdownmenü erstellt. Angezeigt wird der Name -->
+            {% for dozent in dozierenden %}
+                <option value="{{ dozent.d_id }}"
+                    {% if dozent.d_id == d_id %}selected{% endif %}>
+                        {{ dozent.vorname }} {{ dozent.nachname }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <br><br>
+
+        <label for="semester">Semester</label>
+        <input type="number" id="semester" name="semester" value="{{ semester }}">
+
+        <br><br>
+
+        <label>Status</label>
+        <p>{{ status }}</p>
+
+        <br><br>
+
+        <!-- Wenn ein Student eingetragen ist, wird sein Name angezeigt
+             der auf seine Profilseite verweißt -->
+        <label>Zugewiesener Studierender</label>
+        {% if student %}
+            <p><!--TODO: Link zur Profilseite mittels id-->{{ student.vorname }} {{ student.nachname }}</p>
+        {% else %}
+            <p>Kein Student eingetragen</p>
+        {% endif %}
+
+        <button type="submit">Speichern</button>
+    </form>
+
+</body>
+</html>

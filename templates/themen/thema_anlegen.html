@@ -1,0 +1,100 @@
+<!--Author Peer Schulze (410246)-->
+
+{% extends 'base.html' %}
+
+{% block title %}Seminarthema anlegen{% endblock %}
+{% block header %}Seminarthema anlegen{% endblock %}
+
+<!--Sidebar wird hier nicht benötigt-->
+{% block spezNav %}
+{% endblock %}
+
+<!--Sorgt dafür, dass der contentDiv die gesamte Breite ausnutzt, wenn die Sidebar nicht verwendet wird-->
+{% block contentClass %}fullWidth{% endblock %}
+
+{% block content %}
+
+    <!-- Fehlermeldung wird nur angezeigt wenn Flask eine fehler-Variable mitgibt,
+         z.B. wenn Pflichtfelder leer gelassen wurden -->
+    {% if fehler %}
+        <div class="errorMessage">{{ fehler }}</div>
+    {% endif %}
+
+    <!-- method="POST" schickt die Daten im HTTP-Body, nicht in der URL
+         enctype="multipart/form-data" ist Pflicht wenn Dateien (PDF) mitgeschickt werden -->
+    <form method="POST" enctype="multipart/form-data">
+
+        <div class="formColumns">
+            <!--Erste Spalte-->
+            <div class="formCol">
+
+                <!-- Pflichtfeld: Titel des Seminarthemas
+                     name="titel" → Flask greift per request.form.get('titel') darauf zu -->
+                <div class="inpt">
+                    <label for="titel">Titel</label>
+                    <input type="text" name="titel" id="titel" placeholder="Titel des Themas" required>
+                </div>
+
+                <!-- Pflichtfeld: Oberbegriff des Seminarthemas -->
+                <div class="inpt">
+                    <label for="oberbegriff">Oberbegriff</label>
+                    <input type="text" name="oberbegriff" id="oberbegriff" placeholder="Oberbegriff des Themas" required>
+                </div>
+
+                <!-- Pflichtfeld: Dozent-Dropdown wird dynamisch aus der DB befüllt
+                     dozent[0] = d_id (wird in DB gespeichert), dozent[1] = Name (wird angezeigt) -->
+                <div class="inpt">
+                    <label for="d_id">Dozent</label>
+                    <select id="d_id" name="d_id">
+                        {% for dozent in dozierenden %}
+                            <option value="{{ dozent.d_id }}"
+                                    {% if dozent.d_id == eingeloggter_dozent %}selected{% endif %}>
+                                {{ dozent.vorname }} {{ dozent.nachname }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+            </div>
+
+            <!--Zweite Spalte-->
+            <div class="formCol">
+
+                <!-- Optionales Feld: Semester als Zahl, z.B. 20251 für SoSe 2025 -->
+                <div class="inpt">
+                    <label for="semester">Semester</label>
+                    <input type="number" name="semester" id="semester" placeholder="3">
+                </div>
+
+                <!-- Status wird beim Anlegen automatisch auf Frei gesetzt (Default in DB) -->
+                <div class="inpt">
+                    <label for="status">Status</label>
+                    <input type="text" id="status" name="status" value="Frei" readonly>
+                </div>
+
+                <!-- Beim anlegen kann noch kein Student eingetragen werden -->
+                <div class="inpt">
+                    <label for="student">Student</label>
+                    <input type="text" id="student" value="Kein Student eingetragen" readonly>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Optionaler PDF-Upload: accept=".pdf" beschränkt die Dateiauswahl auf PDFs -->
+                <div class="inpt">
+                    <label for="pdf">PDF Upload</label>
+                    <input type="file" name="pdf" id="pdf" accept=".pdf">
+                </div>
+
+        <!-- Pflichtfeld: Beschreibung als mehrzeiliges Textfeld -->
+        <div class="inpt">
+            <label for="beschreibung">Beschreibung</label>
+            <textarea name="beschreibung" id="beschreibung" rows="5" placeholder="Beschreibung des Themas" required></textarea>
+        </div>
+
+        <button type="submit" class="link submit">Seminarthema anlegen</button>
+
+    </form>
+
+{% endblock %}
