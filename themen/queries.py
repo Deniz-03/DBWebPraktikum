@@ -59,3 +59,17 @@ def get_student_by_id(s_id):
 
 
 
+
+
+# Abfrage für Test Seminarthema. Es wird eine d_id aus der Datenbank mittels LIMIT 1 gezogen
+def get_test_dozent_id():
+    with db.connect_to_db() as conn:
+        with conn.cursor() as cur:
+            cur.execute("SELECT d_id FROM dozierende LIMIT 1")
+            # fetchone speichert ein dictionary {'d_id', 3}
+            result = cur.fetchone()
+    # Rückgabe des Wertes der Dozierenden id
+    return result['d_id']
+
+
+
