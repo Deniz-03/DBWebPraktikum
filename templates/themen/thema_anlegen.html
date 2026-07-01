@@ -68,18 +68,24 @@
 
                 <!-- Status wird beim Anlegen automatisch auf Frei gesetzt (Default in DB) -->
                 <div class="inpt">
-                    <label>Status</label>
-                    <p>Frei</p>
+                    <label for="status">Status</label>
+                    <input type="text" id="status" name="status" value="Frei" readonly>
                 </div>
 
-                <!-- Optionaler PDF-Upload: accept=".pdf" beschränkt die Dateiauswahl auf PDFs -->
+                <!-- Beim anlegen kann noch kein Student eingetragen werden -->
                 <div class="inpt">
-                    <label for="pdf">PDF Upload</label>
-                    <input type="file" name="pdf" id="pdf" accept=".pdf">
+                    <label for="student">Student</label>
+                    <input type="text" id="student" value="Kein Student eingetragen" readonly>
                 </div>
 
             </div>
         </div>
+
+        <!-- Optionaler PDF-Upload: accept=".pdf" beschränkt die Dateiauswahl auf PDFs -->
+                <div class="inpt">
+                    <label for="pdf">PDF Upload</label>
+                    <input type="file" name="pdf" id="pdf" accept=".pdf">
+                </div>
 
         <!-- Pflichtfeld: Beschreibung als mehrzeiliges Textfeld -->
         <div class="inpt">

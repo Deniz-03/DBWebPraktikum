@@ -6,6 +6,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, sessio
 
 from auth.queries import get_user_role
 from themen.queries import get_dozierenden, thema_anlegen, thema_bearbeiten, get_seminarthema, get_student_by_id
+from themen.utils import validiere_thema_form
 
 themen_bp = Blueprint('themen', __name__)
 
@@ -25,7 +26,7 @@ def themen_neu():
     # und hat den eingeloggten Dozenten vorausgewählt
     if request.method == 'GET':
         dozierenden = get_dozierenden()
-        eingeloggter_dozent = int(session.get('user_id', '-1'))
+        eingeloggter_dozent = user_id
         return render_template('themen/thema_anlegen.html',
                                 dozierenden = dozierenden,
                                 eingeloggter_dozent = eingeloggter_dozent,)
@@ -40,7 +41,7 @@ def themen_neu():
         semester = data.get('semester')
 
         dozierenden = get_dozierenden()
-        eingeloggter_dozent = int(session.get('user_id', '-1'))
+        eingeloggter_dozent = user_id
 
         # Prüfen der Pflichtfelder und das der Dozent ausgewählt wurde (Vorauswahl oder manuel geändert)
         if not titel or not oberbegriff or not beschreibung or not d_id:
@@ -51,6 +52,17 @@ def themen_neu():
 
         # request.files.get('pdf') holt die hochgeladene Datei aus dem Formular
         pdf = request.files.get('pdf')
+        # Dateiname auslesen
+        pdf_dateiname = pdf.filename if pdf and pdf.filename != '' else None
+
+        # Validieren der mitgeschickten Felder.
+        fehler = validiere_thema_form(titel, oberbegriff, beschreibung, d_id, semester, pdf_dateiname, dozierenden)
+        if fehler:
+            return render_template('themen/thema_anlegen.html',
+                                   fehler=fehler,
+                                   dozierenden=dozierenden,
+                                   eingeloggter_dozent=eingeloggter_dozent, )
+
         # Prüft ob überhaupt eine Datei hochgeladen wurde
         if pdf and pdf.filename != '':
             # bereinigt den Dateinamen, z.B. entfernt Leerzeichen und gefährliche Zeichen
@@ -125,21 +137,31 @@ def themen_bearbeiten(themen_id):
         dozierenden = get_dozierenden()
         eingeloggter_dozent = session.get('user_id')
 
+        # Prüfen der Pflichtfelder und das der Dozent ausgewählt wurde (Vorauswahl oder manuel geändert)
+        if not titel or not oberbegriff or not beschreibung or not d_id:
+            return render_template('themen/thema_bearbeiten.html',
+                                   fehler='Bitte alle Pflichtfelder ausfüllen',
+                                   dozierenden=dozierenden,
+                                   eingeloggter_dozent=eingeloggter_dozent, )
+
         # Ziehen der/des PDF Files/File
         pdf = request.files.get('pdf')
+        pdf_dateiname = pdf.filename if pdf and pdf.filename != '' else None
+
+        # Validieren der mitgeschickten Felder.
+        fehler = validiere_thema_form(titel, oberbegriff, beschreibung, d_id, semester, pdf_dateiname, dozierenden)
+        if fehler:
+            return render_template('themen/thema_bearbeiten.html',
+                                   fehler=fehler,
+                                   dozierenden=dozierenden,
+                                   eingeloggter_dozent=eingeloggter_dozent, )
+
         if pdf and pdf.filename != '':
             dateiname = secure_filename(pdf.filename)
             pdf.save(os.path.join('themen/uploads', dateiname))
             pdf_pfad = dateiname
         else:
             pdf_pfad = None
-
-        # Prüfen der Pflichtfelder und das der Dozent ausgewählt wurde (Vorauswahl oder manuel geändert)
-        if not titel or not oberbegriff or not beschreibung or not d_id:
-            return render_template('themen/thema_bearbeiten.html',
-                                    fehler='Bitte alle Pflichtfelder ausfüllen',
-                                    dozierenden=dozierenden,
-                                    eingeloggter_dozent=eingeloggter_dozent, )
 
         # Neue Daten werden gespeichert
         thema_bearbeiten(themen_id, titel, d_id, oberbegriff, beschreibung, semester, pdf_pfad)
