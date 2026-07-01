@@ -53,15 +53,56 @@ def create_user(data):
                                 int(themen_id),))
             conn.commit()
 
+def update_user_acc(data, user_id, with_password = False):
+    with db.connect_to_db() as conn:
+        with conn.cursor() as cur:
+
+            cur.execute("UPDATE studierende SET matr_nr = %s, "
+                        "vorname = %s, "
+                        "nachname = %s, "
+                        "studiengang_name = %s, "
+                        "abschluss = %s, "
+                        "bel_seminar = %s "
+                        "WHERE s_id = %s",
+                        (data.get("matr_nr", ''),
+                         data.get("vorname", ''),
+                         data.get("nachname", ''),
+                         data.get('studiengang_name', ''),
+                         data.get('abschluss', ''),
+                         data.get('bel_seminar', ''),
+                         user_id))
+
+
+            themen_id = data.get("seminar_thema", '').strip()
+            if themen_id:
+                cur.execute("UPDATE seminarthema SET s_id = %s, status = 'Vergeben' "
+                            "WHERE themen_id = %s ",
+                            (user_id,
+                             int(themen_id),))
+
+            if with_password:
+                passwort_hash = hash_passwort(data.get("passwort", ''))
+                cur.execute("Update account SET email = %s, passwort = %s "
+                            "WHERE id = %s",
+                            (data.get("email", ''),
+                             passwort_hash,
+                             user_id))
+            else:
+                cur.execute("Update account SET email = %s "
+                            "WHERE id = %s",
+                            (data.get("email", ''),
+                             user_id))
+
+            conn.commit()
+
+
 #Diese Funktion gibt bei richtigem Passwort die User_ID zurück, um diese in der
 #   Session zu speichern und später mit der DB abzugleichen.
 #TODO Dieser Version funtkioniert mit gehashten Passwörtern -> Fragen ob erlaubt ist.
-def check_password(data)-> int | None:
+def check_password(email, inp_passwort)-> int | None:
     with db.connect_to_db() as conn:
         with conn.cursor() as cur:
             user_id = None
-            email = data.get("email", '').strip()
-            inp_passwort = data.get("passwort", '')
 
             cur.execute("SELECT passwort FROM account WHERE email = %s", (email,))
 
@@ -78,6 +119,22 @@ def check_password(data)-> int | None:
                 user_id = cur.fetchone()['id']
 
             return user_id #Kann None sein und somit False in If-Abfragen
+
+#Hiermit wird geguckt, ob eine Matrikelnummer bereits vergeben wurde.
+def check_matr_nr(matr_nr, user_id = -1) -> bool:
+    with db.connect_to_db() as conn:
+        with conn.cursor() as cur:
+            matr_nr_exists = False
+
+            cur.execute("SELECT s_id FROM studierende WHERE matr_nr = %s", (matr_nr,))
+            result = cur.fetchone()
+
+            if result:
+                if int(result.get('s_id')) != user_id:
+                    matr_nr_exists = True
+            return matr_nr_exists
+
+
 
 #Diese Funktion hilft dabei die Session minimal zu halten.
 # Statt die User Rolle in der Session zu speichern wird sie hier immer abgefragt.

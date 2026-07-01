@@ -3,7 +3,9 @@
 {% extends 'base.html' %}
 {% if 'user_id' in session %}
     {% set user_rolle = rolle %}
-    {% set view_mode = True %} <!--Nur zu Testzwecken-->
+    {% set edit_mode = edit_mode %}
+    {% set auth_mode = auth_mode %}
+    {% set view_mode = view_mode | default(false) %}
 {% endif %}
 
 {% block title %}Profil{% endblock %}
@@ -11,48 +13,184 @@
 
 
 {% block content %}
-            <!--Knopf für Bearbeitung bereitstellen.
-                Dieser öffnet einen Dialog, in dem man sein Passwort eingeben muss.
-                Danach wird dieses validiert und authentifiziert.
-                Als Nächstes wird man auf eine Version der Seite weitergeleitet, wo man seine Daten
-                bearbeiten kann und speichern kann.-->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="{{ category }}Message">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
 
 
-            <!--Version 1 der Seite: Nicht angemeldet:
-            Nutzer wird aufgefordert sich anzumelden
-            -->
-            {% if 'user_id' not in session %}
-                <p>Bitte melde dich an, um fortzufahren.</p>
-            {% elif user_rolle == 'stud' %}
-                {% if view_mode == True %}
-                    <!--Nur Inhalte anzeigen-->
-                    <div>
-                        <p class="textBold"> Details: </p>
-                        <p>Vorname: {{ user_info.get('vorname', 'Max') }}</p>
-                        <p>Nachname: {{ user_info.get('nachname', 'Mustermann') }}</p>
-                        <p>Rolle: Student</p>
-                        <p>Matrikelnummer: {{ user_info.get('matr_nr', '123456') }}</p>
-                        <p>Studiengang: {{ user_info.get('studiengang_name', 'AI') }}</p>
-                        <p>Angestrebter Abschluss: {{ user_info.get('abschluss', 'B.Sc') }}</p>
-                        <p>Belegtes Seminar: {{ user_info.get('bel_seminar', 'IIS') }}</p>
-                        {% if user_info.get('titel') is not none %}
-                            <p>Seminarthema: {{ user.get('titel') }}</p>
-                        {% endif %}
+    <!--Dieser Abschnitt ist hauptsächlich für den Dozenten gedacht, der sich Profile ansehen will-->
+    {% if view_mode %}
+        <p class="textBold"> Details: </p>
+        <p>Vorname: {{ user_info.get('vorname', 'Max') }}</p>
+        <p>Nachname: {{ user_info.get('nachname', 'Mustermann') }}</p>
+        <p>Rolle: Student</p>
+        <p>Matrikelnummer: {{ user_info.get('matr_nr', '123456') }}</p>
+        <p>Studiengang: {{ user_info.get('studiengang_name', 'AI') }}</p>
+        <p>Angestrebter Abschluss: {{ user_info.get('abschluss', 'B.Sc') }}</p>
+        <p>Belegtes Seminar: {{ user_info.get('bel_seminar', 'IIS') }}</p>
+        {% if user_info.get('titel') is not none %}
+            <p>Seminarthema: {{ user.get('titel') }}</p>
+        {% endif %}
+
+
+    <!--Nicht Angemeldet-->
+    {% elif 'user_id' not in session %}
+        <p>Bitte melde dich an, um fortzufahren.</p>
+
+
+    <!--Passwort Eingabe-->
+    {% elif auth_mode == True %}
+        <p>Bitte authentifiziere dich zuerst.</p>
+        <form action="{{ url_for('auth.edit_profile') }}" method="POST">
+            <div class="inpt">
+                <label for="passwort">Passwort</label>
+                <input type="password" name="passwort" id="passwort" placeholder="...." required>
+            </div>
+        <button type="submit" class="link submit">Anmelden</button>
+        </form>
+    {% elif user_rolle == 'stud' %}
+
+
+        <!--Bearbeitung erlaubt-->
+        {% if edit_mode == True %}
+            <p>Hier die gewünschten Daten ändern. Alle Daten die nicht verändert wurden, bleiben gleich.</p>
+            <form action="{{ url_for('auth.update_user') }}" method="POST">
+
+                <div class="formColumns">
+                    <!--Erste Spalte-->
+                    <div class="formCol">
+                        <div class="inpt">
+                            <label for="vorname">Vorname</label>
+                            <input type="text" name="vorname" id="vorname" value="{{ user_info.get('vorname', 'Max') }}" placeholder="Max">
+                        </div>
+                        <div class="inpt">
+                            <label for="nachname">Nachname</label>
+                            <input type="text" name="nachname" id="nachname" value="{{ user_info.get('nachname', '') }}" placeholder="Mustermann">
+                        </div>
+                        <!--Hier verwende ich einen text Input, um auch Matrikelnummern die mit 0 beginnen zu ermöglichen.
+                        Im Backend wird dann geprüft, ob es eine valide positive Zahl ist. -->
+                        <div class="inpt">
+                            <label for="matr_nr">Matrikelnummer</label>
+                            <input type="text" name="matr_nr" id="matr_nr" value="{{ user_info.get('matr_nr', '') }}" placeholder="123456">
+                        </div>
                     </div>
-                {% else %}
-                    <!--Inhalte bearbeiten !Erst Nach Passworteingabe!-->
-                {% endif %}
-            {% elif user_rolle == 'doz' %}
-                {% if view_mode == True %}
-                    <!--Nur Inhalte anzeigen-->
-                {% else %}
-                    <!--Inhalte bearbeiten !Erst Nach Passworteingabe!-->
-                {% endif %}
-            {% endif %}
+                    <!--Zweite Spalte-->
+                    <div class="formCol">
+                        <div class="inpt">
+                            <label for="email">E-Mail-Adresse</label>
+                            <input type="email" name="email" id="email" value="{{ user_info.get('email', '') }}" placeholder="max@mustermail.de">
+                        </div>
+                        <!--Hier entscheide ich mich bewusst dagegen die Passwörter mit zurückzugeben,
+                        damit diese nicht wieder im HTML Code landen und abgefangen werden können.-->
+                        <div class="inpt">
+                            <label for="passwort">Neues Passwort</label>
+                            <input type="password" name="passwort" id="passwort" placeholder="....">
+                        </div>
+                        <div class="inpt">
+                            <label for="passwort_wiederholen">Passwort wiederholen</label>
+                            <input type="password" name="passwort_wiederholen" id="passwort_wiederholen" placeholder="....">
+                        </div>
+                    </div>
+                </div>
 
-            <!--Version 2 und 3 gibt es auch als Dozierende Version:
-            Sidebar mit Dozierenden Funktionalität:
-                -Alle Studierenden Profile Listen und besuchen.
-                -Anf 7
-            -->
+                <div class="radioRow">
+                    <p class="textBold">Seminar:</p>
+
+                    <input type="radio" id="IIS" name="bel_seminar" value="IIS"
+                        {{ 'checked' if user_info.get('bel_seminar') == 'IIS' else '' }}>
+                    <label for="IIS">IIS</label>
+
+                    <input type="radio" id="WBS" name="bel_seminar" value="WBS"
+                           {{ 'checked' if user_info.get('bel_seminar') == 'WBS' else '' }}>
+                    <label for="WBS">WBS</label>
+                </div>
+
+                <div class="radioRow">
+                    <p class="textBold">Studiengang:</p>
+
+                    <input type="radio" id="WINF" name="studiengang_name" value="WINF"
+                           {{ 'checked' if user_info.get('studiengang_name') == 'WINF' else '' }}>
+                    <label for="WINF">WINF</label>
+
+                    <input type="radio" id="IMIT" name="studiengang_name" value="IMIT"
+                           {{ 'checked' if user_info.get('studiengang_name') == 'IMIT' else '' }}>
+                    <label for="IMIT">IMIT</label>
+
+                    <input type="radio" id="AI" name="studiengang_name" value="AI"
+                           {{ 'checked' if user_info.get('studiengang_name') == 'AI' else '' }}>
+                    <label for="AI">AI</label>
+
+                    <input type="radio" id="IIM" name="studiengang_name" value="IIM"
+                           {{ 'checked' if user_info.get('studiengang_name') == 'IIM' else '' }}>
+                    <label for="IIM">IIM</label>
+
+                    <input type="radio" id="IKU" name="studiengang_name" value="IKU"
+                            {{ 'checked' if user_info.get('studiengang_name') == 'IKU' else '' }}>
+                    <label for="IKU">IKU</label>
+                </div>
+
+                <div class="radioRow">
+                    <p class="textBold">Abschluss:</p>
+
+                    <input type="radio" id="B.Sc" name="abschluss" value="B.Sc"
+                           {{ 'checked' if user_info.get('abschluss') == 'B.Sc' else '' }}>
+                    <label for="B.Sc">B.Sc</label>
+
+                    <input type="radio" id="M.Sc" name="abschluss" value="M.Sc"
+                           {{ 'checked' if user_info.get('abschluss') == 'M.Sc' else '' }}>
+                    <label for="M.Sc">M.Sc</label>
+                </div>
+
+                <div class="inpt">
+                    <label for="seminar_thema">Seminarthema:</label>
+                    <select name="seminar_thema" id="seminar_thema">
+                        <option value="">-- Bitte wählen --</option>
+                        {% for thema in seminarthemen %}
+                            <option value="{{ thema.get('themen_id')  }}" {% if user_info.get('seminar_thema') == thema.get('themen_id')|string %}selected{% endif %}>
+                                {{ thema.get('titel') }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <button type="submit" class="link submit">Speichern</button>
+            </form>
+
+
+
+        <!--Nur Inhalte-->
+        {% else %}
+            <div>
+                <p class="textBold"> Details: </p>
+                <p>Vorname: {{ user_info.get('vorname', 'Max') }}</p>
+                <p>Nachname: {{ user_info.get('nachname', 'Mustermann') }}</p>
+                <p>Rolle: Student</p>
+                <p>Matrikelnummer: {{ user_info.get('matr_nr', '123456') }}</p>
+                <p>Studiengang: {{ user_info.get('studiengang_name', 'AI') }}</p>
+                <p>Angestrebter Abschluss: {{ user_info.get('abschluss', 'B.Sc') }}</p>
+                <p>Belegtes Seminar: {{ user_info.get('bel_seminar', 'IIS') }}</p>
+                {% if user_info.get('titel') is not none %}
+                    <p>Seminarthema: {{ user.get('titel') }}</p>
+                {% endif %}
+                <form action="{{ url_for('auth.edit_profile') }}" method="GET">
+                    <button type="submit" class="link submit">Bearbeiten</button>
+                </form>
+            </div>
+        {% endif %}
+
+
+    {% elif user_rolle == 'doz' %}
+        <!--Der Dozent hat nicht die Möglichkeit seine Daten über die Seite zu ändern,
+        da er sich auch nicht über die Seite registriert hat, sondern vom Admin hinzugefügt wurde.-->
+            <div>
+                <p class="textBold"> Details: </p>
+                <p>Anrede: {{ user_info.get('anrede', '') }}</p>
+                <p>Vorname: {{ user_info.get('vorname', 'Max') }}</p>
+                <p>Nachname: {{ user_info.get('nachname', 'Mustermann') }}</p>
+                <p>Rolle: Dozent</p>
+            </div>
+    {% endif %}
 {% endblock %}

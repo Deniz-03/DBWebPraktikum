@@ -18,11 +18,13 @@ def check_register_input(data)-> tuple[bool, list]:
 
     return empty_input_found, leere_felder
 
-
-def validate_register(data)-> tuple[bool, list]:
+#In der Registrierung existiert noch keine user_id daher wird -1 als Default gesetzt.
+#Beim updaten eines Profils wird eine user_id übergeben.
+#Dies ist relevant, um zu prüfen, ob eine Matrikelnummer bereits vergeben ist.
+def validate_register(data, with_password = True, user_id = -1)-> tuple[bool, list]:
     #Der Import wird lokal gesetzt, um zirkulare Abhängigkeiten zu vermeiden.
     from auth.queries import check_seminarthema
-
+    from auth.queries import check_matr_nr
     #Hier verwende ich bewusst ein + statt einem * für die Kleinbuchstaben,
     # da es eigentlich keine Namen mit nur einem Buchstaben gibt.
     #Der Name muss also aus mindestens einem Groß- und einem Kleinbuchstaben bestehen.
@@ -79,6 +81,9 @@ def validate_register(data)-> tuple[bool, list]:
     if not re.match(matr_nr_pattern, matr_nr):                                  #Matrikelnummer
         valid_input = False
         flash_messages.append("Matrikelnummer ist min. 6, maximal 8 Zahlen lang")
+    if check_matr_nr(matr_nr, user_id):                                  #Matrikelnummer
+        valid_input = False
+        flash_messages.append("Matrikelnummer existiert bereits")
 
     if not re.match(email_pattern, email):                                      #Email
         valid_input = False
@@ -86,14 +91,15 @@ def validate_register(data)-> tuple[bool, list]:
                                 "Minus. Sie ist nicht beliebig lang: Der lokale Teil (vor dem @) ist nicht länger als 63 Zeichen, und "
                                 "die E-Mail Adresse insgesamt ist nicht länger als 254 Zeichen.")
 
-    if passwort != passwort_wiederholen:                                        #Passwörter vergleichen
-        valid_input = False
-        flash_messages.append("Passwörter stimmen nicht überein!")
+    if with_password:
+        if passwort != passwort_wiederholen:                                        #Passwörter vergleichen
+            valid_input = False
+            flash_messages.append("Passwörter stimmen nicht überein!")
 
-    if not re.match(pass_pattern, passwort) or not re.match(pass_pattern, passwort_wiederholen):       #Passwörter
-        valid_input = False
-        flash_messages.append("Passwort muss aus min. einem Groß- und Kleinbuchstaben "
-                              "und einem Sonderzeichen bestehen.")
+        if not re.match(pass_pattern, passwort) or not re.match(pass_pattern, passwort_wiederholen):       #Passwörter
+            valid_input = False
+            flash_messages.append("Passwort muss aus min. einem Groß- und Kleinbuchstaben "
+                                  "und einem Sonderzeichen bestehen.")
 
     if seminar not in valid_seminare:                                           #Seminare
         valid_input = False
