@@ -28,11 +28,11 @@ die gesamte Breite ausnutzt, wenn die Sidebar nicht verwendet wird-->
 
     <form action="{{ url_for('auth.login') }}" method="POST">
         <div class="inpt">
-            <label for="Email">E-Mail-Adresse</label>
+            <label for="email">E-Mail-Adresse</label>
             <input type="email" name="email" id="email" value="{{ values.get('email', '') }}" placeholder="max@mustermail.de" required>
         </div>
         <div class="inpt">
-            <label for="Passwort">Passwort</label>
+            <label for="passwort">Passwort</label>
             <input type="password" name="passwort" id="passwort" placeholder="...." required>
         </div>
         <button type="submit" class="link submit">Anmelden</button>
