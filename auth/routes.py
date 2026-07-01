@@ -45,9 +45,10 @@ def login():
             return render_template("auth/login.html", values=data)
 
         #Ab hier ist der Input geprüft.
-
+        inp_passwort = data.get("passwort", '')
+        email = data.get("email", '').strip()
         if check_account(data):
-            if user_id := check_password(data):
+            if user_id := check_password(email, inp_passwort):
                 session.clear()
                 session['user_id'] = user_id
                 return redirect(url_for('auth.profile'))
@@ -120,10 +121,104 @@ def profile():
             user_info = get_user_info(user_id)
             return render_template("auth/profile.html", user_info=user_info, rolle=rolle)
         else:
-            return render_template("auth/profile.html", user_info={})
+            return render_template("auth/profile.html")
 
     else:
         #TODO Authentifikation hinzufügen
         return render_template("auth/profile.html")
+
+@auth_bp.route('/profile/edit', methods=['GET', 'POST'])
+def edit_profile():
+
+    #Hier wird zu einer Authentifizierung aufgefordert.
+    if request.method == 'GET':
+        if 'user_id' in session:
+            user_id = int(session.get('user_id', '-1'))
+            rolle = get_user_role(user_id)
+            user_info = get_user_info(user_id)
+            edit_mode = False
+            auth_mode = True
+            return render_template('auth/profile.html', user_info=user_info, rolle=rolle,
+                            edit_mode=edit_mode, auth_mode=auth_mode)
+        else:
+            return redirect(url_for('auth.profile'))
+
+    #Der Nutzer hat sein Passwort eingegeben.
+    #Falls richtig, darf dieser jetzt seine Daten verändern.
+    else:
+        if 'user_id' in session:
+            data = request.form
+            user_id = int(session.get('user_id', '-1'))
+            inp_passwort = data.get("passwort", '')
+            rolle = get_user_role(user_id)
+            user_info = get_user_info(user_id)
+            email = user_info.get("email", '').strip()
+            auth_mode = False
+            if user_id := check_password(email, inp_passwort):
+                session['auth'] = True
+                edit_mode = True
+            else:
+                session['auth'] = False
+                auth_mode = True
+                edit_mode = False
+                flash("Passwort falsch!", 'error')
+            return render_template("auth/profile.html", user_info=user_info, rolle=rolle,
+                                   edit_mode=edit_mode, auth_mode=auth_mode)
+
+        else:
+            flash('Session abgelaufen, oder nicht angemeldet!', 'error')
+            return render_template("auth/profile.html")
+
+@auth_bp.route('/update_user', methods=['GET', 'POST'])
+def update_user():
+    if request.method == 'GET':
+        return redirect(url_for('auth.profile'))
+
+
+    else:
+        if 'user_id' in session: #angemeldet
+            user_id = int(session.get('user_id', '-1'))
+            rolle = get_user_role(user_id)
+            user_info = get_user_info(user_id)
+            if 'auth' in session:
+                if session.get('auth', False): #authentifiziert.
+                    data = request.form
+                    passwort = data.get("passwort", '').strip()
+                    with_password = False
+                    if passwort:
+                        with_password = True
+                    valid_input, flash_messages = validate_register(data, with_password, user_id)
+
+                    if not valid_input: #Der User ist noch authentifiziert, aber hat invaliden Input eingegeben.
+                            auth_mode = False
+                            edit_mode = True
+                            if session.get('auth', False):
+                                for message in flash_messages:
+                                    flash(message, 'error')
+                                return render_template("auth/profile.html", user_info=user_info, rolle=rolle,
+                                                       edit_mode=edit_mode, auth_mode=auth_mode)
+
+                    else: #Hier werden die neuen Daten gespeichert -> valide Daten und authentifiziert.
+                        update_user_acc(data, user_id, with_password)
+                        flash("Erfolgreich gespeichert!", 'success')
+                        return redirect(url_for('auth.profile'))
+
+                else: #nicht authentifiziert, weil falsches Passwort.
+                    flash('Nicht authentifiziert!', 'error')
+                    user_id = int(session.get('user_id', '-1'))
+                    rolle = get_user_role(user_id)
+                    user_info = get_user_info(user_id)
+                    return render_template("auth/profile.html", user_info=user_info, rolle=rolle)
+
+            else: #auch nicht authentifiziert, weil noch nicht probiert.
+                flash('Nicht authentifiziert!', 'error')
+                user_id = int(session.get('user_id', '-1'))
+                rolle = get_user_role(user_id)
+                user_info = get_user_info(user_id)
+                return render_template("auth/profile.html", user_info=user_info, rolle=rolle)
+
+        else: #nicht angemeldet.
+            flash('Session abgelaufen oder nicht angemeldet!', 'error')
+            return render_template('auth.profile')
 
 
