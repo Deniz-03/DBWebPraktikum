@@ -2,11 +2,11 @@
 
 import os
 from werkzeug.utils import secure_filename
-from flask import Blueprint, render_template, request, redirect, url_for, session
+from flask import Blueprint, render_template, request, redirect, url_for, session, flash
 
-from auth.queries import get_user_role
+from auth.queries import get_user_role, get_user_info
 from themen.queries import get_dozierenden, thema_anlegen, thema_bearbeiten, get_seminarthema, get_student_by_id
-from themen.utils import validiere_thema_form
+from themen.utils import validiere_thema_form, pruefe_dozent
 
 themen_bp = Blueprint('themen', __name__)
 
@@ -14,12 +14,9 @@ themen_bp = Blueprint('themen', __name__)
 @themen_bp.route('/themen/neu', methods=['GET', 'POST'])
 def themen_neu():
     # Abfangen von Nutzern die keine Dozenten sind oder wenn keiner User_id in der Session ist
-    if 'user_id' not in session:
-        return redirect(url_for('auth.index'))
-
-    user_id = int(session.get('user_id', '-1'))
-    rolle = get_user_role(user_id)
-    if rolle != 'doz':
+    user_id = int(session.get('user_id'))
+    rolle = get_user_role(user_id) if user_id else None
+    if not pruefe_dozent(user_id, rolle):
         return redirect(url_for('auth.index'))
 
     # Lädt die Thema anlegen Seite, füllt das Dropdown für die Dozierenden
@@ -76,27 +73,25 @@ def themen_neu():
             pdf_pfad = None
 
         # Das Seminarthema wird nun gespeichert
-        thema_anlegen(titel, d_id, oberbegriff, beschreibung, semester=semester, pdf_pfad=pdf_pfad)
+        thema_anlegen(titel, d_id, oberbegriff, beschreibung, semester=semester, pdf_pfad=pdf_pfad,)
 
         # Weiterleiten
         return redirect(url_for('themen.themen_uebersicht')) # URL funktioniert wenn anf 4 fertig ist
 
 # Post und Get Methode zum Bearbeiten eines Seminarthemas
+# Es wird durch <int:theme_id> die Themen_id direkt extrahiert und an die Funktion übergeben
 @themen_bp.route('/themen/<int:themen_id>/bearbeiten', methods=['GET', 'POST'])
 def themen_bearbeiten(themen_id):
     # Abfangen von Nutzern die keine Dozenten sind oder wenn keiner User_id in der Session ist
-    if 'user_id' not in session:
-        return redirect(url_for('auth.index'))
-
-    user_id = int(session.get('user_id', '-1'))
-    rolle = get_user_role(user_id)
-    if rolle != 'doz':
+    user_id = int(session.get('user_id'))
+    rolle = get_user_role(user_id) if user_id else None
+    if not pruefe_dozent(user_id, rolle):
         return redirect(url_for('auth.index'))
 
     # Get Methode zum laden der Bearbeitungsseite mit vorausgefüllten Feldern
     if request.method == 'GET':
         data = get_seminarthema(themen_id)
-        # data ist jetzt ein Dictionary, kein Tupel mehr
+        # data ist ein Dictionary, kein Tupel mehr
         titel = data['titel']
         d_id = data['d_id']
         status = data['status']
@@ -105,6 +100,7 @@ def themen_bearbeiten(themen_id):
         s_id = data['s_id']
         semester = data['semester']
         pdf = data['pdf_pfad']
+        vorgetragen = data['vorgetragen']
 
         # Namen des Studenten holen, wenn er eingetragem ist
         if s_id:
@@ -123,7 +119,8 @@ def themen_bearbeiten(themen_id):
                         student=student,
                         semester=semester,
                         pdf_pfad=pdf,
-                        dozierenden=dozierenden,)
+                        dozierenden=dozierenden,
+                        vorgetragen=vorgetragen)
 
     # Post Methode um bearbeitete Felder zu Speichern
     if request.method == 'POST':
@@ -133,6 +130,8 @@ def themen_bearbeiten(themen_id):
         oberbegriff = data.get('oberbegriff')
         beschreibung = data.get('beschreibung')
         semester = data.get('semester')
+        # Da False als String übergeben wird wäre bool('False') == True immer True
+        vorgetragen = data.get('vorgetragen') == 'True'
 
         dozierenden = get_dozierenden()
         eingeloggter_dozent = session.get('user_id')
@@ -164,6 +163,26 @@ def themen_bearbeiten(themen_id):
             pdf_pfad = None
 
         # Neue Daten werden gespeichert
-        thema_bearbeiten(themen_id, titel, d_id, oberbegriff, beschreibung, semester, pdf_pfad)
+        thema_bearbeiten(themen_id, titel, d_id, oberbegriff, beschreibung, semester, pdf_pfad,
+                         vorgetragen=vorgetragen)
 
         return redirect(url_for('themen.themen_uebersicht'))  # URL funktioniert wenn ANF 4 fertig ist
+
+# Route um die User Seite mittels der ID zu Laden
+@themen_bp.route('/themen/profile/<int:student_id>', methods=['GET'])
+def profile(student_id):
+    user_id = session.get('user_id')
+    if not user_id:
+        return redirect(url_for('auth.index'))
+    user_id = int(user_id)
+    rolle = get_user_role(user_id)
+
+    # Nur Dozenten dürfen laut Anf 2 die Profile der Studenten sehen
+    if not pruefe_dozent(user_id, rolle):
+        flash('Nur Dozenten haben Zugriff auf das Profil', 'error')
+        return redirect(url_for('themen.themen_uebersicht'))
+
+    user_info = get_user_info(student_id)
+    return render_template('auth/profile.html', view_mode=True, user_info=user_info)
+
+

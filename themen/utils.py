@@ -79,3 +79,16 @@ def validiere_thema_form(titel, oberbegriff, beschreibung, d_id, semester, pdf_d
         return 'Nur PDF Dateien sind möglich'
 
     return None
+
+# Schauen ob ein Dozierender angemeldet ist
+def pruefe_dozent(user_id, rolle):
+    # False wenn None oder 0
+    if not user_id:
+        return False
+
+    # False wenn ein Student angemeldet ist
+    if rolle != 'doz':
+        return False
+
+    return True
+

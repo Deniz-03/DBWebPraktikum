@@ -30,12 +30,12 @@ def get_seminarthema(themen_id):
 
 # Bearbeiten von Themen. Wird so umgesetzt das alle nicht geänderten Werte automatisch durch das Template
 # weitergegeben werden
-def thema_bearbeiten(themen_id, titel, d_id, oberbegriff, beschreibung, semester, pdf_pfad):
+def thema_bearbeiten(themen_id, titel, d_id, oberbegriff, beschreibung, semester, pdf_pfad, vorgetragen):
     with db.connect_to_db() as conn:
         with conn.cursor() as cur:
             cur.execute("UPDATE seminarthema SET titel=%s, d_id=%s, oberbegriff=%s, beschreibung=%s, "
-                        "semester=%s, pdf_pfad=%s WHERE themen_id=%s",
-                        (titel, d_id, oberbegriff, beschreibung,semester, pdf_pfad, themen_id)
+                        "semester=%s, pdf_pfad=%s, vorgetragen=%s WHERE themen_id=%s",
+                        (titel, d_id, oberbegriff, beschreibung, semester, pdf_pfad, vorgetragen, themen_id)
             )
         conn.commit()
 
