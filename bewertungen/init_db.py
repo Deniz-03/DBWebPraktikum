@@ -12,7 +12,7 @@ with db.connect_to_db() as conn:
         cur.execute('DROP TYPE IF EXISTS BEWERTUNGSSKALA CASCADE')
 
         # language=PostgreSQL
-        cur.execute("CREATE TYPE BEWERTUNGSSKALA AS ENUM ('1', '2', '3', '4', '5')")
+        cur.execute("CREATE TYPE BEWERTUNGSSKALA AS ENUM (1, 2, 3, 4, 5)")
 
         cur.execute("CREATE TABLE bew_vortrag (bv_id SERIAL PRIMARY KEY,"
                     "t_id INT NOT NULL,"
