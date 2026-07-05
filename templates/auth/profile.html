@@ -173,7 +173,7 @@
                 <p>Angestrebter Abschluss: {{ user_info.get('abschluss', 'B.Sc') }}</p>
                 <p>Belegtes Seminar: {{ user_info.get('bel_seminar', 'IIS') }}</p>
                 {% if user_info.get('titel') is not none %}
-                    <p>Seminarthema: {{ user.get('titel') }}</p>
+                    <p>Seminarthema: {{ user_info.get('titel') }}</p>
                 {% endif %}
                 <form action="{{ url_for('auth.edit_profile') }}" method="GET">
                     <button type="submit" class="link submit">Bearbeiten</button>
