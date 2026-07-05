@@ -1,21 +1,20 @@
 #Author Peer Schulze (410246)
 
-import os
-from werkzeug.utils import secure_filename
-from flask import Blueprint, render_template, request, redirect, url_for, session, flash
+from flask import Blueprint, render_template, request, redirect, url_for, flash
 
-from auth.queries import get_user_role, get_user_info
-from themen.queries import get_dozierenden, thema_anlegen, thema_bearbeiten, get_seminarthema, get_student_by_id
-from themen.utils import validiere_thema_form, pruefe_dozent
+from auth.queries import get_user_info
+from themen.queries import get_dozierenden, thema_anlegen, thema_bearbeiten, get_seminarthema, get_student_by_id, \
+    get_alle_seminarthemen, get_dozent_by_id, student_hinzufuegen
+from themen.utils import validiere_thema_form, pruefe_dozent, pruefe_student, thema_belegen_pruefen, \
+    hole_user_und_rolle, speichere_pdf
 
 themen_bp = Blueprint('themen', __name__)
 
 # Post und Get Methode zum Anlegen eines Seminarthemas
 @themen_bp.route('/themen/neu', methods=['GET', 'POST'])
 def themen_neu():
-    # Abfangen von Nutzern die keine Dozenten sind oder wenn keiner User_id in der Session ist
-    user_id = int(session.get('user_id'))
-    rolle = get_user_role(user_id) if user_id else None
+    # Abfangen von Nutzern die keine Dozenten sind oder wenn keine User_id in der Session ist
+    user_id, rolle = hole_user_und_rolle()
     if not pruefe_dozent(user_id, rolle):
         return redirect(url_for('auth.index'))
 
@@ -42,8 +41,14 @@ def themen_neu():
 
         # Prüfen der Pflichtfelder und das der Dozent ausgewählt wurde (Vorauswahl oder manuel geändert)
         if not titel or not oberbegriff or not beschreibung or not d_id:
+            fehler = 'Bitte alle Pflichtfelder ausfüllen'
             return render_template('themen/thema_anlegen.html',
-                                   fehler = 'Bitte alle Pflichtfelder ausfüllen',
+                                   titel=titel,
+                                   oberbegriff=oberbegriff,
+                                   beschreibung=beschreibung,
+                                   d_id=d_id,
+                                   semester=semester,
+                                   fehler = fehler,
                                    dozierenden = dozierenden,
                                    eingeloggter_dozent = eingeloggter_dozent,)
 
@@ -56,21 +61,16 @@ def themen_neu():
         fehler = validiere_thema_form(titel, oberbegriff, beschreibung, d_id, semester, pdf_dateiname, dozierenden)
         if fehler:
             return render_template('themen/thema_anlegen.html',
+                                   titel=titel,
+                                   oberbegriff=oberbegriff,
+                                   beschreibung=beschreibung,
+                                   d_id=d_id,
+                                   semester=semester,
                                    fehler=fehler,
                                    dozierenden=dozierenden,
                                    eingeloggter_dozent=eingeloggter_dozent, )
 
-        # Prüft ob überhaupt eine Datei hochgeladen wurde
-        if pdf and pdf.filename != '':
-            # bereinigt den Dateinamen, z.B. entfernt Leerzeichen und gefährliche Zeichen
-            dateiname = secure_filename(pdf.filename)
-            # Speichert die Datei in themen/uploads
-            pdf.save(os.path.join('themen/uploads', dateiname))
-            # Nur der Dateiname wird in der DB gespeichert
-            pdf_pfad = dateiname
-        # Wird ausgeführt wenn keine Datei hochgeladen wurde
-        else:
-            pdf_pfad = None
+        pdf_pfad = speichere_pdf(pdf)
 
         # Das Seminarthema wird nun gespeichert
         thema_anlegen(titel, d_id, oberbegriff, beschreibung, semester=semester, pdf_pfad=pdf_pfad,)
@@ -82,31 +82,34 @@ def themen_neu():
 # Es wird durch <int:theme_id> die Themen_id direkt extrahiert und an die Funktion übergeben
 @themen_bp.route('/themen/<int:themen_id>/bearbeiten', methods=['GET', 'POST'])
 def themen_bearbeiten(themen_id):
-    # Abfangen von Nutzern die keine Dozenten sind oder wenn keiner User_id in der Session ist
-    user_id = int(session.get('user_id'))
-    rolle = get_user_role(user_id) if user_id else None
+    # Abfangen von Nutzern die keine Dozenten sind oder wenn keine User_id in der Session ist
+    user_id, rolle = hole_user_und_rolle()
     if not pruefe_dozent(user_id, rolle):
         return redirect(url_for('auth.index'))
 
+    # Überprüfung ob die übergebene Themen_id auch wirklich in der Datenbank existert
+    thema_daten = get_seminarthema(themen_id)
+    if not thema_daten:
+        return redirect(url_for('themen.themen_uebersicht'))
+
+    # Namen des Studenten holen, wenn einer eingetragen ist
+    s_id = thema_daten['s_id']
+    if s_id:
+        student = get_student_by_id(s_id)
+    else:
+        student = None
+
     # Get Methode zum laden der Bearbeitungsseite mit vorausgefüllten Feldern
     if request.method == 'GET':
-        data = get_seminarthema(themen_id)
         # data ist ein Dictionary, kein Tupel mehr
-        titel = data['titel']
-        d_id = data['d_id']
-        status = data['status']
-        oberbegriff = data['oberbegriff']
-        beschreibung = data['beschreibung']
-        s_id = data['s_id']
-        semester = data['semester']
-        pdf = data['pdf_pfad']
-        vorgetragen = data['vorgetragen']
-
-        # Namen des Studenten holen, wenn er eingetragem ist
-        if s_id:
-            student = get_student_by_id(s_id)
-        else:
-            student = None
+        titel = thema_daten['titel']
+        d_id = thema_daten['d_id']
+        status = thema_daten['status']
+        oberbegriff = thema_daten['oberbegriff']
+        beschreibung = thema_daten['beschreibung']
+        semester = thema_daten['semester']
+        pdf = thema_daten['pdf_pfad']
+        vorgetragen = thema_daten['vorgetragen']
 
         dozierenden = get_dozierenden()
 
@@ -130,18 +133,27 @@ def themen_bearbeiten(themen_id):
         oberbegriff = data.get('oberbegriff')
         beschreibung = data.get('beschreibung')
         semester = data.get('semester')
+        status = data.get('status')
         # Da False als String übergeben wird wäre bool('False') == True immer True
         vorgetragen = data.get('vorgetragen') == 'True'
 
         dozierenden = get_dozierenden()
-        eingeloggter_dozent = session.get('user_id')
 
         # Prüfen der Pflichtfelder und das der Dozent ausgewählt wurde (Vorauswahl oder manuel geändert)
         if not titel or not oberbegriff or not beschreibung or not d_id:
+            fehler = 'Bitte alle Pflichtfelder ausfüllen'
             return render_template('themen/thema_bearbeiten.html',
-                                   fehler='Bitte alle Pflichtfelder ausfüllen',
+                                   fehler=fehler,
+                                   titel=titel,
+                                   d_id=d_id,
+                                   oberbegriff=oberbegriff,
+                                   beschreibung=beschreibung,
+                                   semester=semester,
+                                   status=status,
+                                   student=student,
                                    dozierenden=dozierenden,
-                                   eingeloggter_dozent=eingeloggter_dozent, )
+                                   vorgetragen=vorgetragen
+                                   )
 
         # Ziehen der/des PDF Files/File
         pdf = request.files.get('pdf')
@@ -152,30 +164,35 @@ def themen_bearbeiten(themen_id):
         if fehler:
             return render_template('themen/thema_bearbeiten.html',
                                    fehler=fehler,
-                                   dozierenden=dozierenden,
-                                   eingeloggter_dozent=eingeloggter_dozent, )
+                                   titel=titel,
+                                   d_id=d_id,
+                                   oberbegriff=oberbegriff,
+                                   beschreibung=beschreibung,
+                                   semester=semester,
+                                   status=status,
+                                   vorgetragen=vorgetragen,
+                                   student=student,
+                                   dozierenden=dozierenden
+                                   )
 
-        if pdf and pdf.filename != '':
-            dateiname = secure_filename(pdf.filename)
-            pdf.save(os.path.join('themen/uploads', dateiname))
-            pdf_pfad = dateiname
+        neuer_pdf_pfad = speichere_pdf(pdf)
+        if neuer_pdf_pfad:
+            pdf_pfad = neuer_pdf_pfad
         else:
-            pdf_pfad = None
+            pdf_pfad = thema_daten['pdf_pfad']
 
         # Neue Daten werden gespeichert
         thema_bearbeiten(themen_id, titel, d_id, oberbegriff, beschreibung, semester, pdf_pfad,
                          vorgetragen=vorgetragen)
 
-        return redirect(url_for('themen.themen_uebersicht'))  # URL funktioniert wenn ANF 4 fertig ist
+        return redirect(url_for('themen.thema_detail', themen_id=themen_id))
 
 # Route um die User Seite mittels der ID zu Laden
 @themen_bp.route('/themen/profile/<int:student_id>', methods=['GET'])
 def profile(student_id):
-    user_id = session.get('user_id')
+    user_id, rolle = hole_user_und_rolle()
     if not user_id:
         return redirect(url_for('auth.index'))
-    user_id = int(user_id)
-    rolle = get_user_role(user_id)
 
     # Nur Dozenten dürfen laut Anf 2 die Profile der Studenten sehen
     if not pruefe_dozent(user_id, rolle):
@@ -184,5 +201,60 @@ def profile(student_id):
 
     user_info = get_user_info(student_id)
     return render_template('auth/profile.html', view_mode=True, user_info=user_info)
+
+# Route um die Themen Übersicht mit allen Anforderungen aus Anf 7 zu Laden
+@themen_bp.route('/themen/uebersicht', methods=['GET'])
+def themen_uebersicht():
+    user_id, rolle = hole_user_und_rolle()
+    if not user_id:
+        return redirect(url_for('auth.index'))
+
+    themen = get_alle_seminarthemen()
+    return render_template('themen/themen_uebersicht.html', themen=themen, rolle=rolle)
+
+# Route für die Detailansicht eines Seminarthemas
+@themen_bp.route('/themen/thema_detail/<int:themen_id>', methods=['GET', 'POST'])
+def thema_detail(themen_id):
+    user_id, rolle = hole_user_und_rolle()
+    if not user_id:
+        return redirect(url_for('auth.index'))
+
+    # Überprüfung ob die übergebene Themen_id auch wirklich in der Datenbank existert
+    data = get_seminarthema(themen_id)
+    if not data:
+        return redirect(url_for('themen.themen_uebersicht'))
+
+    if request.method == 'GET':
+        s_id = data['s_id']
+        d_id = data['d_id']
+
+        # Namen des Studenten holen, wenn einer eingetragen ist
+        if s_id:
+            student = get_student_by_id(s_id)
+        else:
+            student = None
+
+        dozent = get_dozent_by_id(d_id)
+
+        return render_template('themen/thema_detail.html',
+                        thema=data,
+                        student=student,
+                        dozent=dozent,
+                        rolle=rolle,
+                        user_id=user_id,)
+
+    if request.method == 'POST':
+        # Prüfen ob wirklich ein student eingeloggt ist
+        if not pruefe_student(rolle):
+            return redirect(url_for('auth.index'))
+
+        if thema_belegen_pruefen(data, user_id):
+            status = 'Vergeben'
+            flash('Thema erfolgreich ausgewählt.', 'success')
+            student_hinzufuegen(themen_id, user_id, status)
+        else:
+            flash('Das Thema ist bereits belegt oder sie belegen bereits ein Thema.', 'error')
+
+        return redirect(url_for('themen.thema_detail', themen_id=themen_id))
 
 

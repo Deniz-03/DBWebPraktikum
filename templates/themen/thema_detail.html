@@ -1,0 +1,136 @@
+<!-- Autor Peer Schulze (410246) -->
+
+{% extends 'base.html' %}
+
+{% block title %}Themen Übersicht{% endblock %}
+{% block header %}Themen Übersicht{% endblock %}
+
+<!--Sidebar wird hier nicht benötigt-->
+{% block spezNav %}
+{% endblock %}
+
+{% block contentClass %}fullWidth{% endblock %}
+
+{% block content %}
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, nachricht in messages %}
+                {% if category == 'success' %}
+                    <div class="successMessage">{{ nachricht }}</div>
+                {% else %}
+                    <div class="errorMessage">{{ nachricht }}</div>
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <div class="formColumns">
+        <!-- Erste Spalte -->
+        <div class="formCol">
+
+            <div class="inpt">
+                <label>Titel</label>
+                <div class="displayValue">{{ thema.titel }}</div>
+            </div>
+
+            <div class="inpt">
+                <label>Oberbegriff</label>
+                <div class="displayValue">{{ thema.oberbegriff }}</div>
+            </div>
+
+            <div class="inpt">
+                <label>Dozent</label>
+                <div class="displayValue">{{ dozent.vorname }} {{ dozent.nachname }}</div>
+            </div>
+
+            <div class="inpt">
+                <label>PDF Upload</label>
+                <div class="displayValue">{{ thema.pdf_pfad }}</div>
+            </div>
+
+        </div>
+
+        <!-- Zweite Spalte -->
+        <div class="formCol">
+
+            <div class="inpt">
+                <label>Semester</label>
+                <div class="displayValue">{{ thema.semester }}</div>
+            </div>
+
+            <div class="inpt">
+                <label>Status</label>
+                <div class="displayValue">{{ thema.status }}</div>
+            </div>
+
+            <div class="inpt">
+                <label>Eingetragener Student</label>
+                {% if rolle == 'doz' and thema.status != 'Frei' %}
+                    <a href="{{ url_for('themen.profile', student_id=student.s_id) }}" class="link">
+                        {{ student.vorname }} {{ student.nachname }}
+                    </a>
+                {% elif rolle == "stud" and thema.status != "Frei" %}
+                    <div class="displayValue">{{ student.vorname }} {{ student.nachname }}</div>
+                {% else %}
+                    <div class="displayValue">Keine Eintragung</div>
+                {% endif %}
+            </div>
+
+            <div class="inpt">
+                <label>Vorgetragen</label>
+                {% if thema.vorgetragen %}
+                    <div class="displayValue">Vortrag gehalten</div>
+                {% else %}
+                    <div class="displayValue">Vortrag offen</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+        <div class="inpt">
+            <label>Beschreibung</label>
+            <div class="displayValue">{{ thema.beschreibung }}</div>
+        </div>
+
+        {% if user_id == thema.s_id %}
+            <div class="inpt">
+                <div class="displayValue">Seminarthema belegt</div>
+            </div>
+        {% endif %}
+
+
+    <!-- Aktionsleiste für die verschiedenen Navigationen -->
+    <div class="row">
+
+        {% if rolle == 'stud' and thema.status == 'Frei' %}
+            <form method="POST">
+                <button type="submit" class="link">Thema belegen</button>
+            </form>
+        {% endif %}
+
+        {% if rolle == 'doz' %}
+            <a href="{{ url_for('themen.themen_bearbeiten', themen_id=thema.themen_id) }}"
+               class="link">
+                Thema bearbeiten
+            </a>
+
+            {% if thema.status == 'Vergeben' %}
+                <a href="" class="link">
+                    Seminarleistung bewerten
+                </a>
+                <a href="" class="link">
+                    Ausarbeitung bewerten
+                </a>
+            {% endif %}
+        {% endif %}
+
+        {% if thema.vorgetragen and user_id != thema.s_id %}
+            <a href="" class="link">
+                Vortrag bewerten
+            </a>
+        {% endif %}
+
+    </div>
+
+{% endblock %}

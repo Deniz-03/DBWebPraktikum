@@ -306,6 +306,20 @@
     box-shadow: 0 0 4px rgba(56, 5, 163, 0.2);
 }
 
+/* Reine Anzeige eines Wertes – gleicher Look wie .inpt input, aber nicht editierbar */
+.inpt .displayValue {
+    padding: 12px;
+    font-size: 15px;
+    border: 1.5px solid rgba(56, 5, 163, 0.4);
+    border-radius: 4px;
+    background-color: #f0ede8;   /* etwas dunkler als der Input -> signalisiert "gesperrt" */
+    color: #4a3e3d;
+    min-height: 21px;            /* leere Felder fallen nicht zusammen */
+    white-space: pre-wrap;       /* Beschreibung mit Zeilenumbrüchen bleibt erhalten */
+    word-break: break-word;      /* lange Wörter/Links brechen um */
+    box-sizing: border-box;
+}
+
 .checkbox {
     display: flex;
     align-items: center;

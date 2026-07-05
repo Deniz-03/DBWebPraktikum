@@ -1,4 +1,12 @@
 #Author Peer Schulze (410246)
+import os
+
+from werkzeug.utils import secure_filename
+
+from themen.queries import get_sid_aus_themen
+from flask import session
+from auth.queries import get_user_role
+
 
 # Validierungsfunktionen für die Formulardaten von Seminarthema anlegen
 # Diese werden von routes.py aufgerufen um die Sicherheit der eingaben zu garantieren
@@ -91,4 +99,43 @@ def pruefe_dozent(user_id, rolle):
         return False
 
     return True
+
+# Schauen ob ein Student eingeloggt ist
+def pruefe_student(rolle):
+    if rolle != 'stud':
+        return False
+
+    return True
+
+# Schauen ob es eine User_id in der Session gibt
+def hole_user_und_rolle():
+    user_id = session.get('user_id')
+    if not user_id:
+        return None, None
+    user_id = int(user_id)
+    rolle = get_user_role(user_id)
+    return user_id, rolle
+
+# Prüfen ob das Thema belegt werden kann und ib der Student noch kein Thema belegt hat
+def thema_belegen_pruefen(thema, user_id):
+    # Liste der s_ids, die schon ein Thema belegt haben
+    studenten_ids = [row['s_id'] for row in get_sid_aus_themen() if row['s_id'] is not None]
+
+    # Belegbar nur wenn: Thema hat noch keinen Studenten,
+    # Status ist Frei, UND der Student belegt noch kein anderes Thema
+    if not thema['s_id'] and thema['status'] == 'Frei' and user_id not in studenten_ids:
+        return True
+    else:
+        return False
+
+# Speichert ein hochgeladenes PDF und gibt den gespeicherten Dateinamen zurück.
+# Gibt None zurück, wenn keine Datei hochgeladen wurde.
+def speichere_pdf(pdf):
+    if not pdf or pdf.filename == '':
+        return None
+    dateiname = secure_filename(pdf.filename)
+    pdf.save(os.path.join('static/uploads', dateiname))
+    return dateiname
+
+
 

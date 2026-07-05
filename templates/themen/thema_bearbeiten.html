@@ -15,7 +15,7 @@
 
     <!-- Gibt Fehler aus falls eines der Pflichtfelder nicht ausgefüllt/Inhalt entfernt wurde -->
     {% if fehler %}
-        <p>{{ fehler }}</p>
+        <div class="errorMessage">{{ fehler }}</div>
     {% endif %}
 
     <!-- Alle Felder werden mit bereits gesetzten Attributen geladen -->
@@ -69,12 +69,11 @@
                     <input type="text" id="status" name="status" value="{{ status }}" readonly>
                 </div>
 
-                <!-- TODO: Link abklären und mit Profil verbinden -->
                 <div class="inpt">
                      <label for="student">Zugewiesener Studierender</label>
                     {% if student %}
                         <a href="{{ url_for('themen.profile', student_id=student.s_id) }}" id="student"
-                           class="student_link">
+                           class="link">
                             {{ student.vorname }} {{ student.nachname }}
                         </a>
                     {% else %}
@@ -84,19 +83,24 @@
 
                 <div class="inpt">
                     <label for="vorgetragen">Vorgetragen</label>
-                    <select id="vorgetragen" name="vorgetragen">
-                        <option value="True" {% if vorgetragen %}selected{% endif %}>vorgetragen</option>
-                        <option value="False" {% if not vorgetragen %}selected{% endif %}>nicht vorgetragen</option>
-                    </select>
+                    {% if student %}
+                        <select id="vorgetragen" name="vorgetragen">
+                            <option value="True" {% if vorgetragen %}selected{% endif %}>vorgetragen</option>
+                            <option value="False" {% if not vorgetragen %}selected{% endif %}>nicht vorgetragen</option>
+                        </select>
+                    {% else %}
+                        <input type="text" id="vorgetragen" value="nicht vorgetragen" readonly>
+                    {% endif %}
                 </div>
             </div>
+        </div>
 
             <div class="inpt">
                 <label for="beschreibung">Beschreibung</label>
         <textarea id="beschreibung" name="beschreibung" rows="5">{{ beschreibung }}</textarea>
             </div>
 
-        <button type="submit">Speichern</button>
+        <button type="submit" class="link">Speichern</button>
 
     </form>
 
