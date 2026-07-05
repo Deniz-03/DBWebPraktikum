@@ -1,0 +1,48 @@
+<!-- Autor Peer Schulze (410246) -->
+
+{% extends 'base.html' %}
+
+{% block title %}Themen Übersicht{% endblock %}
+{% block header %}Themen Übersicht{% endblock %}
+
+<!--Sidebar wird hier nicht benötigt-->
+{% block spezNav %}
+{% endblock %}
+
+{% block contentClass %}fullWidth{% endblock %}
+
+{% block content %}
+
+    {% if themen %}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Titel</th>
+                    <th>Dozent</th>
+                    <th>Semester</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for thema in themen %}
+                    <tr>
+                        <td>
+                            <!-- Klick auf den Titel führt zur Detailansicht -->
+                            <a href="{{ url_for('themen.thema_detail', themen_id=thema.themen_id) }}"
+                               class="link">
+                                {{ thema.titel }}
+                            </a>
+                        </td>
+                        <td>{{ thema.doz_vorname }} {{ thema.doz_nachname }}</td>
+                        <td>{{ thema.semester }}</td>
+                        <td>{{ thema.status }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>Keine Seminarthemen vorhanden</p>
+    {% endif %}
+
+{% endblock %}
+

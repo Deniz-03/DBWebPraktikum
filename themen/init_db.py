@@ -28,13 +28,19 @@ with db.connect_to_db() as conn:
 
         conn.commit()
 
-        # Test Thema
+        # Test Themen
         dozent_id = get_test_dozent_id()
 
         cur.execute(
             "INSERT INTO seminarthema (titel, d_id, oberbegriff, beschreibung, s_id, semester) "
             "VALUES (%s, %s, %s, %s, %s, %s)",
             ('Peter Pan', dozent_id, 'Phantasie', 'eine Folge schreiben', None, 4)
+        )
+
+        cur.execute(
+            "INSERT INTO seminarthema (titel, d_id, oberbegriff, beschreibung, s_id, semester) "
+            "VALUES (%s, %s, %s, %s, %s, %s)",
+            ('Star Wars', dozent_id, 'Galaxis', 'Beschreibe die Schlacht auf Geonosis', None, 6)
         )
 
         conn.commit()
