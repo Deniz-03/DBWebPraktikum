@@ -31,19 +31,27 @@
         </select>
     </div>
 
+    <div class="bewertungsTabelle">
+
+    <div class="bewertungsZeile">
+        <span class="bewertungLabel"></span>
+        {% for wert, symbol in skala.items() %}
+        <span class="skalaHeaderSymbol">{{ symbol }}</span>
+        {% endfor %}
+    </div>
+
     {% for feld, label in kriterien %}
-    <div class="bewertungRow row">
+    <div class="bewertungsZeile">
         <span class="bewertungLabel">{{ label }}</span>
-        <div class="skalaOptionen row">
-            {% for wert, symbol in skala.items() %}
-            <label class="skalaOption">
-                <input type="radio" name="{{ feld }}" value="{{ wert }}" required>
-                {{ symbol }}
-            </label>
-            {% endfor %}
-        </div>
+        {% for wert, symbol in skala.items() %}
+        <label class="skalaOption">
+            <input type="radio" name="{{ feld }}" value="{{ wert }}" required>
+        </label>
+        {% endfor %}
     </div>
     {% endfor %}
+
+</div>
 
     <div class="kommentarDiv column">
         <label for="kommentar">Kommentar (optional)</label>
