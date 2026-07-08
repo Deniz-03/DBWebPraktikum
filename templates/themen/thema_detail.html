@@ -2,8 +2,8 @@
 
 {% extends 'base.html' %}
 
-{% block title %}Themen Übersicht{% endblock %}
-{% block header %}Themen Übersicht{% endblock %}
+{% block title %}Themen Detailansicht{% endblock %}
+{% block header %}Themen Detailansicht{% endblock %}
 
 <!--Sidebar wird hier nicht benötigt-->
 {% block spezNav %}
@@ -46,7 +46,12 @@
 
             <div class="inpt">
                 <label>PDF Upload</label>
-                <div class="displayValue">{{ thema.pdf_pfad }}</div>
+                {% if thema.pdf_pfad %}
+                    <a href="{{ url_for('static', filename='uploads/' ~ thema.pdf_pfad) }}"
+                    class="link" target="_blank">{{ thema.pdf_pfad }}</a>
+                {% else %}
+                    <div class="displayValue">Kein PDF hochgeladen</div>
+                {% endif %}
             </div>
 
         </div>
@@ -56,7 +61,7 @@
 
             <div class="inpt">
                 <label>Semester</label>
-                <div class="displayValue">{{ thema.semester }}</div>
+                <div class="displayValue">{{ thema.semester or 'Kein Semester' }}</div>
             </div>
 
             <div class="inpt">
@@ -66,11 +71,11 @@
 
             <div class="inpt">
                 <label>Eingetragener Student</label>
-                {% if rolle == 'doz' and thema.status != 'Frei' %}
+                {% if rolle == 'doz' and student %}
                     <a href="{{ url_for('themen.profile', student_id=student.s_id) }}" class="link">
                         {{ student.vorname }} {{ student.nachname }}
                     </a>
-                {% elif rolle == "stud" and thema.status != "Frei" %}
+                {% elif rolle == "stud" and student %}
                     <div class="displayValue">{{ student.vorname }} {{ student.nachname }}</div>
                 {% else %}
                     <div class="displayValue">Keine Eintragung</div>

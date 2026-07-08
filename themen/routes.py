@@ -3,10 +3,11 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 
 from auth.queries import get_user_info
-from themen.queries import get_dozierenden, thema_anlegen, thema_bearbeiten, get_seminarthema, get_student_by_id, \
-    get_alle_seminarthemen, get_dozent_by_id, student_hinzufuegen
+from themen.queries import (get_dozierenden, thema_anlegen, thema_bearbeiten, get_seminarthema, get_student_by_id,
+                            get_dozent_by_id, student_hinzufuegen, get_seminarthemen_by_filter, get_semester,
+                            get_status_optionen)
 from themen.utils import validiere_thema_form, pruefe_dozent, pruefe_student, thema_belegen_pruefen, \
-    hole_user_und_rolle, speichere_pdf
+    hole_user_und_rolle, speichere_pdf, check_status
 
 themen_bp = Blueprint('themen', __name__)
 
@@ -34,7 +35,7 @@ def themen_neu():
         oberbegriff = data.get('oberbegriff')
         beschreibung = data.get('beschreibung')
         d_id = data.get('d_id')
-        semester = data.get('semester')
+        semester = data.get('semester') or None
 
         dozierenden = get_dozierenden()
         eingeloggter_dozent = user_id
@@ -132,7 +133,7 @@ def themen_bearbeiten(themen_id):
         d_id = data.get('d_id')
         oberbegriff = data.get('oberbegriff')
         beschreibung = data.get('beschreibung')
-        semester = data.get('semester')
+        semester = data.get('semester') or None
         status = data.get('status')
         # Da False als String übergeben wird wäre bool('False') == True immer True
         vorgetragen = data.get('vorgetragen') == 'True'
@@ -199,6 +200,11 @@ def profile(student_id):
         flash('Nur Dozenten haben Zugriff auf das Profil', 'error')
         return redirect(url_for('themen.themen_uebersicht'))
 
+    student = get_student_by_id(student_id)
+    if not student:
+        flash('Profil nicht gefunden', 'error')
+        return redirect(url_for('themen.themen_uebersicht'))
+
     user_info = get_user_info(student_id)
     return render_template('auth/profile.html', view_mode=True, user_info=user_info)
 
@@ -209,8 +215,37 @@ def themen_uebersicht():
     if not user_id:
         return redirect(url_for('auth.index'))
 
-    themen = get_alle_seminarthemen()
-    return render_template('themen/themen_uebersicht.html', themen=themen, rolle=rolle)
+    gesetzte_filter = request.args
+    titel = gesetzte_filter.get('titel')
+    d_id = gesetzte_filter.get('d_id', type=int)
+    oberbegriff = gesetzte_filter.get('oberbegriff')
+    beschreibung = gesetzte_filter.get('beschreibung')
+    student = gesetzte_filter.get('student_name')
+    semester = gesetzte_filter.get('semester', type=int)
+    status = gesetzte_filter.get('status')
+
+    if not check_status(status):
+        flash('Bitte nur die gültigen Statuswerte im Dropdown nutzen', 'error')
+        return redirect(url_for('themen.themen_uebersicht'))
+
+    themen = get_seminarthemen_by_filter(titel, d_id, oberbegriff, beschreibung, student, semester, status)
+    semester_dropdown = get_semester()
+    dozierenden = get_dozierenden()
+    status_dropdown = get_status_optionen()
+
+    return render_template('themen/themen_uebersicht.html',
+                           themen=themen,
+                           rolle=rolle,
+                           titel=titel,
+                           d_id=d_id,
+                           oberbegriff=oberbegriff,
+                           beschreibung=beschreibung,
+                           student=student,
+                           semester=semester,
+                           status=status,
+                           status_dropdown=status_dropdown,
+                           semester_dropdown=semester_dropdown,
+                           dozierenden=dozierenden,)
 
 # Route für die Detailansicht eines Seminarthemas
 @themen_bp.route('/themen/thema_detail/<int:themen_id>', methods=['GET', 'POST'])
@@ -248,10 +283,8 @@ def thema_detail(themen_id):
         if not pruefe_student(rolle):
             return redirect(url_for('auth.index'))
 
-        if thema_belegen_pruefen(data, user_id):
-            status = 'Vergeben'
+        if thema_belegen_pruefen(data, user_id) and student_hinzufuegen(themen_id, user_id, 'Vergeben'):
             flash('Thema erfolgreich ausgewählt.', 'success')
-            student_hinzufuegen(themen_id, user_id, status)
         else:
             flash('Das Thema ist bereits belegt oder sie belegen bereits ein Thema.', 'error')
 

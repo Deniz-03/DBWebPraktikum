@@ -36,17 +36,6 @@ def get_seminarthema(themen_id):
                         (themen_id,))
             return cur.fetchone()
 
-# Abfrage um alle seminarthemen für die Übersicht zu bekommen
-def get_alle_seminarthemen():
-    with db.connect_to_db() as conn:
-        with conn.cursor() as cur:
-            cur.execute("SELECT sem.themen_id, sem.titel, sem.semester, sem.status, "
-                        "d.vorname AS doz_vorname, d.nachname AS doz_nachname "
-                        "FROM seminarthema sem "
-                        "JOIN dozierende d ON sem.d_id = d.d_id "
-                        "ORDER BY sem.semester, sem.titel")
-            return cur.fetchall()
-
 # Bearbeiten von Themen. Wird so umgesetzt das alle nicht geänderten Werte automatisch durch das Template
 # weitergegeben werden
 def thema_bearbeiten(themen_id, titel, d_id, oberbegriff, beschreibung, semester, pdf_pfad, vorgetragen):
@@ -62,10 +51,18 @@ def thema_bearbeiten(themen_id, titel, d_id, oberbegriff, beschreibung, semester
 def student_hinzufuegen(themen_id, s_id, status):
     with db.connect_to_db() as conn:
         with conn.cursor() as cur:
-            cur.execute("UPDATE seminarthema SET s_id=%s, status=%s WHERE themen_id=%s",
+            cur.execute("UPDATE seminarthema SET s_id=%s, status=%s WHERE themen_id=%s "
+                        "AND s_id is NULL AND status='Frei'",
                         (s_id, status, themen_id)
             )
+            erfolgreich = False
+            if cur.rowcount == 1:
+                erfolgreich = True
+
         conn.commit()
+
+        # Liefert True wenn die beiden Spalten in dem einen Seminarthema geändert wurden
+        return erfolgreich
 
 # Namen und Link des Studierenden der später im Seminarthema angezeigt wird
 def get_student_by_id(s_id):
@@ -82,7 +79,72 @@ def get_sid_aus_themen():
             cur.execute("SELECT s_id FROM seminarthema")
             return cur.fetchall()
 
+# Abfrage zum Holen aller Seminarthemen die auf die enstprechend gesetzten Filter passen.
+# Alle Filter=None da wenn kein Filter gesetzt wurde keine Filterung gemacht werden soll
+def get_seminarthemen_by_filter(titel=None, d_id=None, oberbegriff=None, beschreibung=None,
+                            s_id=None, semester=None, status=None):
+    # Standard abfrage, um alle Seminarthemen zu erhalten
+    query = ("SELECT sem.themen_id, sem.titel, sem.semester, sem.status, "
+             "d.vorname AS doz_vorname, d.nachname AS doz_nachname "
+             "FROM seminarthema sem "
+             "JOIN dozierende d ON sem.d_id = d.d_id "
+             "LEFT JOIN studierende s ON sem.s_id = s.s_id ")
 
+    bedingungen = []
+    werte = []
+
+    # Nach Filterungen schauen und diese dem wert hinzufügen
+    # Der Bedingung wird die Where Bedingung für diese Anforderung gesetzt
+    if titel:
+        bedingungen.append("sem.titel ILIKE %s")
+        werte.append(f"%{titel}%")
+    if d_id:
+        bedingungen.append("sem.d_id = %s")
+        werte.append(d_id)
+    if oberbegriff:
+        bedingungen.append("sem.oberbegriff ILIKE %s")
+        werte.append(f"%{oberbegriff}%")
+    if beschreibung:
+        bedingungen.append("sem.beschreibung ILIKE %s")
+        werte.append(f"%{beschreibung}%")
+    if s_id:
+        bedingungen.append("s.vorname || ' ' || s.nachname ILIKE %s")
+        werte.append(f'%{s_id}%')
+    if semester:
+        bedingungen.append("sem.semester = %s")
+        werte.append(semester)
+    if status:
+        bedingungen.append("sem.status = %s")
+        werte.append(status)
+
+    if bedingungen:
+        # Die query kriegt eine Where Klausel mit allen in Bedingungen hinzugefügten Klauseln.
+        # Diese werden mittels AND verknüpft
+        query += " WHERE " + " AND ".join(bedingungen)
+    query += " ORDER BY sem.semester, sem.titel"
+
+    with db.connect_to_db() as conn:
+        with conn.cursor() as cur:
+            # Die fertige Abfrage. Vollständige Query und die Werte die für die %s Platzhalter
+            # eingesetzt werden, werden mittels Tupel angehängt
+            cur.execute(query, tuple(werte))
+            return cur.fetchall()
+
+# Gibt alle Semester zurück für das Dropdown menü
+def get_semester():
+    with db.connect_to_db() as conn:
+        with conn.cursor() as cur:
+            cur.execute("SELECT DISTINCT semester FROM seminarthema WHERE semester IS NOT NULL ORDER BY semester")
+            return cur.fetchall()
+
+# Gibt alle möglichen Statuswerte des Enums für das Dropdown Menü zurück.
+# enum_range(NULL::STATUS_TYPE) liefert alle Werte des Enum-Typs in Definitionsreihenfolge,
+# unnest macht aus dem Array einzelne Zeilen
+def get_status_optionen():
+    with db.connect_to_db() as conn:
+        with conn.cursor() as cur:
+            cur.execute("SELECT unnest(enum_range(NULL::STATUS_TYPE)) AS status")
+            return cur.fetchall()
 
 
 

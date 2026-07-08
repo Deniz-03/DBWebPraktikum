@@ -13,36 +13,136 @@
 
 {% block content %}
 
-    {% if themen %}
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Titel</th>
-                    <th>Dozent</th>
-                    <th>Semester</th>
-                    <th>Status</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for thema in themen %}
-                    <tr>
-                        <td>
-                            <!-- Klick auf den Titel führt zur Detailansicht -->
-                            <a href="{{ url_for('themen.thema_detail', themen_id=thema.themen_id) }}"
-                               class="link">
-                                {{ thema.titel }}
-                            </a>
-                        </td>
-                        <td>{{ thema.doz_vorname }} {{ thema.doz_nachname }}</td>
-                        <td>{{ thema.semester }}</td>
-                        <td>{{ thema.status }}</td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    {% else %}
-        <p>Keine Seminarthemen vorhanden</p>
-    {% endif %}
+    <!-- Ausgeben der Flashmessages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, nachricht in messages %}
+                {% if category == 'success' %}
+                    <div class="successMessage">{{ nachricht }}</div>
+                {% else %}
+                    <div class="errorMessage">{{ nachricht }}</div>
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <!-- Zwei Spalten: links die Filterbox, rechts die Themenliste -->
+    <div class="row contentRow">
+
+        <!-- Filterbox im Look der Navigation (spezDiv) -->
+        <div class="spezDiv column filterBox">
+            <div class="text1">Filter</div>
+
+            <form method="GET" action="{{ url_for('themen.themen_uebersicht') }}" class="column">
+
+                <div class="inpt">
+                    <label for="titel">Titel</label>
+                    <input type="text" id="titel" name="titel" value="{{ titel or '' }}" placeholder="Suche">
+                </div>
+
+                <div class="inpt">
+                    <label for="d_id">Dozent</label>
+                    <!-- Erstellt ein Dropdown Menü -->
+                    <select id="d_id" name="d_id">
+                        <!-- Wenn alle ausgegeben werden brauchen wir einen leeren String
+                        damit die Datenbankanfrage None ist -->
+                        <option value="">Alle</option>
+                        <!-- Für jeden Dozenten wird eine Option im Dropdownmenü erstellt. Angezeigt wird der Name -->
+                        {% for dozent in dozierenden %}
+                            <option value="{{ dozent.d_id }}"
+                                {% if dozent.d_id == d_id %}selected{% endif %}>
+                                {{ dozent.vorname }} {{ dozent.nachname }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="inpt">
+                    <label for="oberbegriff">Oberbegriff</label>
+                    <input type="text" id="oberbegriff" name="oberbegriff" value="{{ oberbegriff or '' }}"
+                           placeholder="Suche">
+                </div>
+
+                <div class="inpt">
+                    <label for="beschreibung">Beschreibung</label>
+                    <input type="text" id="beschreibung" name="beschreibung" value="{{ beschreibung or '' }}"
+                           placeholder="Suche">
+                </div>
+
+                <div class="inpt">
+                    <label for="student">Student</label>
+                    <input type="text" id="student" name="student_name"
+                           value="{{ student or '' }}" placeholder="Suche">
+                </div>
+
+                <div class="inpt">
+                    <label for="semester">Semester</label>
+                    <select id="semester" name="semester">
+                        <option value="">Alle</option>
+                        {% for sem in semester_dropdown %}
+                            <option value="{{ sem.semester }}"
+                                {% if sem.semester == semester %}selected{% endif %}>
+                                {{ sem.semester }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="inpt">
+                    <label for="status">Status</label>
+                    <select id="status" name="status">
+                        <option value="">Alle</option>
+                        {% for statuswert in status_dropdown %}
+                            <option value="{{ statuswert.status }}"
+                                    {% if statuswert.status == status %}selected{% endif %}>
+                                {{ statuswert.status }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <button type="submit" class="link">Filtern</button>
+
+            </form>
+        </div>
+
+        <!-- Themenliste rechts, gleiche Box-Optik wie die Filter -->
+        <div class="spezDiv column resultBox">
+            <div class="text1">Themen</div>
+
+            {% if themen %}
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Titel</th>
+                            <th>Dozent</th>
+                            <th>Semester</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for thema in themen %}
+                            <tr>
+                                <td>
+                                    <!-- Klick auf den Titel führt zur Detailansicht -->
+                                    <a href="{{ url_for('themen.thema_detail', themen_id=thema.themen_id) }}"
+                                       class="link">
+                                        {{ thema.titel }}
+                                    </a>
+                                </td>
+                                <td>{{ thema.doz_vorname }} {{ thema.doz_nachname }}</td>
+                                <td>{{ thema.semester }}</td>
+                                <td>{{ thema.status }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p>Keine Seminarthemen vorhanden</p>
+            {% endif %}
+        </div>
+
+    </div>
 
 {% endblock %}
 
