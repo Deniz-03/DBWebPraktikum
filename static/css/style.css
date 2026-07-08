@@ -383,3 +383,54 @@
     min-width: 0;            /* Verhindert Überlaufen bei breitem Tabelleninhalt */
     justify-content: flex-start;
 }
+
+.bewertungsTabelle {
+    display: grid;
+    grid-template-columns: 280px repeat(5, 45px);
+    row-gap: 17px;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.bewertungsZeile {
+    display: contents;
+}
+
+.bewertungLabel {
+    text-align: left;
+}
+
+.skalaHeaderSymbol {
+    text-align: center;
+    font-weight: bold;
+}
+
+.skalaOption {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 4px;
+    padding: 4px 6px;
+    transition: all 0.15s ease;
+}
+
+.skalaOption:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.submitButton {
+    transition: all 0.15s ease;
+}
+
+.submitButton:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    transform: translateY(-1px);
+}
+
+input[type="radio"] {
+    transition: transform 0.15s ease;
+}
+
+input[type="radio"]:hover {
+    transform: scale(1.15);
+}
