@@ -1,3 +1,57 @@
 <!--Author: Tim Deppe (413323)-->
 
 {% extends 'base.html' %}
+{% block title %}Vortrag bewerten{% endblock %}
+{% block header %}Vortrag bewerten{% endblock %}
+
+{% block content %}
+
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    <ul class="flashMessages">
+      {% for message in messages %}
+        <li>{{ message }}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+{% endwith %}
+
+{% if not vortraege %}
+    <p>Aktuell stehen keine Vorträge zur Bewertung zur Verfügung.</p>
+{% else %}
+<form method="POST" action="{{ url_for('bewertungen.vortrag_bewerten') }}" class="column bewertungForm">
+
+    <div class="vortragAuswahlDiv column">
+        <label for="t_id">Vortrag auswählen</label>
+        <select name="t_id" id="t_id" required>
+            <option value="" disabled selected>Bitte wählen</option>
+            {% for v in vortraege %}
+            <option value="{{ v.t_id }}">{{ v.titel }} — {{ v.vorname }} {{ v.nachname }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    {% for feld, label in kriterien %}
+    <div class="bewertungRow row">
+        <span class="bewertungLabel">{{ label }}</span>
+        <div class="skalaOptionen row">
+            {% for wert, symbol in skala.items() %}
+            <label class="skalaOption">
+                <input type="radio" name="{{ feld }}" value="{{ wert }}" required>
+                {{ symbol }}
+            </label>
+            {% endfor %}
+        </div>
+    </div>
+    {% endfor %}
+
+    <div class="kommentarDiv column">
+        <label for="kommentar">Kommentar (optional)</label>
+        <textarea name="kommentar" id="kommentar" rows="4"></textarea>
+    </div>
+
+    <button type="submit" class="submitButton">Bewertung abschicken</button>
+</form>
+{% endif %}
+
+{% endblock %}
