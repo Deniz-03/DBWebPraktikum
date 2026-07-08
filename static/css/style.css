@@ -357,3 +357,29 @@
     font-weight: bold;
     margin-bottom: 15px;
 }
+
+/* Zweispaltiges Layout innerhalb des Content-Bereichs: Filter links, Inhalt rechts */
+.contentRow {
+    width: 100%;
+    align-items: flex-start; /* Boxen sind nur so hoch wie ihr Inhalt */
+}
+
+/* Linke Filterbox mit fester Breite */
+.filterBox {
+    width: 300px;
+    flex-shrink: 0;          /* Verhindert das Zusammenquetschen der Filterfelder */
+    justify-content: flex-start;
+}
+
+/* spezDiv zentriert seine Kinder -> Formular braucht volle Breite,
+   damit die Eingabefelder nicht auf Minimalbreite schrumpfen */
+.filterBox form {
+    width: 100%;
+}
+
+/* Rechte Box füllt den restlichen Platz */
+.resultBox {
+    flex: 1;
+    min-width: 0;            /* Verhindert Überlaufen bei breitem Tabelleninhalt */
+    justify-content: flex-start;
+}

@@ -2,8 +2,8 @@
 
 {% extends 'base.html' %}
 
-{% block title %}Seminarthema anlegen{% endblock %}
-{% block header %}Seminarthema anlegen{% endblock %}
+{% block title %}Seminarthema bearbeiten{% endblock %}
+{% block header %}Seminarthema bearbeiten{% endblock %}
 
 <!--Sidebar wird hier nicht benötigt-->
 {% block spezNav %}
@@ -51,7 +51,10 @@
 
                 <div class="inpt">
                     <label for="pdf">PDF Upload</label>
-                    <input type="file" id="pdf" name="pdf" value="{{ pdf_pfad }}" accept=".pdf">
+                    <input type="file" id="pdf" name="pdf" accept=".pdf">
+                    {% if pdf_pfad %}
+                        <div class="displayValue">Aktuell hinterlegt: {{ pdf_pfad }}</div>
+                    {% endif %}
                 </div>
 
             </div>

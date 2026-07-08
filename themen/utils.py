@@ -3,9 +3,10 @@ import os
 
 from werkzeug.utils import secure_filename
 
-from themen.queries import get_sid_aus_themen
+from themen.queries import get_sid_aus_themen, get_status_optionen
 from flask import session
 from auth.queries import get_user_role
+import uuid
 
 
 # Validierungsfunktionen für die Formulardaten von Seminarthema anlegen
@@ -128,14 +129,28 @@ def thema_belegen_pruefen(thema, user_id):
     else:
         return False
 
-# Speichert ein hochgeladenes PDF und gibt den gespeicherten Dateinamen zurück.
-# Gibt None zurück, wenn keine Datei hochgeladen wurde.
+# Speichern einer PDF Datei
 def speichere_pdf(pdf):
     if not pdf or pdf.filename == '':
         return None
-    dateiname = secure_filename(pdf.filename)
+    # uuid4 erzeugt eine zufällige, praktisch garantiert einmalige Kennung.
+    # Als Präfix verhindert sie Kollisionen und fängt leere secure_filename-Ergebnisse ab
+    dateiname = f"{uuid.uuid4().hex}_{secure_filename(pdf.filename)}"
     pdf.save(os.path.join('static/uploads', dateiname))
     return dateiname
 
+# Schauen, ob ein gewählter Status auch ein zugelassener Status ist
+def check_status(status):
+    if not status:
+        return True
+
+    status_zugelassen = get_status_optionen()
+    enthalten = False
+
+    for statuswert in status_zugelassen:
+        if statuswert['status'] == status:
+            enthalten = True
+
+    return enthalten
 
 
