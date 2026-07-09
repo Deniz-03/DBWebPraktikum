@@ -146,3 +146,37 @@ def get_test_student_id():
     if result:
         return result['s_id']
     return None
+
+#Gibt mit Angabe einer s_id eine dict aus mit der Anzahl an Bewertungen von Vorträgen vom Studierenden gehalten,
+#sowie die Durchschnittsbewertung jeder Kategorie.
+def get_bewertungsstatistik(s_id):
+    with db.connect_to_db() as conn:
+        with conn.cursor() as cur:
+            try:
+                cur.execute(
+                    """
+                    SELECT COUNT(*)                                 AS anzahl_bewertungen,
+                           ROUND(AVG(foliengestaltung), 2)          AS foliengestaltung,
+                           ROUND(AVG(sprachliche_praesentation), 2) AS sprachliche_praesentation,
+                           ROUND(AVG(stil), 2)                      AS stil,
+                           ROUND(AVG(zeitliche_gestaltung), 2)      AS zeitliche_gestaltung,
+                           ROUND(AVG(verstaendnis), 2)              AS verstaendnis,
+                           ROUND(AVG(inhalt), 2)                    AS inhalt,
+                           ROUND(AVG(verknuepfung), 2)              AS verknuepfung,
+                           ROUND(AVG(diskussion), 2)                AS diskussion,
+                           ROUND(AVG(beteiligung), 2)               AS beteiligung
+                    FROM bewertung_vortrag bv
+                             JOIN seminarthema st ON bv.t_id = st.themen_id
+                    WHERE st.s_id = %s
+                    """,
+                    (s_id,)
+                )
+                row = cur.fetchone()
+                spalten = [
+                    'anzahl_bewertungen', 'foliengestaltung', 'sprachliche_praesentation',
+                    'stil', 'zeitliche_gestaltung', 'verstaendnis', 'inhalt',
+                    'verknuepfung', 'diskussion', 'beteiligung'
+                ]
+                return dict(zip(spalten, row))
+            finally:
+                conn.close()
