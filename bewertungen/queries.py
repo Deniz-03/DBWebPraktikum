@@ -30,22 +30,6 @@ def get_bew_vortrag(themen_id):
                 return result
             return None
 
-BEWERTUNGSSKALA = {
-    1: '1',
-    2: '2',
-    3: '3',
-    4: '4',
-    5: '5',
-}
-
-def _bewertungsskala_wert(value):
-    try:
-        value = int(value)
-    except (TypeError, ValueError):
-        return None
-
-    return BEWERTUNGSSKALA.get(value)
-
 #Erstellt eine neue Vortragsbewertung
 def create_bew_vortrag(data):
     with db.connect_to_db() as conn:
@@ -55,36 +39,26 @@ def create_bew_vortrag(data):
             if not erlaubt:
                 return False
 
-            bewertungen = [
-                _bewertungsskala_wert(data.get("foliengestaltung")),
-                _bewertungsskala_wert(data.get("sprachliche_praesentation")),
-                _bewertungsskala_wert(data.get("stil")),
-                _bewertungsskala_wert(data.get("zeitliche_gestaltung")),
-                _bewertungsskala_wert(data.get("verstaendnis")),
-                _bewertungsskala_wert(data.get("inhalt")),
-                _bewertungsskala_wert(data.get("verknuepfung")),
-                _bewertungsskala_wert(data.get("diskussion")),
-                _bewertungsskala_wert(data.get("beteiligung")),
-            ]
-
-            if any(wert is None for wert in bewertungen):
-                return False
-
             try:
                 cur.execute(
                     "INSERT INTO bew_vortrag ("
                     "t_id, bewertender_id, foliengestaltung, sprachliche_praesentation, "
                     "stil, zeitliche_gestaltung, verstaendnis, inhalt, verknuepfung, "
                     "diskussion, beteiligung, kommentar) "
-                    "VALUES (%s, %s, CAST(%s AS bewertungsskala), CAST(%s AS bewertungsskala),"
-                    "CAST(%s AS bewertungsskala), CAST(%s AS bewertungsskala), CAST(%s AS bewertungsskala),"
-                    "CAST(%s AS bewertungsskala), CAST(%s AS bewertungsskala), CAST(%s AS bewertungsskala),"
-                    "CAST(%s AS bewertungsskala), %s"
-                    ")",
+                    "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
                     (data.get("t_id"),
                         data.get("bewertender_id"),
-                        *bewertungen,
-                        data.get("kommentar") or None,))
+                        data.get("foliengestaltung"),
+                        data.get("sprachliche_praesentation"),
+                        data.get("stil"),
+                        data.get("zeitliche_gestaltung"),
+                        data.get("verstaendnis"),
+                        data.get("inhalt"),
+                        data.get("verknuepfung"),
+                        data.get("diskussion"),
+                        data.get("beteiligung"),
+                        data.get("kommentar") or None,)
+                    )
                 conn.commit()
                 return True
 
@@ -92,13 +66,10 @@ def create_bew_vortrag(data):
                 conn.rollback()
                 return "bereits_bewertet"
 
+#Gibt alle Seminarthemen (t_id, Titel, Name des Vortragenden) aus, die bewertbar bzw. vergeben und vorgetragen sind.
+#Zusätzlich werden Seminarthemen die dem angemeldeten Nutzer zugeweiesen sind ausgefiltert, da er diese nicht bewerten
+#darf.
 def get_bewertbare_vortraege(exclude_account_id=None):
-    """
-    Liefert alle Seminarthemen mit Status 'vergeben' und vorgetragen = TRUE,
-    inkl. Titel sowie Vor- und Nachname des vortragenden Studierenden.
-    Über exclude_account_id kann der eigene Vortrag (falls vorhanden)
-    direkt aus der Auswahl ausgeblendet werden.
-    """
     with db.connect_to_db() as conn:
         try:
             with conn.cursor() as cur:
@@ -125,13 +96,9 @@ def get_bewertbare_vortraege(exclude_account_id=None):
         finally:
             conn.close()
 
-
+#Hilfsfunktion um zu prüfen ob ein Seminarthema vergeben sowie vorgetragen wurde. Zusätzlich werden die Seminarthemen
+#ausgefiltert, dessen Vorträge vom angemeldeten Nutzern bereits bewertet wurden
 def ist_vortrag_bewertbar(t_id, account_id=None):
-    """
-    Prüft serverseitig, ob t_id aktuell tatsächlich Status 'vergeben'
-    und vorgetragen = TRUE hat. Notwendig, da ein Dropdown-Wert im
-    POST-Request manipuliert werden könnte (z. B. per curl).
-    """
     with db.connect_to_db() as conn:
         try:
             with conn.cursor() as cur:
@@ -149,14 +116,9 @@ def ist_vortrag_bewertbar(t_id, account_id=None):
         finally:
             conn.close()
 
+#Hilfsfunktion um zu prüfen ob angemeldeter Nutzer der Vortragende des Seminarthemas t_id ist.
+#Gibt True nur dann zurück, wenn der Nutzer der Vortragende ist, sonst False.
 def ist_eigener_vortrag(t_id, account_id):
-    """
-    Prüft, ob der Studierende mit gegebener account_id selbst der
-    Vortragende des Seminarthemas t_id ist.
-    Gibt True zurück, wenn es sich um den eigenen Vortrag handelt,
-    sonst False (z. B. auch dann, wenn account_id zu einem Dozenten gehört,
-    da der JOIN dann keinen Treffer liefert).
-    """
     with db.connect_to_db() as conn:
         try:
             with conn.cursor() as cur:
@@ -173,7 +135,7 @@ def ist_eigener_vortrag(t_id, account_id):
         finally:
             conn.close()
 
-# Abfrage für Test Seminarthema. Es wird eine s_id aus der Datenbank mittels LIMIT 1 gezogen
+# Abfrage für Test Seminarthema. Es wird genau eine s_id aus der Datenbank gezogen
 def get_test_student_id():
     with db.connect_to_db() as conn:
         with conn.cursor() as cur:
