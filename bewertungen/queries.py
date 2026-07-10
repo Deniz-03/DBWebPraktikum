@@ -179,3 +179,53 @@ def get_vortragsstatistik(s_id):
                     result[feld] = SKALA_LABELS[int(wert)]
 
             return result
+
+def get_einfache_vortragsstatistik(s_id):
+    with db.connect_to_db() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT COUNT(*) AS anzahl_bewertungen,
+                ROUND(
+                (AVG(foliengestaltung) + AVG(sprachliche_praesentation) + AVG(stil) + AVG(zeitliche_gestaltung) + 
+                 AVG(verstaendnis) + AVG(inhalt) + AVG(verknuepfung) + AVG(diskussion) + AVG(beteiligung)) / 9, 0
+                ) AS gesamtdurchschnitt
+                FROM bew_vortrag bv
+                JOIN seminarthema st ON bv.t_id = st.themen_id
+                WHERE st.s_id = %s
+                """,
+                (s_id,)
+            )
+            row = cur.fetchone()
+            if row is None:
+                return {"anzahl_bewertungen": 0}
+
+            result = dict(row)
+
+            if result["gesamtdurchschnitt"] is not None:
+                result["gesamtdurchschnitt"] = SKALA_LABELS[int(result["gesamtdurchschnitt"])]
+
+            return result
+
+def create_bew_ausarbeitung(data):
+    with db.connect_to_db() as conn:
+        with conn.cursor() as cur:
+            try:
+                cur.execute(
+                    "INSERT INTO bew_ausarbeitung ("
+                    "t_id, umfang, referenzen, sprachliche_gestaltung, inhalt, schwierigkeitsgrad, kommentar) "
+                    "VALUES (%s, %s, %s, %s, %s, %s, %s)",
+                    (data.get("t_id"),
+                    data.get("umfang"),
+                    data.get("referenzen"),
+                    data.get("sprachliche_gestaltung"),
+                    data.get("inhalt"),
+                    data.get("schwierigkeitsgrad"),
+                    data.get("kommentar") or None,)
+                    )
+                conn.commit()
+                return True
+
+            except psycopg.errors.UniqueViolation:
+                conn.rollback()
+                return "bereits_bewertet"
