@@ -453,6 +453,11 @@ input[type="radio"]:hover {
     border-spacing: 0;
 }
 
+.statistikAnzahlZeile td {
+    padding-bottom: 14px;
+    border-bottom: 1px solid #ddd;
+}
+
 .statistikLabel {
     padding-right: 40px;
     text-align: left;

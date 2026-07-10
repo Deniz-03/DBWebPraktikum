@@ -1,0 +1,41 @@
+<!--Author: Tim Deppe (413323)-->
+
+{% extends 'base.html' %}
+{% block title %}Ansicht Bewertungsstatistik zu deinen Vorträgen{% endblock %}
+{% block header %}Ansicht Bewertungsstatistik zu deinen Vorträgen{% endblock %}
+
+{% block content %}
+
+{% if statistik.anzahl_bewertungen > 0 %}
+    <div class="statistikContainer column" xmlns="http://www.w3.org/1999/html">
+        <h3 class="statistikTitel">Bewertungsstatistik zu deinen Vorträgen</h3>
+
+
+            <table class="statistikTabelle">
+                <tr class="statistikAnzahlZeile"><td class="statistikTabelle">Anzahl Bewertungen:</td>
+                    <td class="statistikWert">{{ statistik.anzahl_bewertungen }}</td></tr>
+                <tr><td class="statistikTabelle">Foliengestaltung:</td>
+                    <td class="statistikWert">{{ statistik.foliengestaltung }}</td></tr>
+                <tr><td class="statistikTabelle">Sprachliche Präsentation:</td>
+                    <td class="statistikWert">{{ statistik.sprachliche_praesentation }}</td></tr>
+                <tr><td class="statistikTabelle">Präsentationsstil:</td>
+                    <td class="statistikWert">{{ statistik.stil }}</td></tr>
+                <tr><td class="statistikTabelle">Zeitliche Gestaltung:</td>
+                    <td class="statistikWert">{{ statistik.zeitliche_gestaltung }}</td></tr>
+                <tr><td class="statistikTabelle">Verständnis:</td>
+                    <td class="statistikWert">{{ statistik.verstaendnis }}</td></tr>
+                <tr><td class="statistikTabelle">Inhaltliche Aufbereitung:</td>
+                    <td class="statistikWert">{{ statistik.inhalt }}</td></tr>
+                <tr><td class="statistikTabelle">Verknüpfung mit anderen Vorträgen:</td>
+                    <td class="statistikWert">{{ statistik.verknuepfung }}</td></tr>
+                <tr><td class="statistikTabelle">Diskussionsführung:</td>
+                    <td class="statistikWert">{{ statistik.diskussion }}</td></tr>
+                <tr><td class="statistikTabelle">Beteiligung an Diskussionen:</td>
+                    <td class="statistikWert">{{ statistik.beteiligung }}</td></tr>
+            </table>
+    </div>
+{% else %}
+    <p>Deine Vorträge wurden noch nicht bewertet</p>
+{% endif %}
+
+{% endblock %}
