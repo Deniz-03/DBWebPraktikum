@@ -142,7 +142,7 @@ SKALA_LABELS = {1: '--', 2: '-', 3: 'o', 4: '+', 5: '++'}
 
 #Gibt mit Angabe einer s_id eine dict aus mit der Anzahl an Bewertungen von Vorträgen vom Studierenden gehalten,
 #sowie die Durchschnittsbewertung in Symbolform (--, -, o, +, ++) jeder Kategorie.
-def get_bewertungsstatistik(s_id):
+def get_vortragsstatistik(s_id):
     with db.connect_to_db() as conn:
         with conn.cursor() as cur:
             cur.execute(
