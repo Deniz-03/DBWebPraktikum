@@ -59,8 +59,8 @@ def vortrag_bewerten():
             data = {'t_id': t_id, 'bewertender_id': session['user_id']}
 
             for feld, label in KRITERIEN:
-                wert = form.get(feld)
-                if wert not in ('1', '2', '3', '4', '5'):
+                wert = form.get(feld, type=int)
+                if wert not in (1, 2, 3, 4, 5):
                     flash(f'Bitte "{label}" bewerten.')
                     vortraege = get_bewertbare_vortraege(exclude_account_id=session['user_id'])
                     return render_template(

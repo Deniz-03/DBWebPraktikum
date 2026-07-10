@@ -434,3 +434,31 @@ input[type="radio"] {
 input[type="radio"]:hover {
     transform: scale(1.15);
 }
+
+.statistikContainer {
+    margin-top: 24px;
+    padding: 20px 24px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #fafafa;
+}
+
+.statistikTitel {
+    margin: 0 0 16px 0;
+    font-size: 1.1rem;
+}
+
+.statistikTabelle {
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.statistikLabel {
+    padding-right: 40px;
+    text-align: left;
+}
+
+.statistikWert {
+    text-align: center;
+    min-width: 60px;
+}
