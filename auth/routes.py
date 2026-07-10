@@ -2,6 +2,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session
 from auth.queries import *
 from auth.utils import *
+from bewertungen.queries import get_vortragsstatistik
 
 auth_bp = Blueprint('auth', __name__, template_folder='templates')
 
@@ -119,7 +120,9 @@ def profile():
             user_id = int(session.get('user_id', '-1'))
             rolle = get_user_role(user_id)
             user_info = get_user_info(user_id)
-            return render_template("auth/profile.html", user_info=user_info, rolle=rolle)
+            statistik = get_vortragsstatistik(user_id)
+            return render_template("auth/profile.html", user_info=user_info, rolle=rolle,
+                                   statistik=statistik)
         else:
             return render_template("auth/profile.html")
 

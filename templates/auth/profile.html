@@ -178,6 +178,35 @@
                 <form action="{{ url_for('auth.edit_profile') }}" method="GET">
                     <button type="submit" class="link submit">Bearbeiten</button>
                 </form>
+                {% if statistik.anzahl_bewertungen > 0 %}
+                    <div class="statistikContainer column">
+                        <h3 class="statistikTitel">Statistiken zu Bewertungen deiner Vorträge</h3>
+
+
+                            <table class="statistikTabelle">
+                                <tr><td class="statistikTabelle">Anzahl Bewertungen:</td>
+                                    <td class="statistikWert">{{ statistik.anzahl_bewertungen }}</td></tr>
+                                <tr><td class="statistikTabelle">Foliengestaltung:</td>
+                                    <td class="statistikWert">{{ statistik.foliengestaltung }}</td></tr>
+                                <tr><td class="statistikTabelle">Sprachliche Präsentation:</td>
+                                    <td class="statistikWert">{{ statistik.sprachliche_praesentation }}</td></tr>
+                                <tr><td class="statistikTabelle">Präsentationsstil:</td>
+                                    <td class="statistikWert">{{ statistik.stil }}</td></tr>
+                                <tr><td class="statistikTabelle">Zeitliche Gestaltung:</td>
+                                    <td class="statistikWert">{{ statistik.zeitliche_gestaltung }}</td></tr>
+                                <tr><td class="statistikTabelle">Verständnis:</td>
+                                    <td class="statistikWert">{{ statistik.verstaendnis }}</td></tr>
+                                <tr><td class="statistikTabelle">Inhaltliche Aufbereitung:</td>
+                                    <td class="statistikWert">{{ statistik.inhalt }}</td></tr>
+                                <tr><td class="statistikTabelle">Verknüpfung mit anderen Vorträgen:</td>
+                                    <td class="statistikWert">{{ statistik.verknuepfung }}</td></tr>
+                                <tr><td class="statistikTabelle">Diskussionsführung:</td>
+                                    <td class="statistikWert">{{ statistik.diskussion }}</td></tr>
+                                <tr><td class="statistikTabelle">Beteiligung an Diskussionen:</td>
+                                    <td class="statistikWert">{{ statistik.beteiligung }}</td></tr>
+                            </table>
+                    </div>
+                {% endif %}
             </div>
         {% endif %}
 
