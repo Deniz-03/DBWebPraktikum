@@ -71,69 +71,60 @@ def create_bew_vortrag(data):
 #darf.
 def get_bewertbare_vortraege(exclude_account_id=None):
     with db.connect_to_db() as conn:
-        try:
-            with conn.cursor() as cur:
-                query = """
-                    SELECT st.themen_id, st.titel, s.vorname, s.nachname
-                    FROM seminarthema st
-                    JOIN studierende s ON st.s_id = s.s_id
-                    WHERE st.status = 'Vergeben' AND st.vorgetragen = TRUE
-                """
-                params = []
-                if exclude_account_id is not None:
-                    query += " AND st.s_id != %s"
-                    query += " AND st.themen_id NOT IN (SELECT t_id FROM bew_vortrag WHERE bewertender_id = %s)"
-                    params.extend([exclude_account_id, exclude_account_id])
-                query += " ORDER BY s.nachname, s.vorname"
+        with conn.cursor() as cur:
+            query = """
+                SELECT st.themen_id, st.titel, s.vorname, s.nachname
+                FROM seminarthema st
+                JOIN studierende s ON st.s_id = s.s_id
+                WHERE st.status = 'Vergeben' AND st.vorgetragen = TRUE
+            """
+            params = []
+            if exclude_account_id is not None:
+                query += " AND st.s_id != %s"
+                query += " AND st.themen_id NOT IN (SELECT t_id FROM bew_vortrag WHERE bewertender_id = %s)"
+                params.extend([exclude_account_id, exclude_account_id])
+            query += " ORDER BY s.nachname, s.vorname"
 
-                cur.execute(query, params)
-                rows = cur.fetchall()
-                return [
-                    {'t_id': r['themen_id'], 'titel': r['titel'], 'vorname': r['vorname'],
-                        'nachname': r['nachname']}
-                    for r in rows
-                ]
-        finally:
-            conn.close()
+            cur.execute(query, params)
+            rows = cur.fetchall()
+            return [
+                {'t_id': r['themen_id'], 'titel': r['titel'], 'vorname': r['vorname'],
+                    'nachname': r['nachname']}
+                for r in rows
+            ]
 
 #Hilfsfunktion um zu prüfen ob ein Seminarthema vergeben sowie vorgetragen wurde. Zusätzlich werden die Seminarthemen
 #ausgefiltert, dessen Vorträge vom angemeldeten Nutzern bereits bewertet wurden
 def ist_vortrag_bewertbar(t_id, account_id=None):
     with db.connect_to_db() as conn:
-        try:
-            with conn.cursor() as cur:
-                cur.execute(
-                    """
-                SELECT 1 FROM seminarthema
-                WHERE themen_id = %s AND status = 'Vergeben' AND vorgetragen = TRUE
-                AND themen_id NOT IN (
-                    SELECT t_id FROM bew_vortrag WHERE bewertender_id = %s
-                )
-                """,
-                (t_id, account_id)
-                )
-                return cur.fetchone() is not None
-        finally:
-            conn.close()
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+            SELECT 1 FROM seminarthema
+            WHERE themen_id = %s AND status = 'Vergeben' AND vorgetragen = TRUE
+            AND themen_id NOT IN (
+                SELECT t_id FROM bew_vortrag WHERE bewertender_id = %s
+            )
+            """,
+            (t_id, account_id)
+            )
+            return cur.fetchone() is not None
 
 #Hilfsfunktion um zu prüfen ob angemeldeter Nutzer der Vortragende des Seminarthemas t_id ist.
 #Gibt True nur dann zurück, wenn der Nutzer der Vortragende ist, sonst False.
 def ist_eigener_vortrag(t_id, account_id):
     with db.connect_to_db() as conn:
-        try:
-            with conn.cursor() as cur:
-                cur.execute(
-                    """
-                    SELECT 1
-                    FROM seminarthema st
-                    JOIN studierende s ON st.s_id = s.s_id
-                    WHERE st.themen_id = %s AND s.s_id = %s
-                    """,
-                    (t_id, account_id)
-                )
-                return cur.fetchone() is not None
-        finally:
-            conn.close()
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT 1
+                FROM seminarthema st
+                JOIN studierende s ON st.s_id = s.s_id
+                WHERE st.themen_id = %s AND s.s_id = %s
+                """,
+                (t_id, account_id)
+            )
+            return cur.fetchone() is not None
 
 # Abfrage für Test Seminarthema. Es wird genau eine s_id aus der Datenbank gezogen
 def get_test_student_id():
@@ -147,36 +138,44 @@ def get_test_student_id():
         return result['s_id']
     return None
 
+SKALA_LABELS = {1: '--', 2: '-', 3: 'o', 4: '+', 5: '++'}
+
 #Gibt mit Angabe einer s_id eine dict aus mit der Anzahl an Bewertungen von Vorträgen vom Studierenden gehalten,
-#sowie die Durchschnittsbewertung jeder Kategorie.
+#sowie die Durchschnittsbewertung in Symbolform (--, -, o, +, ++) jeder Kategorie.
 def get_bewertungsstatistik(s_id):
     with db.connect_to_db() as conn:
         with conn.cursor() as cur:
-            try:
-                cur.execute(
-                    """
-                    SELECT COUNT(*)                                 AS anzahl_bewertungen,
-                           ROUND(AVG(foliengestaltung), 2)          AS foliengestaltung,
-                           ROUND(AVG(sprachliche_praesentation), 2) AS sprachliche_praesentation,
-                           ROUND(AVG(stil), 2)                      AS stil,
-                           ROUND(AVG(zeitliche_gestaltung), 2)      AS zeitliche_gestaltung,
-                           ROUND(AVG(verstaendnis), 2)              AS verstaendnis,
-                           ROUND(AVG(inhalt), 2)                    AS inhalt,
-                           ROUND(AVG(verknuepfung), 2)              AS verknuepfung,
-                           ROUND(AVG(diskussion), 2)                AS diskussion,
-                           ROUND(AVG(beteiligung), 2)               AS beteiligung
-                    FROM bewertung_vortrag bv
-                             JOIN seminarthema st ON bv.t_id = st.themen_id
-                    WHERE st.s_id = %s
-                    """,
-                    (s_id,)
-                )
-                row = cur.fetchone()
-                spalten = [
-                    'anzahl_bewertungen', 'foliengestaltung', 'sprachliche_praesentation',
-                    'stil', 'zeitliche_gestaltung', 'verstaendnis', 'inhalt',
-                    'verknuepfung', 'diskussion', 'beteiligung'
-                ]
-                return dict(zip(spalten, row))
-            finally:
-                conn.close()
+            cur.execute(
+                """
+                SELECT COUNT(*)                                 AS anzahl_bewertungen,
+                       ROUND(AVG(foliengestaltung), 0)          AS foliengestaltung,
+                       ROUND(AVG(sprachliche_praesentation), 0) AS sprachliche_praesentation,
+                       ROUND(AVG(stil), 0)                      AS stil,
+                       ROUND(AVG(zeitliche_gestaltung), 0)      AS zeitliche_gestaltung,
+                       ROUND(AVG(verstaendnis), 0)              AS verstaendnis,
+                       ROUND(AVG(inhalt), 0)                    AS inhalt,
+                       ROUND(AVG(verknuepfung), 0)              AS verknuepfung,
+                       ROUND(AVG(diskussion), 0)                AS diskussion,
+                       ROUND(AVG(beteiligung), 0)               AS beteiligung
+                FROM bew_vortrag bv
+                         JOIN seminarthema st ON bv.t_id = st.themen_id
+                WHERE st.s_id = %s
+                """,
+                (s_id,)
+            )
+            row = cur.fetchone()
+            if row is None:
+                return {"anzahl_bewertungen": 0}
+
+            result = dict(row)
+
+            for feld, wert in result.items():
+                if feld == "anzahl_bewertungen":
+                    continue
+
+                if wert is None:
+                    result[feld] = None
+                else:
+                    result[feld] = SKALA_LABELS[int(wert)]
+
+            return result
