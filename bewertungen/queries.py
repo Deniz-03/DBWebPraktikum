@@ -2,11 +2,12 @@
 import db
 import psycopg
 
-#with db.connect_to_db() as conn:
-#   with conn.cursor() as cur:   für db zugriff
-
-#Gibt den Wahrheitswert zurück, ob ein Vortrag zu dem Seminarthema bereits gegeben wurde
 def is_seminar_vorgetragen(themen_id):
+    """
+    Gibt an, ob ein Vortrag zu einem bestimmten Seminarthema bereits gegeben wurde.
+    :param themen_id: themen_id des Seminarthemas
+    :return: Boolean
+    """
     with db.connect_to_db() as conn:
         with conn.cursor() as cur:
 
@@ -18,20 +19,13 @@ def is_seminar_vorgetragen(themen_id):
 
             return bool(vorgetragen["vorgetragen"])
 
-#Gibt jede Vortragsbewertung zurück, die zu einem bestimmten Vortrag gemacht wurde
-def get_bew_vortrag(themen_id):
-    with db.connect_to_db() as conn:
-        with conn.cursor() as cur:
-
-            cur.execute("SELECT * FROM bew_vortrag WHERE t_id = %s", (int(themen_id),))
-
-            result = cur.fetchall()
-            if result:
-                return result
-            return None
-
-#Erstellt eine neue Vortragsbewertung
 def create_bew_vortrag(data):
+    """
+    Erstellt eine neue Bewertung mittels Angabe einer Dict
+    :param data: Dict mit Keys: 't_id', 'bewertender_id', 'foliengestaltung', 'sprachliche_praesentation',
+    'stil', 'zeitliche_gestaltung', 'verstaendnis', 'inhalt', 'verknuepfung', 'diskussion', 'beteiligung',
+    evtl. 'kommentar'
+    :return: True oder 'bereits_bewertet'"""
     with db.connect_to_db() as conn:
         with conn.cursor() as cur:
 
@@ -66,10 +60,14 @@ def create_bew_vortrag(data):
                 conn.rollback()
                 return "bereits_bewertet"
 
-#Gibt alle Seminarthemen (t_id, Titel, Name des Vortragenden) aus, die bewertbar bzw. vergeben und vorgetragen sind.
-#Zusätzlich werden Seminarthemen die dem angemeldeten Nutzer zugeweiesen sind ausgefiltert, da er diese nicht bewerten
-#darf.
 def get_bewertbare_vortraege(exclude_account_id=None):
+    """
+    Gibt alle Seminarthemen aus, die bewertbar (status='Vergeben' und vorgetragen=True) sind.
+    Zusätzlich werden Seminarthemen die dem angegebenen Nutzer zugeweiesen sind ausgefiltert, da er diese nicht
+    bewerten darf.
+    :param exclude_account_id: account_id des Nutzers
+    :return: Liste von Dicts mit Keys: 'themen_id', 'titel', 'vorname', 'nachname'
+    """
     with db.connect_to_db() as conn:
         with conn.cursor() as cur:
             query = """
@@ -93,9 +91,14 @@ def get_bewertbare_vortraege(exclude_account_id=None):
                 for r in rows
             ]
 
-#Hilfsfunktion um zu prüfen ob ein Seminarthema vergeben sowie vorgetragen wurde. Zusätzlich werden die Seminarthemen
-#ausgefiltert, dessen Vorträge vom angemeldeten Nutzern bereits bewertet wurden
 def ist_vortrag_bewertbar(t_id, account_id=None):
+    """
+    Hilfsfunktion um zu prüfen, ob ein Seminarthema vergeben sowie vorgetragen wurde. Zusätzlich werden Seminarthemen
+    ausgefiltert, dessen Vorträge vom angegebenen Nutzer bereits bewertet wurden
+    :param t_id: themen_id des Seminarthemas
+    :param account_id: account_id des Nutzers
+    :return: Boolean
+    """
     with db.connect_to_db() as conn:
         with conn.cursor() as cur:
             cur.execute(
@@ -110,9 +113,14 @@ def ist_vortrag_bewertbar(t_id, account_id=None):
             )
             return cur.fetchone() is not None
 
-#Hilfsfunktion um zu prüfen ob angemeldeter Nutzer der Vortragende des Seminarthemas t_id ist.
-#Gibt True nur dann zurück, wenn der Nutzer der Vortragende ist, sonst False.
 def ist_eigener_vortrag(t_id, account_id):
+    """
+    Hilfsfunktion um zu prüfen ob angemeldeter Nutzer der Vortragende des Seminarthemas t_id ist.
+    Gibt True nur dann zurück, wenn der Nutzer der Vortragende ist, sonst False.
+    :param t_id: themen_id des Seminarthemas
+    :param account_id: account_id des Nutzers
+    :return: Boolean
+    """
     with db.connect_to_db() as conn:
         with conn.cursor() as cur:
             cur.execute(
@@ -126,23 +134,16 @@ def ist_eigener_vortrag(t_id, account_id):
             )
             return cur.fetchone() is not None
 
-# Abfrage für Test Seminarthema. Es wird genau eine s_id aus der Datenbank gezogen
-def get_test_student_id():
-    with db.connect_to_db() as conn:
-        with conn.cursor() as cur:
-            cur.execute("SELECT s_id FROM studierende LIMIT 1")
-            # fetchone speichert ein dictionary {'s_id', 3}
-            result = cur.fetchone()
-    # Rückgabe des Wertes der Studierenden id
-    if result:
-        return result['s_id']
-    return None
-
+#Dict für Werte-Mapping von ints auf zugehörige Symbole
 SKALA_LABELS = {1: '--', 2: '-', 3: 'o', 4: '+', 5: '++'}
 
-#Gibt mit Angabe einer s_id eine dict aus mit der Anzahl an Bewertungen von Vorträgen vom Studierenden gehalten,
-#sowie die Durchschnittsbewertung in Symbolform (--, -, o, +, ++) jeder Kategorie.
 def get_vortragsstatistik(s_id):
+    """Gibt mittels Angabe einer s_id eine Dict aus. Die Strings sind je nach Durchschnittswert entweder
+    '--', '-', 'o', '+' oder '++'
+    :param s_id: s_id des Studierenden dessen Statistik gefragt ist
+    :return: Dict mit Keys: 'anzahl_bewertungen':int, 'foliengestaltung':str, ...:str,
+    'beteiligung':str
+    """
     with db.connect_to_db() as conn:
         with conn.cursor() as cur:
             cur.execute(
@@ -158,7 +159,7 @@ def get_vortragsstatistik(s_id):
                        ROUND(AVG(diskussion), 0)                AS diskussion,
                        ROUND(AVG(beteiligung), 0)               AS beteiligung
                 FROM bew_vortrag bv
-                         JOIN seminarthema st ON bv.t_id = st.themen_id
+                JOIN seminarthema st ON bv.t_id = st.themen_id
                 WHERE st.s_id = %s
                 """,
                 (s_id,)
@@ -181,6 +182,10 @@ def get_vortragsstatistik(s_id):
             return result
 
 def get_einfache_vortragsstatistik(s_id):
+    """Gibt mittels Angabe einer s_id eine Dict aus.
+    Die Strings sind je nach Durchschnittswert entweder '--', '-', 'o', '+' oder '++'
+    :param s_id: s_id des Studierenden dessen Statistik gefragt ist
+    :return: Dict mit Keys: 'anzahl_bewertungen':int, 'gesamtdurchschnitt':str"""
     with db.connect_to_db() as conn:
         with conn.cursor() as cur:
             cur.execute(
@@ -208,6 +213,10 @@ def get_einfache_vortragsstatistik(s_id):
             return result
 
 def create_bew_ausarbeitung(data):
+    """Erstellt eine neue Ausarbeitung mittels Angabe einer Dict
+    :param data: Dict mit Keys: 't_id', 'umfang', 'referenzen',
+    'sprachliche_gestaltung', 'inhalt', 'schwierigkeitsgrad', evtl. 'kommentar'
+    :return: True oder 'bereits_bewertet'"""
     with db.connect_to_db() as conn:
         with conn.cursor() as cur:
             try:
@@ -229,3 +238,46 @@ def create_bew_ausarbeitung(data):
             except psycopg.errors.UniqueViolation:
                 conn.rollback()
                 return "bereits_bewertet"
+
+def get_bewertbare_ausarbeitungen(d_id):
+    """Gibt mittels Angabe einer d_id alle Ausarbeitungen
+    (als Liste von Dicts) aus, die von dem Dozenten bewertbar
+    (haben Status:'Vergeben', gehören zum Seminar des Dozenten, wurden noch nicht bewertet) sind.
+    :param d_id: d_id des Dozenten der für die Bewertung zuständig ist
+    :return: Liste von Dicts mit Keys: 'themen_id', 'titel', 'vorname', 'nachname'"""
+    with db.connect_to_db() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT st.themen_id, st.titel, s.vorname, s.nachname
+                FROM seminarthema st
+                JOIN studierende s ON st.s_id = s.s_id
+                JOIN dozierende d ON st.d_id = d.d_id
+                WHERE st.status = 'Vergeben' AND d.d_id = %s AND st.themen_id NOT IN (SELECT t_id FROM bew_ausarbeitung)
+                """,
+                (d_id,)
+            )
+            rows = cur.fetchall()
+            return [
+                {'t_id': r['themen_id'], 'titel': r['titel'], 'vorname': r['vorname'],
+                    'nachname': r['nachname']}
+                for r in rows
+            ]
+
+def ist_ausarbeitung_bewertbar(t_id):
+    """Gibt True aus wenn ein Seminarthema status:'Vergeben' hat und noch nicht bewertet wurde, sonst False.
+    :param t_id: themen_id des Seminarthemas
+    :return: Boolean"""
+    with db.connect_to_db() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+            SELECT 1 FROM seminarthema
+            WHERE themen_id = %s AND status = 'Vergeben'
+            AND themen_id NOT IN (
+                SELECT t_id FROM bew_ausarbeitung
+            )
+            """,
+            (t_id,)
+            )
+            return cur.fetchone() is not None
