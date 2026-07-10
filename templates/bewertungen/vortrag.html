@@ -17,7 +17,7 @@
 {% endwith %}
 
 {% if not vortraege %}
-    <p>Aktuell stehen keine Vorträge zur Bewertung zur Verfügung.</p>
+    <p>Aktuell stehen keine bewertbaren Vorträge zur Verfügung.</p>
 {% else %}
 <form method="POST" action="{{ url_for('bewertungen.vortrag_bewerten') }}" class="column bewertungForm">
 

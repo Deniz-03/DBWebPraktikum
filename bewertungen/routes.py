@@ -12,7 +12,7 @@ from bewertungen.utils import *
 
 bewertungen_bp = Blueprint('bewertungen', __name__, template_folder='templates')
 
-KRITERIEN = [
+VORTRAGSKRITERIEN = [
     ('foliengestaltung', 'Foliengestaltung'),
     ('sprachliche_praesentation', 'Sprachliche Präsentation'),
     ('stil', 'Präsentationsstil'),
@@ -31,41 +31,42 @@ def vortrag_bewerten():
     if request.method == 'GET':
         if 'user_id' in session: #Unangemeldete User werden auf die Startseite zurückgeleitet
             vortraege = get_bewertbare_vortraege(exclude_account_id=session['user_id'])
-            if vortraege is None:
-                flash('Kein Vortrag angegeben.')
-                return redirect(url_for('themen.themen_uebersicht'))
             return render_template('bewertungen/vortrag.html',
-                vortraege=vortraege, kriterien=KRITERIEN, skala=SKALA_LABELS)
+                vortraege=vortraege, kriterien=VORTRAGSKRITERIEN, skala=SKALA_LABELS)
         return render_template("index.html")
 
     else:
         if 'user_id' in session:
             form = request.form
 
+            # Prüft ob ein Vortrag im Formular gewählt wurde
             t_id_raw = form.get('t_id')
             if not t_id_raw or not t_id_raw.isdigit():
                 flash('Bitte einen Vortrag auswählen.')
                 return redirect(url_for('bewertungen.vortrag_bewerten'))
             t_id = int(t_id_raw)
 
+            # Prüft ob der Vortrag vom angemeldeten Nutzer bewertbar ist
             if not ist_vortrag_bewertbar(t_id, session['user_id']):
                 flash('Dieser Vortrag steht aktuell nicht zur Bewertung.')
                 return redirect(url_for('bewertungen.vortrag_bewerten'))
 
+            #Prüft ob der angemeldete Nutzer versucht seinen eigenen Vortrag zu bewerten
             if ist_eigener_vortrag(t_id, session['user_id']):
                 flash('Du kannst deinen eigenen Vortrag nicht bewerten.')
                 return redirect(url_for('bewertungen.vortrag_bewerten'))
 
             data = {'t_id': t_id, 'bewertender_id': session['user_id']}
 
-            for feld, label in KRITERIEN:
+            #Prüft ob zu jedem Kriterium eine Bewertung angegeben wurde
+            for feld, label in VORTRAGSKRITERIEN:
                 wert = form.get(feld, type=int)
                 if wert not in (1, 2, 3, 4, 5):
                     flash(f'Bitte "{label}" bewerten.')
                     vortraege = get_bewertbare_vortraege(exclude_account_id=session['user_id'])
                     return render_template(
                         'bewertungen/vortrag.html',
-                        vortraege=vortraege, kriterien=KRITERIEN, skala=SKALA_LABELS
+                        vortraege=vortraege, kriterien=VORTRAGSKRITERIEN, skala=SKALA_LABELS
                     )
                 data[feld] = int(wert)
 
@@ -81,9 +82,23 @@ def vortrag_bewerten():
                 vortraege = get_bewertbare_vortraege(exclude_account_id=session['user_id'])
                 return render_template(
                     'bewertungen/vortrag.html',
-                    vortraege=vortraege, kriterien=KRITERIEN, skala=SKALA_LABELS
+                    vortraege=vortraege, kriterien=VORTRAGSKRITERIEN, skala=SKALA_LABELS
                 )
     return render_template("index.html")
+
+AUSARBEITUNGSKRITERIEN = [
+    ('umfang', 'Umfang'),
+    ('referenzen', 'Referenzen'),
+    ('sprachliche_gestaltung', 'Sprachliche Gestaltung'),
+    ('inhalt', 'Inhaltliche Aufbereitung'),
+    ('schwierigkeitsgrad', 'Schwierigkeitsgrad')
+]
+
+#temporär
+ausarbeitungen = [
+                {'t_id': 20, 'titel': "Tims Ausarbeitung", 'vorname': "Tim", 'nachname': "Deppe"},
+                {'t_id': 21, 'titel': "Bingos Ausarbeitung", 'vorname': "Bingo", 'nachname': "Bongo"}
+            ]
 
 @bewertungen_bp.route('/bewertungen/ausarbeitung_bewerten', methods=['GET', 'POST'])
 def ausarbeitung_bewerten():
@@ -93,7 +108,9 @@ def ausarbeitung_bewerten():
             rolle = get_user_role(user_id)
             if not pruefe_dozent(user_id, rolle): #Studenten werden auf die Startseite zurückgeleitet
                 return render_template("index.html")
-            return render_template("bewertungen/ausarbeitung.html", user_id=user_id)
+            return render_template("bewertungen/ausarbeitung.html", ausarbeitungen=ausarbeitungen,
+                                   kriterien=AUSARBEITUNGSKRITERIEN, skala=SKALA_LABELS
+                                   )
         return render_template("index.html")
     #TODO: Logik für method POST
     return render_template("index.html")
