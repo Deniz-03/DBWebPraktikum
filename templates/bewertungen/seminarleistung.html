@@ -2,6 +2,10 @@
 
 {% extends "base.html" %}
 
+{% if 'user_id' in session %}
+    {% set user_rolle = rolle %}
+{% endif %}
+
 {% block title %}Seminarleistung bewerten{% endblock %}
 {% block header %}Seminarleistung bewerten{% endblock %}
 
