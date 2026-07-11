@@ -314,3 +314,54 @@ def get_ausarbeitung_statistiken(s_id):
                     result[feld] = SKALA_LABELS[int(wert)]
 
             return result
+
+def create_seminarleistung(data):
+    with db.connect_to_db() as conn:
+        with conn.cursor() as cur:
+            try:
+                cur.execute(
+                    """
+                    INSERT INTO seminarleistung (t_id, note)
+                    VALUES (%s, %s)
+                    """,
+                    (data['t_id'], data['note'])
+                )
+                cur.execute(
+                    """
+                    UPDATE seminarthema SET status = 'Abgeschlossen' WHERE themen_id = %s
+                    """,
+                    (data['t_id'],)
+                )
+                conn.commit()
+                return True
+            except psycopg.errors.UniqueViolation:
+                conn.rollback()
+                return False
+
+def get_bewertbare_seminarleistungen(dozent_id):
+    """
+    Liefert alle Seminarthemen, für die der Dozent dozent_id verantwortlich ist,
+    bei denen bereits mindestens eine Vortragsbewertung UND eine Ausarbeitungsbewertung
+    existieren, und für die noch KEINE Seminarleistung vergeben wurde.
+    Inkl. Titel sowie Vor- und Nachname des Studierenden.
+    """
+    with db.connect_to_db() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT st.themen_id, st.titel, s.vorname, s.nachname
+                FROM seminarthema st
+                JOIN studierende s ON st.s_id = s.s_id
+                WHERE st.d_id = %s
+                AND EXISTS (SELECT 1 FROM bew_vortrag bv WHERE bv.t_id = st.themen_id)
+                AND EXISTS (SELECT 1 FROM bew_ausarbeitung ba WHERE ba.t_id = st.themen_id)
+                AND NOT EXISTS (SELECT 1 FROM seminarleistung sl WHERE sl.t_id = st.themen_id)
+                ORDER BY s.nachname, s.vorname
+                """,
+                (dozent_id,)
+            )
+            rows = cur.fetchall()
+            return [
+                {'t_id': r['themen_id'], 'titel': r['titel'], 'vorname': r['vorname'], 'nachname': r['nachname']}
+                for r in rows
+            ]

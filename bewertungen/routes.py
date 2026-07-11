@@ -1,11 +1,9 @@
 #Author Tim Deppe (413323)
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash
-from jinja2 import defaults
 
 from auth.queries import get_user_role, get_user_info, is_seminar_occupied
 from themen.utils import pruefe_dozent
 from bewertungen.queries import *
-from bewertungen.utils import *
 
 """<a href="{{ url_for('bewertungen.vortrag_bewerten') }}" class="sidebarLinks">Vortrag Bewerten</a>"""
 """<a href="{{ url_for('bewertungen.ausarbeitung_bewerten') }}" class="sidebarLinks">Ausarbeitungen Bewerten</a>"""
@@ -31,11 +29,12 @@ SKALA_LABELS = {1: '--', 2: '-', 3: 'o', 4: '+', 5: '++'}
 @bewertungen_bp.route('/bewertungen/vortrag_bewerten', methods=['GET', 'POST'])
 def vortrag_bewerten():
     if request.method == 'GET':
-        if 'user_id' in session:  #Unangemeldete User werden auf die Startseite zurückgeleitet
+        if 'user_id' in session:  #Unangemeldete User werden auf die Loginseite zurückgeleitet
             vortraege = get_bewertbare_vortraege(exclude_account_id=session['user_id'])
             return render_template('bewertungen/vortrag.html',
                                    vortraege=vortraege, kriterien=VORTRAGSKRITERIEN, skala=SKALA_LABELS)
-        return redirect(url_for('auth.index'))
+        flash('Bitte zuerst einloggen.')
+        return redirect(url_for('auth.login'))
 
     else:
         if 'user_id' in session:
@@ -82,12 +81,13 @@ def vortrag_bewerten():
                 vortraege = get_bewertbare_vortraege(exclude_account_id=session['user_id'])
                 return render_template('bewertungen/vortrag.html',
                                        vortraege=vortraege, kriterien=VORTRAGSKRITERIEN, skala=SKALA_LABELS)
-    return render_template("index.html")
+        flash('Bitte zuerst einloggen.')
+        return redirect(url_for('auth.login'))
 
 
 @bewertungen_bp.route('/bewertungen/ansicht/<int:s_id>', methods=['GET'])
 def ansicht_vortragsstatistik(s_id):
-    if 'user_id' in session:  #Unangemeldete User werden auf die Startseite zurückgeleitet
+    if 'user_id' in session:  #Unangemeldete User werden auf die Loginseite zurückgeleitet
         user_id = int(session.get('user_id', '-1'))
         rolle = get_user_role(user_id)
         if rolle == 'doz':
@@ -100,7 +100,8 @@ def ansicht_vortragsstatistik(s_id):
         v_statistik = get_vortragsstatistiken(session['user_id'])
         return render_template('bewertungen/ansicht.html',
             user_info=user_info, v_statistik=v_statistik)
-    return redirect(url_for('auth.index'))
+    flash('Bitte zuerst einloggen.')
+    return redirect(url_for('auth.login'))
 
 
 AUSARBEITUNGSKRITERIEN = [
@@ -111,25 +112,19 @@ AUSARBEITUNGSKRITERIEN = [
     ('schwierigkeitsgrad', 'Schwierigkeitsgrad')
 ]
 
-#temporär
-"""ausarbeitungen = [
-                {'t_id': 20, 'titel': "Tims Ausarbeitung", 'vorname': "Tim", 'nachname': "Deppe"},
-                {'t_id': 21, 'titel': "Bingos Ausarbeitung", 'vorname': "Bingo", 'nachname': "Bongo"}
-            ]"""
-
-
 @bewertungen_bp.route('/bewertungen/ausarbeitung_bewerten', methods=['GET', 'POST'])
 def ausarbeitung_bewerten():
     if request.method == 'GET':
-        if 'user_id' in session:  #Unangemeldete User werden auf die Startseite zurückgeleitet
+        if 'user_id' in session:  #Unangemeldete User werden auf die Loginseite zurückgeleitet
             user_id = int(session.get('user_id', '-1'))
             rolle = get_user_role(user_id)
-            if not pruefe_dozent(user_id, rolle):  #Studenten werden auf die Startseite zurückgeleitet
+            if not pruefe_dozent(user_id, rolle):  #Studenten werden auf die Loginseite zurückgeleitet
                 return render_template("index.html")
             ausarbeitungen = get_bewertbare_ausarbeitungen(session['user_id'])
             return render_template("bewertungen/ausarbeitung.html",
                                    ausarbeitungen=ausarbeitungen, kriterien=AUSARBEITUNGSKRITERIEN, skala=SKALA_LABELS)
-        return redirect(url_for('auth.index'))
+        flash('Bitte zuerst einloggen.')
+        return redirect(url_for('auth.login'))
     else:
         if 'user_id' in session:
             form = request.form
@@ -171,18 +166,73 @@ def ausarbeitung_bewerten():
                 ausarbeitungen = get_bewertbare_ausarbeitungen(session['user_id'])
                 return render_template('bewertungen/vortrag.html',
                                        ausarbeitungen=ausarbeitungen, kriterien=VORTRAGSKRITERIEN, skala=SKALA_LABELS)
-        return redirect(url_for('auth.index'))
+        flash('Bitte zuerst einloggen.')
+        return redirect(url_for('auth.login'))
 
+
+ZULAESSIGE_NOTEN = [1.0, 1.3, 1.7, 2.0, 2.3, 2.7, 3.0, 3.3, 3.7, 4.0, 5.0]
 
 @bewertungen_bp.route('/bewertungen/seminarleistung', methods=['GET', 'POST'])
 def seminarleistung_bewerten():
     if request.method == 'GET':
-        if 'user_id' in session:
-            user_id = int(session.get('user_id', '-1'))
+        if 'user_id' in session: #Unangemeldete User werden auf die Loginseite zurückgeleitet
+            user_id = session['user_id']
             rolle = get_user_role(user_id)
-            if not pruefe_dozent(user_id, rolle):  # Studenten werden auf die Startseite zurückgeleitet
-                return redirect(url_for('auth.index'))
-            return render_template("bewertungen/seminarleistung.html", user_id=user_id)
-        return redirect(url_for('auth.index'))
-    #TODO: Logik für method POST
-    return render_template("index.html")
+            if rolle == 'doz': #Studierende werden an die Themenübersicht Seite weitergeleitet
+                seminarthemen = get_bewertbare_seminarleistungen(user_id)
+                return render_template(
+                    'bewertungen/seminarleistung.html',
+                    seminarthemen=seminarthemen, noten=ZULAESSIGE_NOTEN
+                )
+            flash('Nur Dozenten können die Seminarleistung bewerten.')
+            return redirect(url_for('themen.themen_uebersicht'))
+        flash('Bitte zuerst einloggen.')
+        return redirect(url_for('auth.login'))
+
+    else:
+        if 'user_id' in session: #Unangemeldete User werden auf die Loginseite zurückgeleitet
+            user_id = session['user_id']
+            rolle = get_user_role(user_id)
+            if rolle == 'doz': #Studierende werden an die Themenübersicht Seite weitergeleitet
+                form = request.form
+
+                t_id_raw = form.get('t_id')
+                if not t_id_raw or not t_id_raw.isdigit():
+                    flash('Bitte ein Seminarthema auswählen.')
+                    return redirect(url_for('bewertungen.seminarleistung_bewerten'))
+                t_id = int(t_id_raw)
+
+                note_raw = form.get('note')
+                try:
+                    note = float(note_raw)
+                except (TypeError, ValueError):
+                    note = None
+
+                if note is None or note not in ZULAESSIGE_NOTEN:
+                    flash('Bitte eine gültige Note auswählen.')
+                    seminarthemen = get_bewertbare_seminarleistungen(user_id)
+                    return render_template(
+                        'bewertungen/seminarleistung.html',
+                        seminarthemen=seminarthemen, noten=ZULAESSIGE_NOTEN
+                    )
+
+                # Sicherstellen, dass t_id tatsächlich noch zulässig ist (nicht nur im Dropdown, auch serverseitig)
+                zulaessige_ids = [s['t_id'] for s in get_bewertbare_seminarleistungen(user_id)]
+                if t_id not in zulaessige_ids:
+                    flash('Dieses Seminarthema steht aktuell nicht zur Bewertung.')
+                    return redirect(url_for('bewertungen.seminarleistung_bewerten'))
+
+                data = {'t_id': t_id, 'note': note}
+                erfolg = create_seminarleistung(data)
+
+                if erfolg:
+                    flash('Seminarleistung erfolgreich bewertet.')
+                    return redirect(url_for('themen.themen_uebersicht'))
+                else:
+                    flash('Seminarleistung konnte nicht gespeichert werden.')
+
+                return redirect(url_for('bewertungen.seminarleistung_bewerten'))
+            flash('Nur Dozenten können die Seminarleistung bewerten.')
+            return redirect(url_for('themen.themen_uebersicht'))
+        flash('Bitte zuerst einloggen.')
+        return redirect(url_for('auth.login'))
