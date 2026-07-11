@@ -1,0 +1,88 @@
+<!--Author: Tim Deppe (413323)-->
+
+{% extends 'base.html' %}
+{% block title %}Ansicht Bewertungsstatistik{% endblock %}
+{% block header %}Ansicht Bewertungsstatistik{% endblock %}
+
+{% block content %}
+
+{% if user_info %}
+<div class="profilKopf">
+    <h2>{{ user_info.vorname }} {{ user_info.nachname }}</h2>
+    <p class="profilKopfMeta">
+        Matr.-Nr.: {{ user_info.matr_nr }}
+        {% if user_info.titel %}
+            &nbsp;|&nbsp; Seminarthema: {{ user_info.titel }}
+        {% else %}
+            &nbsp;|&nbsp; Kein Seminarthema ausgewählt
+        {% endif %}
+    </p>
+</div>
+{% endif %}
+
+{% if v_statistik is defined %}
+    <div class="statistikContainer column" xmlns="http://www.w3.org/1999/html">
+        <h3 class="statistikTitel">Bewertungen: Vorträge</h3>
+
+            {% if v_statistik.anzahl_bewertungen %}
+            <table class="statistikTabelle">
+                <tr class="statistikAnzahlZeile"><td class="statistikTabelle">Anzahl Bewertungen:</td>
+                    <td class="statistikWert">{{ v_statistik.anzahl_bewertungen }}</td></tr>
+                <tr><td class="statistikTabelle">Foliengestaltung:</td>
+                    <td class="statistikWert">{{ v_statistik.foliengestaltung }}</td></tr>
+                <tr><td class="statistikTabelle">Sprachliche Präsentation:</td>
+                    <td class="statistikWert">{{ v_statistik.sprachliche_praesentation }}</td></tr>
+                <tr><td class="statistikTabelle">Präsentationsstil:</td>
+                    <td class="statistikWert">{{ v_statistik.stil }}</td></tr>
+                <tr><td class="statistikTabelle">Zeitliche Gestaltung:</td>
+                    <td class="statistikWert">{{ v_statistik.zeitliche_gestaltung }}</td></tr>
+                <tr><td class="statistikTabelle">Verständnis:</td>
+                    <td class="statistikWert">{{ v_statistik.verstaendnis }}</td></tr>
+                <tr><td class="statistikTabelle">Inhaltliche Aufbereitung:</td>
+                    <td class="statistikWert">{{ v_statistik.inhalt }}</td></tr>
+                <tr><td class="statistikTabelle">Verknüpfung mit anderen Vorträgen:</td>
+                    <td class="statistikWert">{{ v_statistik.verknuepfung }}</td></tr>
+                <tr><td class="statistikTabelle">Diskussionsführung:</td>
+                    <td class="statistikWert">{{ v_statistik.diskussion }}</td></tr>
+                <tr><td class="statistikTabelle">Beteiligung an Diskussionen:</td>
+                    <td class="statistikWert">{{ v_statistik.beteiligung }}</td></tr>
+            </table>
+            {% else %}
+            <p>Noch keine Vortragsbewertungen vorhanden.</p>
+            {% endif %}
+    </div>
+{% else %}
+    <p>Noch keine bewerteten Vorträge</p>
+{% endif %}
+
+{% if a_statistik is defined %}
+<div class="statistikContainer column ausarbeitungContainer">
+    <h3 class="statistikTitel">Bewertung: Ausarbeitung</h3>
+
+    {% if a_statistik.titel %}
+    <table class="statistikTabelle">
+        <tr class="statistikAnzahlZeile">
+            <td class="statistikLabel">Titel</td>
+            <td class="statistikWert">{{ a_statistik.titel }}</td>
+        </tr>
+        <tr><td class="statistikLabel">Umfang</td>
+            <td class="statistikWert">{{ a_statistik.umfang }}</td></tr>
+        <tr><td class="statistikLabel">Referenzen</td>
+            <td class="statistikWert">{{ a_statistik.referenzen }}</td></tr>
+        <tr><td class="statistikLabel">Sprachliche Gestaltung</td>
+            <td class="statistikWert">{{ a_statistik.sprachliche_gestaltung }}</td></tr>
+        <tr><td class="statistikLabel">Inhaltliche Aufbereitung</td>
+            <td class="statistikWert">{{ a_statistik.inhalt }}</td></tr>
+        <tr><td class="statistikLabel">Schwierigkeitsgrad</td>
+            <td class="statistikWert">{{ a_statistik.schwierigkeitsgrad }}</td></tr>
+    </table>
+    {% if a_statistik.kommentar %}
+    <p class="kommentarText"><strong>Kommentar:</strong> {{ a_statistik.kommentar }}</p>
+    {% endif %}
+    {% else %}
+    <p>Noch keine Bewertung der Ausarbeitung vorhanden.</p>
+    {% endif %}
+</div>
+{% endif %}
+
+{% endblock %}
