@@ -1,5 +1,6 @@
 #Author Tim Deppe (413323)
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash
+from jinja2 import defaults
 
 from auth.queries import get_user_role, get_user_info, is_seminar_occupied
 from themen.utils import pruefe_dozent
@@ -26,13 +27,14 @@ VORTRAGSKRITERIEN = [
 
 SKALA_LABELS = {1: '--', 2: '-', 3: 'o', 4: '+', 5: '++'}
 
+
 @bewertungen_bp.route('/bewertungen/vortrag_bewerten', methods=['GET', 'POST'])
 def vortrag_bewerten():
     if request.method == 'GET':
-        if 'user_id' in session: #Unangemeldete User werden auf die Startseite zurückgeleitet
+        if 'user_id' in session:  #Unangemeldete User werden auf die Startseite zurückgeleitet
             vortraege = get_bewertbare_vortraege(exclude_account_id=session['user_id'])
             return render_template('bewertungen/vortrag.html',
-                vortraege=vortraege, kriterien=VORTRAGSKRITERIEN, skala=SKALA_LABELS)
+                                   vortraege=vortraege, kriterien=VORTRAGSKRITERIEN, skala=SKALA_LABELS)
         return redirect(url_for('auth.index'))
 
     else:
@@ -65,7 +67,7 @@ def vortrag_bewerten():
                     flash(f'Bitte "{label}" bewerten.')
                     vortraege = get_bewertbare_vortraege(exclude_account_id=session['user_id'])
                     return render_template('bewertungen/vortrag.html',
-                        vortraege=vortraege, kriterien=VORTRAGSKRITERIEN, skala=SKALA_LABELS)
+                                           vortraege=vortraege, kriterien=VORTRAGSKRITERIEN, skala=SKALA_LABELS)
                 data[feld] = int(wert)
 
             kommentar = form.get('kommentar', '').strip()
@@ -79,15 +81,27 @@ def vortrag_bewerten():
                 flash('Bewertung konnte nicht gespeichert werden (evtl. hast du bereits bewertet).')
                 vortraege = get_bewertbare_vortraege(exclude_account_id=session['user_id'])
                 return render_template('bewertungen/vortrag.html',
-                    vortraege=vortraege, kriterien=VORTRAGSKRITERIEN, skala=SKALA_LABELS)
+                                       vortraege=vortraege, kriterien=VORTRAGSKRITERIEN, skala=SKALA_LABELS)
     return render_template("index.html")
 
-@bewertungen_bp.route('/bewertungen/vortragsstatistik', methods=['GET'])
-def ansicht_vortragsstatistik():
-    if 'user_id' in session: #Unangemeldete User werden auf die Startseite zurückgeleitet
-        statistik = get_vortragsstatistik(session['user_id'])
-        return render_template('bewertungen/vortragsstatistik.html', statistik=statistik)
+
+@bewertungen_bp.route('/bewertungen/ansicht/<int:s_id>', methods=['GET'])
+def ansicht_vortragsstatistik(s_id):
+    if 'user_id' in session:  #Unangemeldete User werden auf die Startseite zurückgeleitet
+        user_id = int(session.get('user_id', '-1'))
+        rolle = get_user_role(user_id)
+        if rolle == 'doz':
+            user_info = get_user_info(s_id)
+            v_statistik = get_vortragsstatistiken(s_id)
+            a_statistik = get_ausarbeitung_statistiken(s_id)
+            return render_template('bewertungen/ansicht.html',
+                user_info=user_info, v_statistik=v_statistik, a_statistik=a_statistik)
+        user_info = get_user_info(session['user_id'])
+        v_statistik = get_vortragsstatistiken(session['user_id'])
+        return render_template('bewertungen/ansicht.html',
+            user_info=user_info, v_statistik=v_statistik)
     return redirect(url_for('auth.index'))
+
 
 AUSARBEITUNGSKRITERIEN = [
     ('umfang', 'Umfang'),
@@ -103,17 +117,18 @@ AUSARBEITUNGSKRITERIEN = [
                 {'t_id': 21, 'titel': "Bingos Ausarbeitung", 'vorname': "Bingo", 'nachname': "Bongo"}
             ]"""
 
+
 @bewertungen_bp.route('/bewertungen/ausarbeitung_bewerten', methods=['GET', 'POST'])
 def ausarbeitung_bewerten():
     if request.method == 'GET':
-        if 'user_id' in session: #Unangemeldete User werden auf die Startseite zurückgeleitet
+        if 'user_id' in session:  #Unangemeldete User werden auf die Startseite zurückgeleitet
             user_id = int(session.get('user_id', '-1'))
             rolle = get_user_role(user_id)
-            if not pruefe_dozent(user_id, rolle): #Studenten werden auf die Startseite zurückgeleitet
+            if not pruefe_dozent(user_id, rolle):  #Studenten werden auf die Startseite zurückgeleitet
                 return render_template("index.html")
             ausarbeitungen = get_bewertbare_ausarbeitungen(session['user_id'])
             return render_template("bewertungen/ausarbeitung.html",
-                ausarbeitungen=ausarbeitungen, kriterien=AUSARBEITUNGSKRITERIEN, skala=SKALA_LABELS)
+                                   ausarbeitungen=ausarbeitungen, kriterien=AUSARBEITUNGSKRITERIEN, skala=SKALA_LABELS)
         return redirect(url_for('auth.index'))
     else:
         if 'user_id' in session:
@@ -140,7 +155,8 @@ def ausarbeitung_bewerten():
                 if wert not in (1, 2, 3, 4, 5):
                     flash(f'Bitte "{label}" bewerten.')
                     return render_template('bewertungen/vortrag.html',
-                        ausarbeitungen=ausarbeitungen, kriterien=VORTRAGSKRITERIEN, skala=SKALA_LABELS)
+                                           ausarbeitungen=ausarbeitungen, kriterien=VORTRAGSKRITERIEN,
+                                           skala=SKALA_LABELS)
                 data[feld] = int(wert)
 
             kommentar = form.get('kommentar', '').strip()
@@ -154,8 +170,9 @@ def ausarbeitung_bewerten():
                 flash('Bewertung konnte nicht gespeichert werden (evtl. hast du bereits bewertet).')
                 ausarbeitungen = get_bewertbare_ausarbeitungen(session['user_id'])
                 return render_template('bewertungen/vortrag.html',
-                    ausarbeitungen=ausarbeitungen, kriterien=VORTRAGSKRITERIEN, skala=SKALA_LABELS)
+                                       ausarbeitungen=ausarbeitungen, kriterien=VORTRAGSKRITERIEN, skala=SKALA_LABELS)
         return redirect(url_for('auth.index'))
+
 
 @bewertungen_bp.route('/bewertungen/seminarleistung', methods=['GET', 'POST'])
 def seminarleistung_bewerten():
@@ -163,7 +180,7 @@ def seminarleistung_bewerten():
         if 'user_id' in session:
             user_id = int(session.get('user_id', '-1'))
             rolle = get_user_role(user_id)
-            if not pruefe_dozent(user_id, rolle): # Studenten werden auf die Startseite zurückgeleitet
+            if not pruefe_dozent(user_id, rolle):  # Studenten werden auf die Startseite zurückgeleitet
                 return redirect(url_for('auth.index'))
             return render_template("bewertungen/seminarleistung.html", user_id=user_id)
         return redirect(url_for('auth.index'))
