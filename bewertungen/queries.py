@@ -137,7 +137,7 @@ def ist_eigener_vortrag(t_id, account_id):
 #Dict für Werte-Mapping von ints auf zugehörige Symbole
 SKALA_LABELS = {1: '--', 2: '-', 3: 'o', 4: '+', 5: '++'}
 
-def get_vortragsstatistik(s_id):
+def get_vortragsstatistiken(s_id):
     """Gibt mittels Angabe einer s_id eine Dict aus. Die Strings sind je nach Durchschnittswert entweder
     '--', '-', 'o', '+' oder '++'
     :param s_id: s_id des Studierenden dessen Statistik gefragt ist
@@ -148,16 +148,17 @@ def get_vortragsstatistik(s_id):
         with conn.cursor() as cur:
             cur.execute(
                 """
-                SELECT COUNT(*)                                 AS anzahl_bewertungen,
-                       ROUND(AVG(foliengestaltung), 0)          AS foliengestaltung,
-                       ROUND(AVG(sprachliche_praesentation), 0) AS sprachliche_praesentation,
-                       ROUND(AVG(stil), 0)                      AS stil,
-                       ROUND(AVG(zeitliche_gestaltung), 0)      AS zeitliche_gestaltung,
-                       ROUND(AVG(verstaendnis), 0)              AS verstaendnis,
-                       ROUND(AVG(inhalt), 0)                    AS inhalt,
-                       ROUND(AVG(verknuepfung), 0)              AS verknuepfung,
-                       ROUND(AVG(diskussion), 0)                AS diskussion,
-                       ROUND(AVG(beteiligung), 0)               AS beteiligung
+                SELECT 
+                    COUNT(*)                                 AS anzahl_bewertungen,
+                    ROUND(AVG(foliengestaltung), 0)          AS foliengestaltung,
+                    ROUND(AVG(sprachliche_praesentation), 0) AS sprachliche_praesentation,
+                    ROUND(AVG(stil), 0)                      AS stil,
+                    ROUND(AVG(zeitliche_gestaltung), 0)      AS zeitliche_gestaltung,
+                    ROUND(AVG(verstaendnis), 0)              AS verstaendnis,
+                    ROUND(AVG(inhalt), 0)                    AS inhalt,
+                    ROUND(AVG(verknuepfung), 0)              AS verknuepfung,
+                    ROUND(AVG(diskussion), 0)                AS diskussion,
+                    ROUND(AVG(beteiligung), 0)               AS beteiligung   
                 FROM bew_vortrag bv
                 JOIN seminarthema st ON bv.t_id = st.themen_id
                 WHERE st.s_id = %s
@@ -166,7 +167,7 @@ def get_vortragsstatistik(s_id):
             )
             row = cur.fetchone()
             if row is None:
-                return {"anzahl_bewertungen": 0}
+                return {"anzahl_bewertungen": None}
 
             result = dict(row)
 
@@ -281,3 +282,35 @@ def ist_ausarbeitung_bewertbar(t_id):
             (t_id,)
             )
             return cur.fetchone() is not None
+
+def get_ausarbeitung_statistiken(s_id):
+    with db.connect_to_db() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT st.titel, s.vorname, s.nachname, ba.umfang, ba.referenzen, ba.sprachliche_gestaltung,
+                    ba.inhalt, ba.schwierigkeitsgrad, ba.kommentar
+                FROM bew_ausarbeitung ba
+                JOIN seminarthema st ON ba.t_id = st.themen_id
+                JOIN studierende s ON st.s_id = s.s_id
+                WHERE st.s_id = %s
+                """,
+                (s_id,)
+            )
+            row = cur.fetchone()
+
+            if row is None:
+                return {"t_id": None}
+
+            result = dict(row)
+
+            for feld, wert in result.items():
+                if feld in ("titel", "vorname", "nachname", "kommentar"):
+                    continue
+
+                if wert is None:
+                    result[feld] = None
+                else:
+                    result[feld] = SKALA_LABELS[int(wert)]
+
+            return result
