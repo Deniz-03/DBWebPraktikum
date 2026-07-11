@@ -1,6 +1,11 @@
 <!--Author: Tim Deppe (413323)-->
 
 {% extends 'base.html' %}
+
+{% if 'user_id' in session %}
+    {% set user_rolle = rolle %}
+{% endif %}
+
 {% block title %}Ausarbeitung bewerten{% endblock %}
 {% block header %}Ausarbeitung bewerten{% endblock %}
 

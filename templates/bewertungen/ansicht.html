@@ -1,6 +1,11 @@
 <!--Author: Tim Deppe (413323)-->
 
 {% extends 'base.html' %}
+
+{% if 'user_id' in session %}
+    {% set user_rolle = rolle %}
+{% endif %}
+
 {% block title %}Ansicht Bewertungsstatistik{% endblock %}
 {% block header %}Ansicht Bewertungsstatistik{% endblock %}
 
@@ -56,33 +61,46 @@
 {% endif %}
 
 {% if a_statistik is defined %}
-<div class="statistikContainer column ausarbeitungContainer">
-    <h3 class="statistikTitel">Bewertung: Ausarbeitung</h3>
+    <div class="statistikContainer column ausarbeitungContainer">
+        <h3 class="statistikTitel">Bewertung: Ausarbeitung</h3>
 
-    {% if a_statistik.titel %}
-    <table class="statistikTabelle">
-        <tr class="statistikAnzahlZeile">
-            <td class="statistikLabel">Titel</td>
-            <td class="statistikWert">{{ a_statistik.titel }}</td>
-        </tr>
-        <tr><td class="statistikLabel">Umfang</td>
-            <td class="statistikWert">{{ a_statistik.umfang }}</td></tr>
-        <tr><td class="statistikLabel">Referenzen</td>
-            <td class="statistikWert">{{ a_statistik.referenzen }}</td></tr>
-        <tr><td class="statistikLabel">Sprachliche Gestaltung</td>
-            <td class="statistikWert">{{ a_statistik.sprachliche_gestaltung }}</td></tr>
-        <tr><td class="statistikLabel">Inhaltliche Aufbereitung</td>
-            <td class="statistikWert">{{ a_statistik.inhalt }}</td></tr>
-        <tr><td class="statistikLabel">Schwierigkeitsgrad</td>
-            <td class="statistikWert">{{ a_statistik.schwierigkeitsgrad }}</td></tr>
-    </table>
-    {% if a_statistik.kommentar %}
-    <p class="kommentarText"><strong>Kommentar:</strong> {{ a_statistik.kommentar }}</p>
-    {% endif %}
-    {% else %}
-    <p>Noch keine Bewertung der Ausarbeitung vorhanden.</p>
-    {% endif %}
-</div>
+        {% if a_statistik.titel %}
+        <table class="statistikTabelle">
+            <tr class="statistikAnzahlZeile">
+                <td class="statistikLabel">Titel</td>
+                <td class="statistikWert">{{ a_statistik.titel }}</td>
+            </tr>
+            <tr><td class="statistikLabel">Umfang</td>
+                <td class="statistikWert">{{ a_statistik.umfang }}</td></tr>
+            <tr><td class="statistikLabel">Referenzen</td>
+                <td class="statistikWert">{{ a_statistik.referenzen }}</td></tr>
+            <tr><td class="statistikLabel">Sprachliche Gestaltung</td>
+                <td class="statistikWert">{{ a_statistik.sprachliche_gestaltung }}</td></tr>
+            <tr><td class="statistikLabel">Inhaltliche Aufbereitung</td>
+                <td class="statistikWert">{{ a_statistik.inhalt }}</td></tr>
+            <tr><td class="statistikLabel">Schwierigkeitsgrad</td>
+                <td class="statistikWert">{{ a_statistik.schwierigkeitsgrad }}</td></tr>
+        </table>
+        {% if a_statistik.kommentar %}
+        <p class="kommentarText"><strong>Kommentar:</strong> {{ a_statistik.kommentar }}</p>
+        {% endif %}
+        {% else %}
+        <p>Noch keine Bewertung der Ausarbeitung vorhanden.</p>
+        {% endif %}
+    </div>
 {% endif %}
 
+{% if l_statistik is defined %}
+    <div class="statistikContainer column ausarbeitungContainer">
+    <h3 class="statistikTitel">Bewertung: Seminarleistung</h3>
+        <table class="statistikTabelle">
+            <tr class="statistikAnzahlZeile">
+                <td class="statistikLabel">Note</td>
+                <td class="statistikWert">{{ l_statistik.note }}</td>
+            </tr>
+        </table>
+    </div>
+{% else %}
+    <p>Noch keine Bewertung der Seminarleistung vorhanden.</p>
+{% endif %}
 {% endblock %}

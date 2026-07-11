@@ -217,7 +217,7 @@ def create_bew_ausarbeitung(data):
     """Erstellt eine neue Ausarbeitung mittels Angabe einer Dict
     :param data: Dict mit Keys: 't_id', 'umfang', 'referenzen',
     'sprachliche_gestaltung', 'inhalt', 'schwierigkeitsgrad', evtl. 'kommentar'
-    :return: True oder 'bereits_bewertet'"""
+    :return: Boolean"""
     with db.connect_to_db() as conn:
         with conn.cursor() as cur:
             try:
@@ -238,7 +238,7 @@ def create_bew_ausarbeitung(data):
 
             except psycopg.errors.UniqueViolation:
                 conn.rollback()
-                return "bereits_bewertet"
+                return False
 
 def get_bewertbare_ausarbeitungen(d_id):
     """Gibt mittels Angabe einer d_id alle Ausarbeitungen
@@ -284,6 +284,12 @@ def ist_ausarbeitung_bewertbar(t_id):
             return cur.fetchone() is not None
 
 def get_ausarbeitung_statistiken(s_id):
+    """
+    Gibt die Dict mit Symbolwerten (--, ..., ++) zur Bewertung der Ausarbeitung eines Studierenden.
+    :param s_id: s_id des Studierenden dessen Statistik gefragt ist
+    :return: Dict mit Keys: 'titel', 'vorname', 'nachname', 'umfang', 'referenzen', 'sprachliche_gestaltung',
+    'inhalt', 'schwierigkeitsgrad', 'kommentar'
+    """
     with db.connect_to_db() as conn:
         with conn.cursor() as cur:
             cur.execute(
@@ -316,6 +322,11 @@ def get_ausarbeitung_statistiken(s_id):
             return result
 
 def create_seminarleistung(data):
+    """
+    Erstellt eine neue Seminarleistung mittels Angabe einer Dict. Anschließlich wird der Status des Seminarthemas
+    von 'Vergeben' auf 'Abgeschlossen' gesetzt.
+    :param data: Dict mit Keys: 't_id', 'note'
+    :return: Boolean"""
     with db.connect_to_db() as conn:
         with conn.cursor() as cur:
             try:
@@ -344,6 +355,8 @@ def get_bewertbare_seminarleistungen(dozent_id):
     bei denen bereits mindestens eine Vortragsbewertung UND eine Ausarbeitungsbewertung
     existieren, und für die noch KEINE Seminarleistung vergeben wurde.
     Inkl. Titel sowie Vor- und Nachname des Studierenden.
+    :param dozent_id: d_id des Dozenten
+    :return: Liste von Dicts mit Keys: 'themen_id', 'titel', 'vorname', 'nachname'
     """
     with db.connect_to_db() as conn:
         with conn.cursor() as cur:
@@ -365,3 +378,25 @@ def get_bewertbare_seminarleistungen(dozent_id):
                 {'t_id': r['themen_id'], 'titel': r['titel'], 'vorname': r['vorname'], 'nachname': r['nachname']}
                 for r in rows
             ]
+
+def get_seminarleistung(s_id):
+    """
+    Gibt mittels Angabe einer s_id die zugehörige Seminarleistung aus.
+    :param s_id: s_id des Studierenden dessen Seminarleistung gefragt ist
+    :return: None OR Dict mit Key: 'note'
+    """
+    with (db.connect_to_db() as conn):
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT sl.note 
+                FROM seminarleistung sl
+                JOIN seminarthema st ON sl.t_id = st.themen_id
+                WHERE st.s_id = %s
+                """,
+                (s_id,)
+            )
+            result = cur.fetchone()
+            if result is None:
+                return None
+            return result
