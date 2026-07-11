@@ -453,6 +453,11 @@ input[type="radio"]:hover {
     border-spacing: 0;
 }
 
+.statistikAnzahlZeile td {
+    padding-bottom: 14px;
+    border-bottom: 1px solid #ddd;
+}
+
 .statistikLabel {
     padding-right: 40px;
     text-align: left;
@@ -461,4 +466,27 @@ input[type="radio"]:hover {
 .statistikWert {
     text-align: center;
     min-width: 60px;
+}
+
+.ausarbeitungContainer {
+    margin-top: 20px;
+}
+
+.kommentarText {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid #ddd;
+}
+
+.profilKopf {
+    margin-bottom: 24px;
+}
+
+.profilKopf h2 {
+    margin: 0 0 4px 0;
+}
+
+.profilKopfMeta {
+    color: #555;
+    margin: 0;
 }

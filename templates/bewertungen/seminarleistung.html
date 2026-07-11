@@ -1,3 +1,49 @@
 <!--Author: Tim Deppe (413323)-->
 
-{% extends 'base.html' %}
+{% extends "base.html" %}
+
+{% block title %}Seminarleistung bewerten{% endblock %}
+{% block header %}Seminarleistung bewerten{% endblock %}
+
+{% block content %}
+
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    <ul class="flashMessages">
+      {% for message in messages %}
+        <li>{{ message }}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+{% endwith %}
+
+{% if not seminarthemen %}
+    <p>Aktuell stehen keine Seminarleistungen zur Bewertung zur Verfügung.</p>
+{% else %}
+<form method="POST" action="{{ url_for('bewertungen.seminarleistung_bewerten') }}" class="column bewertungForm">
+
+    <div class="vortragAuswahlDiv column">
+        <label for="t_id">Seminarthema auswählen</label>
+        <select name="t_id" id="t_id" required>
+            <option value="" disabled selected>Bitte wählen</option>
+            {% for s in seminarthemen %}
+            <option value="{{ s.t_id }}">{{ s.titel }} — {{ s.vorname }} {{ s.nachname }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="vortragAuswahlDiv column">
+        <label for="note">Note</label>
+        <select name="note" id="note" required>
+            <option value="" disabled selected>Bitte wählen</option>
+            {% for n in noten %}
+            <option value="{{ n }}">{{ '%.1f' | format(n) }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <button type="submit" class="submitButton">Note speichern</button>
+</form>
+{% endif %}
+
+{% endblock %}
