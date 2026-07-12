@@ -53,7 +53,7 @@ with db.connect_to_db() as conn:
                     "CONSTRAINT chk_schwierigkeitsgrad CHECK (schwierigkeitsgrad BETWEEN 1 AND 5))")
         cur.execute("CREATE TABLE seminarleistung (t_id INT PRIMARY KEY,"
                     "note DECIMAL(2,1) NOT NULL "
-                        "CHECK (note IN (1.0, 1.3, 1.7, 2.0, 2.3, 2.7, 3.0, 3.3, 3.7, 4.0, 5.0)),"
+                    "CHECK (note IN (1.0, 1.3, 1.7, 2.0, 2.3, 2.7, 3.0, 3.3, 3.7, 4.0, 5.0)),"
                     "FOREIGN KEY (t_id) REFERENCES seminarthema(themen_id) ON DELETE CASCADE)")
 
         conn.commit()
