@@ -86,26 +86,35 @@ def vortrag_bewerten():
         return redirect(url_for('auth.login'))
 
 
-@bewertungen_bp.route('/bewertungen/ansicht/<int:s_id>', methods=['GET'])
-def ansicht_statistik(s_id):
-    if 'user_id' in session:  #Unangemeldete User werden auf die Loginseite zurückgeleitet
-        user_id = int(session.get('user_id', '-1'))
-        rolle = get_user_role(user_id)
-        if rolle == 'doz': #Dozenten dürfen Profile ansehen, die nicht ihnen selbst zugeordnet sind
-            user_info = get_user_info(s_id)
-            v_statistik = get_vortragsstatistiken(s_id)
-            a_statistik = get_ausarbeitung_statistiken(s_id)
-            l_statistik = get_seminarleistung(s_id)
+@bewertungen_bp.route('/bewertungen/ansicht', methods=['GET', 'POST'])
+def ansicht_statistik():
+    if request.method == 'GET':
+        return redirect(url_for('auth.profile'))
+    else:
+        if 'user_id' in session:  #Unangemeldete User werden auf die Loginseite zurückgeleitet
+            user_id = int(session.get('user_id', '-1'))
+            rolle = get_user_role(user_id)
+            if rolle == 'doz': #Dozenten dürfen Profile ansehen, die nicht ihnen selbst zugeordnet sind
+                form = request.form
+                s_id = form.get('s_id')
+                try:
+                    user_info = get_user_info(s_id)
+                    v_statistik = get_vortragsstatistiken(s_id)
+                    a_statistik = get_ausarbeitung_statistiken(s_id)
+                    l_statistik = get_seminarleistung(s_id)
+                    return render_template('bewertungen/ansicht.html',
+                        user_info=user_info, v_statistik=v_statistik, a_statistik=a_statistik, l_statistik=l_statistik,
+                        rolle=rolle)
+                except ValueError:
+                    flash('Das Konto existiert nicht.')
+                    return redirect(url_for('themen.themen_uebersicht'))
+            #Studierende sehen immer nur ihre eigenen Statistiken
+            user_info = get_user_info(session['user_id'])
+            v_statistik = get_vortragsstatistiken(session['user_id'])
             return render_template('bewertungen/ansicht.html',
-                user_info=user_info, v_statistik=v_statistik, a_statistik=a_statistik, l_statistik=l_statistik,
-                rolle=rolle)
-        #Studierende sehen immer nur ihre eigenen Statistiken
-        user_info = get_user_info(session['user_id'])
-        v_statistik = get_vortragsstatistiken(session['user_id'])
-        return render_template('bewertungen/ansicht.html',
-            user_info=user_info, v_statistik=v_statistik, rolle=rolle)
-    flash('Bitte zuerst einloggen.')
-    return redirect(url_for('auth.login'))
+                user_info=user_info, v_statistik=v_statistik, rolle=rolle)
+        flash('Bitte zuerst einloggen.')
+        return redirect(url_for('auth.login'))
 
 
 AUSARBEITUNGSKRITERIEN = [
