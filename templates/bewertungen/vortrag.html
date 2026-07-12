@@ -31,7 +31,7 @@
         <select name="t_id" id="t_id" required>
             <option value="" disabled selected>Bitte wählen</option>
             {% for v in vortraege %}
-            <option value="{{ v.t_id }}">{{ v.titel }} — {{ v.vorname }} {{ v.nachname }}</option>
+            <option value="{{ v.get('t_id', '') }}">{{ v.get('titel', '') }} — {{ v.get('vorname', '') }} {{ v.get('nachname', '') }}</option>
             {% endfor %}
         </select>
     </div>
