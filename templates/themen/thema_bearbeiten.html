@@ -75,8 +75,11 @@
                 <div class="inpt">
                      <label for="student">Zugewiesener Studierender</label>
                     {% if student %}
-                        <a href="{{ url_for('themen.profile', student_id=student.s_id) }}" id="student"
-                           class="link">
+                        <div class="inpt">
+                            <input type="text" id="student" name="student" value="{{ student.matr_nr }}"
+                                   pattern="\d{6,8}" inputmode="numeric">
+                        </div>
+                        <a href="{{ url_for('themen.profile', student_id=student.s_id) }}" class="link">
                             {{ student.vorname }} {{ student.nachname }}
                         </a>
                     {% else %}
@@ -100,7 +103,7 @@
 
             <div class="inpt">
                 <label for="beschreibung">Beschreibung</label>
-        <textarea id="beschreibung" name="beschreibung" rows="5">{{ beschreibung }}</textarea>
+                <textarea id="beschreibung" name="beschreibung" rows="5">{{ beschreibung }}</textarea>
             </div>
 
         <button type="submit" class="link">Speichern</button>
