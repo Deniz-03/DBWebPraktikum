@@ -31,7 +31,7 @@
         <select name="t_id" id="t_id" required>
             <option value="" disabled selected>Bitte wählen</option>
             {% for s in seminarthemen %}
-            <option value="{{ s.t_id }}">{{ s.titel }} — {{ s.vorname }} {{ s.nachname }}</option>
+            <option value="{{ s.get('t_id', '') }}">{{ s.get('titel', '') }} — {{ s.get('vorname', '') }} {{ s.get('nachname', '') }}</option>
             {% endfor %}
         </select>
     </div>

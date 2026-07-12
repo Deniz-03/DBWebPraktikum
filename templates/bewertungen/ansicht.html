@@ -13,11 +13,11 @@
 
 {% if user_info %}
 <div class="profilKopf">
-    <h2>{{ user_info.vorname }} {{ user_info.nachname }}</h2>
+    <h2>{{ user_info.get('vorname', '') }} {{ user_info.get('nachname', '') }}</h2>
     <p class="profilKopfMeta">
-        Matr.-Nr.: {{ user_info.matr_nr }}
-        {% if user_info.titel %}
-            &nbsp;|&nbsp; Seminarthema: {{ user_info.titel }}
+        Matr.-Nr.: {{ user_info.get('matr_nr', '') }}
+        {% if user_info.get('titel') %}
+            &nbsp;|&nbsp; Seminarthema: {{ user_info.get('titel', '') }}
         {% else %}
             &nbsp;|&nbsp; Kein Seminarthema ausgewählt
         {% endif %}
@@ -29,28 +29,28 @@
     <div class="statistikContainer column" xmlns="http://www.w3.org/1999/html">
         <h3 class="statistikTitel">Bewertungen Vorträge:</h3>
 
-            {% if v_statistik.anzahl_bewertungen %}
+            {% if v_statistik.get('anzahl_bewertungen') %}
             <table class="statistikTabelle">
                 <tr class="statistikAnzahlZeile"><td class="statistikTabelle">Anzahl Bewertungen:</td>
-                    <td class="statistikWert">{{ v_statistik.anzahl_bewertungen }}</td></tr>
+                    <td class="statistikWert">{{ v_statistik.get('anzahl_bewertungen', '') }}</td></tr>
                 <tr><td class="statistikTabelle">Foliengestaltung:</td>
-                    <td class="statistikWert">{{ v_statistik.foliengestaltung }}</td></tr>
+                    <td class="statistikWert">{{ v_statistik.get('foliengestaltung', '') }}</td></tr>
                 <tr><td class="statistikTabelle">Sprachliche Präsentation:</td>
-                    <td class="statistikWert">{{ v_statistik.sprachliche_praesentation }}</td></tr>
+                    <td class="statistikWert">{{ v_statistik.get('sprachliche_praesentation', '') }}</td></tr>
                 <tr><td class="statistikTabelle">Präsentationsstil:</td>
-                    <td class="statistikWert">{{ v_statistik.stil }}</td></tr>
+                    <td class="statistikWert">{{ v_statistik.get('stil', '') }}</td></tr>
                 <tr><td class="statistikTabelle">Zeitliche Gestaltung:</td>
-                    <td class="statistikWert">{{ v_statistik.zeitliche_gestaltung }}</td></tr>
+                    <td class="statistikWert">{{ v_statistik.get('zeitliche_gestaltung', '') }}</td></tr>
                 <tr><td class="statistikTabelle">Verständnis:</td>
-                    <td class="statistikWert">{{ v_statistik.verstaendnis }}</td></tr>
+                    <td class="statistikWert">{{ v_statistik.get('verstaendnis', '') }}</td></tr>
                 <tr><td class="statistikTabelle">Inhaltliche Aufbereitung:</td>
-                    <td class="statistikWert">{{ v_statistik.inhalt }}</td></tr>
+                    <td class="statistikWert">{{ v_statistik.get('inhalt', '') }}</td></tr>
                 <tr><td class="statistikTabelle">Verknüpfung mit anderen Vorträgen:</td>
-                    <td class="statistikWert">{{ v_statistik.verknuepfung }}</td></tr>
+                    <td class="statistikWert">{{ v_statistik.get('verknuepfung', '') }}</td></tr>
                 <tr><td class="statistikTabelle">Diskussionsführung:</td>
-                    <td class="statistikWert">{{ v_statistik.diskussion }}</td></tr>
+                    <td class="statistikWert">{{ v_statistik.get('diskussion', '') }}</td></tr>
                 <tr><td class="statistikTabelle">Beteiligung an Diskussionen:</td>
-                    <td class="statistikWert">{{ v_statistik.beteiligung }}</td></tr>
+                    <td class="statistikWert">{{ v_statistik.get('beteiligung', '') }}</td></tr>
             </table>
             {% else %}
             <p>Noch keine Vortragsbewertungen vorhanden.</p>
@@ -68,21 +68,21 @@
         <table class="statistikTabelle">
             <tr class="statistikAnzahlZeile">
                 <td class="statistikLabel">Titel</td>
-                <td class="statistikWert">{{ a_statistik.titel }}</td>
+                <td class="statistikWert">{{ a_statistik.get('titel', '') }}</td>
             </tr>
             <tr><td class="statistikLabel">Umfang</td>
-                <td class="statistikWert">{{ a_statistik.umfang }}</td></tr>
+                <td class="statistikWert">{{ a_statistik.get('umfang', '') }}</td></tr>
             <tr><td class="statistikLabel">Referenzen</td>
-                <td class="statistikWert">{{ a_statistik.referenzen }}</td></tr>
+                <td class="statistikWert">{{ a_statistik.get('referenzen', '') }}</td></tr>
             <tr><td class="statistikLabel">Sprachliche Gestaltung</td>
-                <td class="statistikWert">{{ a_statistik.sprachliche_gestaltung }}</td></tr>
+                <td class="statistikWert">{{ a_statistik.get('sprachliche_gestaltung', '') }}</td></tr>
             <tr><td class="statistikLabel">Inhaltliche Aufbereitung</td>
-                <td class="statistikWert">{{ a_statistik.inhalt }}</td></tr>
+                <td class="statistikWert">{{ a_statistik.get('inhalt', '') }}</td></tr>
             <tr><td class="statistikLabel">Schwierigkeitsgrad</td>
-                <td class="statistikWert">{{ a_statistik.schwierigkeitsgrad }}</td></tr>
+                <td class="statistikWert">{{ a_statistik.get('schwierigkeitsgrad', '') }}</td></tr>
         </table>
-        {% if a_statistik.kommentar %}
-        <p class="kommentarText"><strong>Kommentar:</strong> {{ a_statistik.kommentar }}</p>
+        {% if a_statistik.get('kommentar') %}
+        <p class="kommentarText"><strong>Kommentar:</strong> {{ a_statistik.get('kommentar', '') }}</p>
         {% endif %}
         {% else %}
         <p>Noch keine Bewertung der Ausarbeitung vorhanden.</p>
@@ -93,11 +93,11 @@
 {% if l_statistik is defined %}
     <div class="statistikContainer column ausarbeitungContainer">
     <h3 class="statistikTitel">Bewertung Seminarleistung:</h3>
-        {% if l_statistik.note %}
+        {% if l_statistik.get('note') %}
         <table class="statistikTabelle">
             <tr class="statistikAnzahlZeile">
                 <td class="statistikLabel">Note</td>
-                <td class="statistikWert">{{ l_statistik.note }}</td>
+                <td class="statistikWert">{{ l_statistik.get('note', '') }}</td>
             </tr>
         </table>
         {% else %}
@@ -106,29 +106,3 @@
     </div>
 {% endif %}
 {% endblock %}
-
-<!-- Diesen Abschnitt bitte reinkopieren!
-{% if avg_vortrag_bew.anzahl_bewertungen or aus_bew is defined %}
-    <div class="statistikContainer">
-    <h3 class="statistikTitel">Statistik</h3>
-        <table class="statistikTabelle">
-            {% if avg_vortrag_bew.anzahl_bewertungen %}
-                <tr><td class="statistikLabel">Durchschnittliche Vortragsbewertung:</td>
-                    <td class="statistikWert">{{ avg_vortrag_bew.gesamtdurchschnitt }}</td></tr>
-            {% endif %}
-            {% if aus_bew is defined and aus_bew.titel %}
-                <tr><td class="statistikLabel">Durchschnittliche Ausarbeitungsbewertung:</td>
-                    <td class="statistikWert">{{ aus_bew.gesamtdurchschnitt }}</td></tr>
-            {% endif %}
-            {% if sem_leistung is defined and sem_leistung.note %}
-                <tr><td class="statistikLabel">Seminarleistung:</td>
-                    <td class="statistikWert">{{ sem_leistung.note }}</td></tr>
-            {% endif %}
-        </table>
-        <form action="{{ url_for('bewertungen.ansicht_statistik') }}" method="POST">
-            <input type="hidden" name="s_id" value="{{ user_info.get('user_id') }}">
-            <button type="submit" class="link submit">Detailansicht</button>
-        </form>
-    </div>
-{% endif %}
--->
