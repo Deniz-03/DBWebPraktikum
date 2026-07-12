@@ -1,9 +1,10 @@
 #Author Peer Schulze (410246)
 import os
+import re
 
 from werkzeug.utils import secure_filename
 
-from themen.queries import get_sid_aus_themen, get_status_optionen
+from themen.queries import get_sid_aus_themen, get_status_optionen, get_student_by_matr_nr
 from flask import session
 from auth.queries import get_user_role
 import uuid
@@ -117,14 +118,23 @@ def hole_user_und_rolle():
     rolle = get_user_role(user_id)
     return user_id, rolle
 
-# Prüfen ob das Thema belegt werden kann und ib der Student noch kein Thema belegt hat
-def thema_belegen_pruefen(thema, user_id):
+# Prüfe ob der student bereits ein Thema hat.
+def thema_belegen_s_id_pruefen(user_id):
     # Liste der s_ids, die schon ein Thema belegt haben
-    studenten_ids = [row['s_id'] for row in get_sid_aus_themen() if row['s_id'] is not None]
+    studenten_ids = []
 
-    # Belegbar nur wenn: Thema hat noch keinen Studenten,
-    # Status ist Frei, UND der Student belegt noch kein anderes Thema
-    if not thema['s_id'] and thema['status'] == 'Frei' and user_id not in studenten_ids:
+    for row in get_sid_aus_themen():
+        if row['s_id'] is not None:
+            studenten_ids.append(row['s_id'])
+
+    if user_id not in studenten_ids:
+        return True
+    else:
+        return False
+
+# Prüfen, ob das Thema noch nicht belegt ist
+def thema_belegen_status_pruefen(thema):
+    if not thema['s_id'] and thema['status'] == 'Frei':
         return True
     else:
         return False
@@ -152,5 +162,20 @@ def check_status(status):
             enthalten = True
 
     return enthalten
+
+# Schauen ob eine metr_nr existiert
+def check_matr_nr(matr_nr):
+    # Prüft, ob eine Matrikelnummer auch das richtige Format hat
+    if not re.match(r'^\d{6,8}$', matr_nr):
+        return False
+
+    student = get_student_by_matr_nr(matr_nr)
+
+    if student:
+      return True
+    else:
+        return False
+
+
 
 

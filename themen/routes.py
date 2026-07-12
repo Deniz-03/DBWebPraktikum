@@ -5,9 +5,10 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash
 from auth.queries import get_user_info
 from themen.queries import (get_dozierenden, thema_anlegen, thema_bearbeiten, get_seminarthema, get_student_by_id,
                             get_dozent_by_id, student_hinzufuegen, get_seminarthemen_by_filter, get_semester,
-                            get_status_optionen)
-from themen.utils import validiere_thema_form, pruefe_dozent, pruefe_student, thema_belegen_pruefen, \
-    hole_user_und_rolle, speichere_pdf, check_status
+                            get_status_optionen, get_student_by_matr_nr)
+from themen.utils import validiere_thema_form, pruefe_dozent, pruefe_student,\
+    hole_user_und_rolle, speichere_pdf, check_status, check_matr_nr, thema_belegen_status_pruefen, \
+    thema_belegen_s_id_pruefen
 
 themen_bp = Blueprint('themen', __name__)
 
@@ -93,16 +94,18 @@ def themen_bearbeiten(themen_id):
     if not thema_daten:
         return redirect(url_for('themen.themen_uebersicht'))
 
-    # Namen des Studenten holen, wenn einer eingetragen ist
+    # Namen und matrNr des Studenten holen, wenn einer eingetragen ist
     s_id = thema_daten['s_id']
     if s_id:
         student = get_student_by_id(s_id)
     else:
         student = None
 
+    dozierenden = get_dozierenden()
+
     # Get Methode zum laden der Bearbeitungsseite mit vorausgefüllten Feldern
     if request.method == 'GET':
-        # data ist ein Dictionary, kein Tupel mehr
+        # data ist ein Dictionary
         titel = thema_daten['titel']
         d_id = thema_daten['d_id']
         status = thema_daten['status']
@@ -111,8 +114,6 @@ def themen_bearbeiten(themen_id):
         semester = thema_daten['semester']
         pdf = thema_daten['pdf_pfad']
         vorgetragen = thema_daten['vorgetragen']
-
-        dozierenden = get_dozierenden()
 
         return render_template('themen/thema_bearbeiten.html',
                         titel=titel,
@@ -134,11 +135,60 @@ def themen_bearbeiten(themen_id):
         oberbegriff = data.get('oberbegriff')
         beschreibung = data.get('beschreibung')
         semester = data.get('semester') or None
-        status = data.get('status')
+        # Aus dem Thema lesen nicht aus dem Formular
+        # Damit kein manipluierter Status ankommen kann
+        status = thema_daten['status']
         # Da False als String übergeben wird wäre bool('False') == True immer True
         vorgetragen = data.get('vorgetragen') == 'True'
+        # formatiere eine matr_nr ohne leerzeichen und Zeilenumbrüche
+        matr_nr = data.get('student', '').strip()
 
-        dozierenden = get_dozierenden()
+        if student:
+            alte_matr_nr = student['matr_nr']
+        else:
+            alte_matr_nr = None
+
+        s_id_neu = s_id
+        student_neu = student
+        # Gucken ob matr_nr verändert wurde
+        if matr_nr and matr_nr != alte_matr_nr:
+            if not check_matr_nr(matr_nr):
+                fehler = 'Die eingegebene Matrikelnummer existiert nicht.'
+                return render_template('themen/thema_bearbeiten.html',
+                                       fehler=fehler,
+                                       titel=titel,
+                                       d_id=d_id,
+                                       oberbegriff=oberbegriff,
+                                       beschreibung=beschreibung,
+                                       student=student,
+                                       semester=semester,
+                                       status=status,
+                                       dozierenden=dozierenden,
+                                       vorgetragen=vorgetragen)
+            else:
+                student_neu = get_student_by_matr_nr(matr_nr)
+                s_id_neu = student_neu['s_id']
+
+            if not thema_belegen_s_id_pruefen(s_id_neu):
+                fehler = 'Die eingetragene Matrikelnummer ist bereits in einem anderen Seminarthema eingetragen.'
+                return render_template('themen/thema_bearbeiten.html',
+                                        fehler=fehler,
+                                        titel=titel,
+                                        d_id=d_id,
+                                        oberbegriff=oberbegriff,
+                                        beschreibung=beschreibung,
+                                        student=student,
+                                        semester=semester,
+                                        status=status,
+                                        dozierenden=dozierenden,
+                                        vorgetragen=vorgetragen)
+
+        # Status ergibt sich aus der Belegung, 'Abgeschlossen' bleibt aber immer bestehen
+        if thema_daten['status'] != 'Abgeschlossen':
+            if s_id_neu:
+               status = 'Vergeben'
+            else:
+               status = 'Frei'
 
         # Prüfen der Pflichtfelder und das der Dozent ausgewählt wurde (Vorauswahl oder manuel geändert)
         if not titel or not oberbegriff or not beschreibung or not d_id:
@@ -149,9 +199,9 @@ def themen_bearbeiten(themen_id):
                                    d_id=d_id,
                                    oberbegriff=oberbegriff,
                                    beschreibung=beschreibung,
+                                   student=student_neu,
                                    semester=semester,
                                    status=status,
-                                   student=student,
                                    dozierenden=dozierenden,
                                    vorgetragen=vorgetragen
                                    )
@@ -160,7 +210,7 @@ def themen_bearbeiten(themen_id):
         pdf = request.files.get('pdf')
         pdf_dateiname = pdf.filename if pdf and pdf.filename != '' else None
 
-        # Validieren der mitgeschickten Felder.
+        # Validieren der mitgeschickten Felder, die in der Prüfung gefunden wurden.
         fehler = validiere_thema_form(titel, oberbegriff, beschreibung, d_id, semester, pdf_dateiname, dozierenden)
         if fehler:
             return render_template('themen/thema_bearbeiten.html',
@@ -172,7 +222,7 @@ def themen_bearbeiten(themen_id):
                                    semester=semester,
                                    status=status,
                                    vorgetragen=vorgetragen,
-                                   student=student,
+                                   student=student_neu,
                                    dozierenden=dozierenden
                                    )
 
@@ -183,7 +233,7 @@ def themen_bearbeiten(themen_id):
             pdf_pfad = thema_daten['pdf_pfad']
 
         # Neue Daten werden gespeichert
-        thema_bearbeiten(themen_id, titel, d_id, oberbegriff, beschreibung, semester, pdf_pfad,
+        thema_bearbeiten(themen_id, titel, d_id, oberbegriff, beschreibung, s_id_neu, status, semester, pdf_pfad,
                          vorgetragen=vorgetragen)
 
         return redirect(url_for('themen.thema_detail', themen_id=themen_id))
@@ -283,7 +333,8 @@ def thema_detail(themen_id):
         if not pruefe_student(rolle):
             return redirect(url_for('auth.index'))
 
-        if thema_belegen_pruefen(data, user_id) and student_hinzufuegen(themen_id, user_id, 'Vergeben'):
+        if (thema_belegen_status_pruefen(data) and thema_belegen_s_id_pruefen(user_id)
+                and student_hinzufuegen(themen_id, user_id, 'Vergeben')):
             flash('Thema erfolgreich ausgewählt.', 'success')
         else:
             flash('Das Thema ist bereits belegt oder sie belegen bereits ein Thema.', 'error')
