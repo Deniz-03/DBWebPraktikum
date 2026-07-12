@@ -323,9 +323,9 @@ def get_ausarbeitung_statistiken(s_id):
 
 def get_einfache_ausarbeitungsstatistik(s_id):
     """Gibt mittels Angabe einer s_id eine Dict aus.
-    Die Strings sind je nach Durchschnittswert entweder '--', '-', 'o', '+' oder '++'
+    Die String ist je nach Durchschnittswert entweder '--', '-', 'o', '+' oder '++'
     :param s_id: s_id des Studierenden dessen Statistik gefragt ist
-    :return: Dict mit Keys: 'anzahl_bewertungen':int, 'gesamtdurchschnitt':str"""
+    :return: Dict mit Key: 'gesamtdurchschnitt':str"""
     with db.connect_to_db() as conn:
         with conn.cursor() as cur:
             cur.execute(
