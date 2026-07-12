@@ -24,7 +24,7 @@
 {% if not ausarbeitungen %}
     <p>Aktuell stehen keine bewertbaren Ausarbeitungen zur Verfügung.</p>
 {% else %}
-<form method="POST" action="{{ url_for('bewertungen.ausarbeitung_bewerten', '') }}" class="column bewertungForm">
+<form method="POST" action="{{ url_for('bewertungen.ausarbeitung_bewerten') }}" class="column bewertungForm">
 
     <div class="vortragAuswahlDiv column">
         <label for="t_id">Ausarbeitung auswählen</label>

@@ -5,10 +5,6 @@ from auth.queries import get_user_role, get_user_info
 from themen.utils import pruefe_dozent
 from bewertungen.queries import *
 
-"""<a href="{{ url_for('bewertungen.vortrag_bewerten') }}" class="sidebarLinks">Vortrag Bewerten</a>"""
-"""<a href="{{ url_for('bewertungen.ausarbeitung_bewerten') }}" class="sidebarLinks">Ausarbeitungen Bewerten</a>"""
-"""<a href="{{ url_for('bewertungen.seminarleistung') }}" class="sidebarLinks">Seminarleistung Bewerten</a>"""
-
 bewertungen_bp = Blueprint('bewertungen', __name__, template_folder='templates')
 
 VORTRAGSKRITERIEN = [
@@ -25,7 +21,7 @@ VORTRAGSKRITERIEN = [
 
 SKALA_LABELS = {1: '--', 2: '-', 3: 'o', 4: '+', 5: '++'}
 
-@bewertungen_bp.route('/bewertungen/vortrag_bewerten', methods=['GET', 'POST'])
+@bewertungen_bp.route('/bewertungen/vortrag', methods=['GET', 'POST'])
 def vortrag_bewerten():
     if request.method == 'GET':
         if 'user_id' in session:  #Unangemeldete User werden auf die Loginseite zurückgeleitet
@@ -125,7 +121,7 @@ AUSARBEITUNGSKRITERIEN = [
     ('schwierigkeitsgrad', 'Schwierigkeitsgrad')
 ]
 
-@bewertungen_bp.route('/bewertungen/ausarbeitung_bewerten', methods=['GET', 'POST'])
+@bewertungen_bp.route('/bewertungen/ausarbeitung', methods=['GET', 'POST'])
 def ausarbeitung_bewerten():
     if request.method == 'GET':
         if 'user_id' in session:  #Unangemeldete User werden auf die Loginseite zurückgeleitet

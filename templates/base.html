@@ -42,14 +42,15 @@
                 <div class="column">
                     <a href="{{ url_for('themen.themen_neu') }}" class="sidebarLinks">Seminarthema anlegen</a>
                     <a href="{{ url_for('themen.themen_uebersicht') }}" class="sidebarLinks">Themenübersicht</a>
-                    <a href="" class="sidebarLinks">Funktion3</a>
-                    <a href="" class="sidebarLinks">Funktion4</a>
+                    <a href="{{ url_for('bewertungen.vortrag_bewerten') }}" class="sidebarLinks">Vortrag Bewerten</a>
+                    <a href="{{ url_for('bewertungen.ausarbeitung_bewerten') }}" class="sidebarLinks">Ausarbeitungen Bewerten</a>
+                    <a href="{{ url_for('bewertungen.seminarleistung_bewerten') }}" class="sidebarLinks">Seminarleistung Bewerten</a>
                 </div>
              {% elif user_rolle == 'stud' %}
                  <!--Hier kommen die spezifischen Funktionen für Studierende hin-->
                 <div class="column">
                     <a href="{{ url_for('themen.themen_uebersicht') }}" class="sidebarLinks">Themenübersicht</a>
-                    <a href="" class="sidebarLinks">Funktion2</a>
+                    <a href="{{ url_for('bewertungen.vortrag_bewerten') }}" class="sidebarLinks">Vortrag Bewerten</a>
                     <a href="" class="sidebarLinks">Funktion3</a>
                     <a href="" class="sidebarLinks">Funktion4</a>
                 </div>
