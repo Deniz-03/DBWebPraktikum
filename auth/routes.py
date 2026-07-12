@@ -2,6 +2,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session
 from auth.queries import *
 from auth.utils import *
+from bewertungen.queries import *
 
 auth_bp = Blueprint('auth', __name__, template_folder='templates')
 
@@ -108,10 +109,6 @@ def register():
 
 
 
-
-
-
-
 @auth_bp.route('/profile', methods=['GET', 'POST'])
 def profile():
     if request.method == 'GET':
@@ -119,7 +116,19 @@ def profile():
             user_id = int(session.get('user_id', '-1'))
             rolle = get_user_role(user_id)
             user_info = get_user_info(user_id)
-            return render_template("auth/profile.html", user_info=user_info, rolle=rolle)
+
+            if rolle == "stud":
+                avg_vortrag_bew = get_einfache_vortragsstatistik(user_id)
+                aus_bew = get_einfache_ausarbeitungsstatistik(user_id)
+                sem_leistung = get_seminarleistung(user_id)
+                return render_template("auth/profile.html",
+                                        user_info=user_info,
+                                        rolle=rolle,
+                                        avg_vortrag_bew=avg_vortrag_bew,
+                                        #aus_bew=aus_bew,
+                                        sem_leistung=sem_leistung)
+            else:
+                return render_template("auth/profile.html", user_info=user_info, rolle=rolle)
         else:
             return render_template("auth/profile.html")
 
