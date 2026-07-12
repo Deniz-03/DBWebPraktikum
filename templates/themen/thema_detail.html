@@ -121,17 +121,17 @@
             </a>
 
             {% if thema.status == 'Vergeben' %}
-                <a href="" class="link">
+                <a href="{{ url_for('bewertungen.seminarleistung_bewerten') }}" class="link">
                     Seminarleistung bewerten
                 </a>
-                <a href="" class="link">
+                <a href="{{ url_for('bewertungen.ausarbeitung_bewerten') }}" class="link">
                     Ausarbeitung bewerten
                 </a>
             {% endif %}
         {% endif %}
 
         {% if thema.vorgetragen and user_id != thema.s_id %}
-            <a href="" class="link">
+            <a href="{{ url_for('bewertungen.vortrag_bewerten') }}" class="link">
                 Vortrag bewerten
             </a>
         {% endif %}
