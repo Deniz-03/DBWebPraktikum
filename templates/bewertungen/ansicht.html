@@ -27,7 +27,7 @@
 
 {% if v_statistik is defined %}
     <div class="statistikContainer column" xmlns="http://www.w3.org/1999/html">
-        <h3 class="statistikTitel">Bewertungen: Vorträge</h3>
+        <h3 class="statistikTitel">Bewertungen Vorträge:</h3>
 
             {% if v_statistik.anzahl_bewertungen %}
             <table class="statistikTabelle">
@@ -62,7 +62,7 @@
 
 {% if a_statistik is defined %}
     <div class="statistikContainer column ausarbeitungContainer">
-        <h3 class="statistikTitel">Bewertung: Ausarbeitung</h3>
+        <h3 class="statistikTitel">Bewertung Ausarbeitung:</h3>
 
         {% if a_statistik.titel %}
         <table class="statistikTabelle">
@@ -92,15 +92,43 @@
 
 {% if l_statistik is defined %}
     <div class="statistikContainer column ausarbeitungContainer">
-    <h3 class="statistikTitel">Bewertung: Seminarleistung</h3>
+    <h3 class="statistikTitel">Bewertung Seminarleistung:</h3>
+        {% if l_statistik.note %}
         <table class="statistikTabelle">
             <tr class="statistikAnzahlZeile">
                 <td class="statistikLabel">Note</td>
                 <td class="statistikWert">{{ l_statistik.note }}</td>
             </tr>
         </table>
+        {% else %}
+        <p>Noch keine Bewertung der Seminarleistung vorhanden.</p>
+        {% endif %}
     </div>
-{% else %}
-    <p>Noch keine Bewertung der Seminarleistung vorhanden.</p>
 {% endif %}
 {% endblock %}
+
+<!-- Diesen Abschnitt bitte reinkopieren!
+{% if avg_vortrag_bew.anzahl_bewertungen or aus_bew is defined %}
+    <div class="statistikContainer">
+    <h3 class="statistikTitel">Statistik</h3>
+        <table class="statistikTabelle">
+            {% if avg_vortrag_bew.anzahl_bewertungen %}
+                <tr><td class="statistikLabel">Durchschnittliche Vortragsbewertung:</td>
+                    <td class="statistikWert">{{ avg_vortrag_bew.gesamtdurchschnitt }}</td></tr>
+            {% endif %}
+            {% if aus_bew is defined and aus_bew.titel %}
+                <tr><td class="statistikLabel">Durchschnittliche Ausarbeitungsbewertung:</td>
+                    <td class="statistikWert">{{ aus_bew.gesamtdurchschnitt }}</td></tr>
+            {% endif %}
+            {% if sem_leistung is defined and sem_leistung.note %}
+                <tr><td class="statistikLabel">Seminarleistung:</td>
+                    <td class="statistikWert">{{ sem_leistung.note }}</td></tr>
+            {% endif %}
+        </table>
+        <form action="{{ url_for('bewertungen.ansicht_statistik') }}" method="POST">
+            <input type="hidden" name="s_id" value="{{ user_info.get('user_id') }}">
+            <button type="submit" class="link submit">Detailansicht</button>
+        </form>
+    </div>
+{% endif %}
+-->
