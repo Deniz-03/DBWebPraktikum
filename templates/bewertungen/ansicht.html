@@ -29,7 +29,7 @@
     <div class="statistikContainer column" xmlns="http://www.w3.org/1999/html">
         <h3 class="statistikTitel">Bewertungen Vorträge:</h3>
 
-            {% if v_statistik.get('anzahl_bewertungen') %}
+            {% if v_statistik.anzahl_bewertungen %}
             <table class="statistikTabelle">
                 <tr class="statistikAnzahlZeile"><td class="statistikTabelle">Anzahl Bewertungen:</td>
                     <td class="statistikWert">{{ v_statistik.get('anzahl_bewertungen', '') }}</td></tr>
@@ -93,7 +93,7 @@
 {% if l_statistik is defined %}
     <div class="statistikContainer column ausarbeitungContainer">
     <h3 class="statistikTitel">Bewertung Seminarleistung:</h3>
-        {% if l_statistik.get('note') %}
+        {% if l_statistik.note %}
         <table class="statistikTabelle">
             <tr class="statistikAnzahlZeile">
                 <td class="statistikLabel">Note</td>
