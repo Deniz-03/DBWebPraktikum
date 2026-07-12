@@ -36,6 +36,25 @@
             <p>Seminarthema: {{ user_info.get('titel') }}</p>
         {% endif %}
 
+        <!--Zunächst wird geschaut, ob der folgende Block benötigt wird,
+        also ob schon Bewertungen vorliegen. Danach wird jede Bewertung nochmal einzeln geprüft-->
+        {% if avg_vortrag_bew is not none or aus_bew is not none or sem_leistung is not none%}
+            <div class="statistikContainer">
+                {% if avg_vortrag_bew is not none %}
+                    <p>Durchschnittliche Vortragsbewertung: {{ avg_vortrag_bew }}</p>
+                {% endif %}
+                {% if aus_bew is not none %}
+                    <p>Bewertung d. Ausarbeitung: {{ aus_bew }} </p>
+                {% endif %}
+                {% if sem_leistung is not none %}
+                    <p>Gesamte Seminarleistung: {{ sem_leistung }}</p>
+                {% endif %}
+                <form action="{{ url_for('bewertungen.ansicht_statistik') }}" method="POST">
+                    <input type="hidden" name="s_id" value="{{ user_info.get('user_id') }}">
+                    <button type="submit" class="link submit">Detailansicht</button>
+                </form>
+            </div>
+        {% endif %}
 
     <!--Nicht Angemeldet-->
     {% elif 'user_id' not in session %}
@@ -175,6 +194,27 @@
                 {% if user_info.get('titel') is not none %}
                     <p>Seminarthema: {{ user_info.get('titel') }}</p>
                 {% endif %}
+
+                <!--Zunächst wird geschaut, ob der folgende Block benötigt wird,
+                also ob schon Bewertungen vorliegen. Danach wird jede Bewertung nochmal einzeln geprüft-->
+                {% if avg_vortrag_bew is not none or aus_bew is not none or sem_leistung is not none%}
+                    <div class="statistikContainer">
+                        {% if avg_vortrag_bew is not none %}
+                            <p>Durchschnittliche Vortragsbewertung: {{ avg_vortrag_bew }}</p>
+                        {% endif %}
+                        {% if aus_bew is not none %}
+                            <p>Bewertung d. Ausarbeitung: {{ aus_bew }} </p>
+                        {% endif %}
+                        {% if sem_leistung is not none %}
+                            <p>Gesamte Seminarleistung: {{ sem_leistung }}</p>
+                        {% endif %}
+                        <form action="{{ url_for('bewertungen.ansicht_statistik') }}" method="POST">
+                            <input type="hidden" name="s_id" value="{{ user_info.get('user_id') }}">
+                            <button type="submit" class="link submit">Detailansicht</button>
+                        </form>
+                    </div>
+                {% endif %}
+
                 <form action="{{ url_for('auth.edit_profile') }}" method="GET">
                     <button type="submit" class="link submit">Bearbeiten</button>
                 </form>

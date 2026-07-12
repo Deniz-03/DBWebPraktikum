@@ -332,7 +332,7 @@ def get_einfache_ausarbeitungsstatistik(s_id):
                 """
                 SELECT
                 ROUND(
-                (AVG(umfang) + AVG(referenzen) + AVG(sprachliche_gestaltung) + AVG(inhalt) + AVG(schweirigkeitsgrad)) 
+                (AVG(umfang) + AVG(referenzen) + AVG(sprachliche_gestaltung) + AVG(inhalt) + AVG(schwierigkeitsgrad)) 
                     / 5, 0
                 ) AS gesamtdurchschnitt
                 FROM bew_ausarbeitung ba

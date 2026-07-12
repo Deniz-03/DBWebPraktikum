@@ -176,6 +176,7 @@ def get_user_info(user_id):
 
             result = cur.fetchone()
             if result:
+                result['user_id'] = user_id
                 return result
             return None
 
