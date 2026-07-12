@@ -321,6 +321,37 @@ def get_ausarbeitung_statistiken(s_id):
 
             return result
 
+def get_einfache_ausarbeitungsstatistik(s_id):
+    """Gibt mittels Angabe einer s_id eine Dict aus.
+    Die Strings sind je nach Durchschnittswert entweder '--', '-', 'o', '+' oder '++'
+    :param s_id: s_id des Studierenden dessen Statistik gefragt ist
+    :return: Dict mit Keys: 'anzahl_bewertungen':int, 'gesamtdurchschnitt':str"""
+    with db.connect_to_db() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT
+                ROUND(
+                (AVG(umfang) + AVG(referenzen) + AVG(sprachliche_gestaltung) + AVG(inhalt) + AVG(schweirigkeitsgrad)) 
+                    / 5, 0
+                ) AS gesamtdurchschnitt
+                FROM bew_ausarbeitung ba
+                JOIN seminarthema st ON ba.t_id = st.themen_id
+                WHERE st.s_id = %s
+                """,
+                (s_id,)
+            )
+            row = cur.fetchone()
+            if row is None:
+                return {"gesamtdurchschnitt": None}
+
+            result = dict(row)
+
+            if result["gesamtdurchschnitt"] is not None:
+                result["gesamtdurchschnitt"] = SKALA_LABELS[int(result["gesamtdurchschnitt"])]
+
+            return result
+
 def create_seminarleistung(data):
     """
     Erstellt eine neue Seminarleistung mittels Angabe einer Dict. Anschließlich wird der Status des Seminarthemas
