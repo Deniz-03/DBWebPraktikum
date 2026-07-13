@@ -2,7 +2,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session
 from auth.queries import *
 from auth.utils import *
-from bewertungen.queries import *
+from bewertungen.utils import *
 
 auth_bp = Blueprint('auth', __name__, template_folder='templates')
 
@@ -118,15 +118,11 @@ def profile():
             user_info = get_user_info(user_id)
 
             if rolle == "stud":
-                avg_vortrag_bew = get_einfache_vortragsstatistik(user_id)
-                aus_bew = get_einfache_ausarbeitungsstatistik(user_id)
-                sem_leistung = get_seminarleistung(user_id)
+                avg_vortrag_bew = get_bew_vortrag_for_display(user_id)
                 return render_template("auth/profile.html",
                                         user_info=user_info,
                                         rolle=rolle,
-                                        avg_vortrag_bew=avg_vortrag_bew,
-                                        #aus_bew=aus_bew,
-                                        sem_leistung=sem_leistung)
+                                        avg_vortrag_bew=avg_vortrag_bew)
             else:
                 return render_template("auth/profile.html", user_info=user_info, rolle=rolle)
         else:
@@ -177,6 +173,48 @@ def edit_profile():
         else:
             flash('Session abgelaufen, oder nicht angemeldet!', 'error')
             return render_template("auth/profile.html")
+@auth_bp.route('/profiles', methods=['GET', 'POST'])
+def stud_profiles():
+    if request.method == 'GET':
+        if 'user_id' in session:  # angemeldet
+            user_id = int(session.get('user_id', '-1'))
+            rolle = get_user_role(user_id)
+
+            if rolle == 'doz':
+                stud_infos = get_all_stud()
+
+                return render_template('auth/stud_profiles.html', stud_infos=stud_infos, user_rolle=rolle)
+            else:
+                return redirect(url_for('auth.profile'))
+        else:
+            return redirect(url_for('auth.index'))
+    else:
+        if 'user_id' in session:  # angemeldet
+            user_id = int(session.get('user_id', '-1'))
+            rolle = get_user_role(user_id)
+            if rolle == 'doz':
+                data = request.form
+                s_id = int(data.get("s_id", '-1'))
+                if s_id > 0:
+                    user_info = get_user_info(s_id)
+                    avg_vortrag_bew = get_bew_vortrag_for_display(s_id)
+                    aus_bew = get_bew_ausarbeitung_for_display(s_id)
+                    sem_leistung = get_seminarleistung_for_display(s_id)
+                    return render_template('auth/profile.html',
+                                           view_mode=True,
+                                           user_info=user_info, #Das sind die Infos des ausgewählten Studis
+                                           avg_vortrag_bew = avg_vortrag_bew,
+                                           aus_bew =  aus_bew,
+                                           sem_leistung = sem_leistung,
+                                           rolle=rolle) #Hier handelt es sich um die Rolle des Dozenten
+                else:
+                    flash("Fehler bei der Auswahl, versuche es später erneut.", "error")
+                    return render_template("auth/stud_profiles.html")
+            else:
+                return redirect(url_for('auth.index'))
+        else:
+            redirect(url_for('auth.index'))
+
 
 @auth_bp.route('/update_user', methods=['GET', 'POST'])
 def update_user():

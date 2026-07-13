@@ -1,0 +1,29 @@
+<!--Auhtor Deniz Rahnefeld (409637)-->
+
+{% extends 'base.html' %}
+
+{% block title %}Profile{% endblock %}
+{% block header %}Profile{% endblock %}
+
+{% block content %}
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="{{ category }}Message">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <div>
+        <ul class="scrollList">
+            {% for stud in stud_infos %}
+                    <li>
+                            <form action="{{ url_for('auth.stud_profiles') }}", method="POST">
+                                <input type="hidden" name="s_id" value="{{ stud.get('s_id') }}">
+                                <button type="submit" class="link submit">Student:in: {{ stud.get('vorname') }} {{ stud.get('nachname') }}</button>
+                            </form>
+                    </li>
+            {% endfor %}
+        </ul>
+    </div>
+{% endblock %}

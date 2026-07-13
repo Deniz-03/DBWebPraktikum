@@ -217,4 +217,15 @@ def is_seminar_occupied(themen_id):
 
             return occupied
 
+#Namen und ID der Studierenden für die Übersichtsseite
+def get_all_stud():
+    with db.connect_to_db() as conn:
+        with conn.cursor() as cur:
+            cur.execute("SELECT s_id, vorname, nachname FROM studierende")
+            result = cur.fetchall()
+
+            if result:
+                return result
+            return None
+
 
