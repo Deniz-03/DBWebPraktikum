@@ -17,7 +17,7 @@
 
 .mainContainer {
     display: grid;
-    grid-template-columns: 150px 1fr;
+    grid-template-columns: 260px 1fr;
     gap: 10px;
 
     background-color: #ffffff;
@@ -103,8 +103,9 @@
                 0 1px 4px rgba(0, 0, 0, 0.02);
 
     min-height: 100px;
-    padding: 32px;
+    padding: 30px 15px;
     box-sizing: border-box;
+    justify-content: flex-start;
     align-items: center;
 }
 
@@ -198,14 +199,14 @@
 .sidebarLinks {
     display: inline-block;
 
-    width: 80px;
+    width: 200px;
     height: 45px;
     line-height: 45px;
     padding: 0 12px;
 
     text-align: center;
 
-    font-size: 15px;
+    font-size: 13px;
     font-weight: 600;
     text-decoration: none;
     letter-spacing: 0.5px;
@@ -245,6 +246,9 @@
     color: #2c3e50;
     font-size: 18px;
     font-weight: bold;
+}
+
+.center {
     text-align: center;
 }
 
@@ -489,4 +493,36 @@ input[type="radio"]:hover {
 .profilKopfMeta {
     color: #555;
     margin: 0;
+}
+
+/* Scrollbare Liste */
+.scrollList {
+    max-height: 250px; /*Dieser wert bestimmt, ab wann die Liste scrollable wird*/
+    overflow-y: auto; /*Der Balken rechts zum scrollen erscheint nur, wenn er benötigt wird*/
+    background-color: #faf8f5;
+    border: 1.5px solid rgba(56, 5, 163, 0.4);
+    border-radius: 4px;
+
+    padding: 12px 15px;
+    margin: 10px 0;
+    box-sizing: border-box;
+    list-style: none;
+    list-style-position: inside;
+}
+
+.scrollList li {
+    color: #4a3e3d;
+    padding: 6px 0;
+    font-size: 15px;
+    border-bottom: 1px solid rgba(211, 203, 210, 0.3);
+}
+
+.scrollList li:last-child {
+    border-bottom: none;
+}
+
+.studContainer {
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }

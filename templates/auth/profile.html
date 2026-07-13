@@ -9,7 +9,7 @@
 {% endif %}
 
 {% block title %}Profil{% endblock %}
-{% block header %}Profil{% endblock %}
+{% block header %}Profilansicht{% endblock %}
 
 
 {% block content %}
@@ -24,37 +24,41 @@
 
     <!--Dieser Abschnitt ist hauptsächlich für den Dozenten gedacht, der sich Profile ansehen will-->
     {% if view_mode %}
-        <p class="textBold"> Details: </p>
-        <p>Vorname: {{ user_info.get('vorname', 'Max') }}</p>
-        <p>Nachname: {{ user_info.get('nachname', 'Mustermann') }}</p>
-        <p>Rolle: Student</p>
-        <p>Matrikelnummer: {{ user_info.get('matr_nr', '123456') }}</p>
-        <p>Studiengang: {{ user_info.get('studiengang_name', 'AI') }}</p>
-        <p>Angestrebter Abschluss: {{ user_info.get('abschluss', 'B.Sc') }}</p>
-        <p>Belegtes Seminar: {{ user_info.get('bel_seminar', 'IIS') }}</p>
-        {% if user_info.get('titel') is not none %}
-            <p>Seminarthema: {{ user_info.get('titel') }}</p>
-        {% endif %}
+        <div>
+            <p class="textBold"> Details: </p>
+            <p>Vorname: {{ user_info.get('vorname', 'Max') }}</p>
+            <p>Nachname: {{ user_info.get('nachname', 'Mustermann') }}</p>
+            <p>Rolle: Student</p>
+            <p>Matrikelnummer: {{ user_info.get('matr_nr', '123456') }}</p>
+            <p>Studiengang: {{ user_info.get('studiengang_name', 'AI') }}</p>
+            <p>Angestrebter Abschluss: {{ user_info.get('abschluss', 'B.Sc') }}</p>
+            <p>Belegtes Seminar: {{ user_info.get('bel_seminar', 'IIS') }}</p>
+            {% if user_info.get('titel') is not none %}
+                <p>Seminarthema: {{ user_info.get('titel') }}</p>
+            {% endif %}
 
-        <!--Zunächst wird geschaut, ob der folgende Block benötigt wird,
-        also ob schon Bewertungen vorliegen. Danach wird jede Bewertung nochmal einzeln geprüft-->
-        {% if avg_vortrag_bew is not none or aus_bew is not none or sem_leistung is not none%}
-            <div class="statistikContainer">
-                {% if avg_vortrag_bew is not none %}
-                    <p>Durchschnittliche Vortragsbewertung: {{ avg_vortrag_bew }}</p>
-                {% endif %}
-                {% if aus_bew is not none %}
-                    <p>Bewertung d. Ausarbeitung: {{ aus_bew }} </p>
-                {% endif %}
-                {% if sem_leistung is not none %}
-                    <p>Gesamte Seminarleistung: {{ sem_leistung }}</p>
-                {% endif %}
-                <form action="{{ url_for('bewertungen.ansicht_statistik') }}" method="POST">
-                    <input type="hidden" name="s_id" value="{{ user_info.get('user_id') }}">
-                    <button type="submit" class="link submit">Detailansicht</button>
-                </form>
-            </div>
-        {% endif %}
+
+            <!--Zunächst wird geschaut, ob der folgende Block benötigt wird,
+            also ob schon Bewertungen vorliegen. Danach wird jede Bewertung nochmal einzeln geprüft-->
+            {% if avg_vortrag_bew is not none or aus_bew is not none or sem_leistung is not none %}
+                <div class="statistikContainer">
+                    {% if avg_vortrag_bew is not none %}
+                        <p>Durchschnittliche Vortragsbewertung: {{ avg_vortrag_bew }}</p>
+                    {% endif %}
+                    {% if aus_bew is not none %}
+                        <p>Bewertung d. Ausarbeitung: {{ aus_bew }} </p>
+                    {% endif %}
+                    {% if sem_leistung is not none %}
+                        <p>Gesamte Seminarleistung: {{ sem_leistung }}</p>
+                    {% endif %}
+                    <form action="{{ url_for('bewertungen.ansicht_statistik') }}" method="POST">
+                        <input type="hidden" name="s_id" value="{{ user_info.get('user_id') }}">
+                        <button type="submit" class="link submit">Detailansicht</button>
+                    </form>
+                </div>
+            {% endif %}
+        </div>
+
 
     <!--Nicht Angemeldet-->
     {% elif 'user_id' not in session %}
@@ -72,7 +76,6 @@
         <button type="submit" class="link submit">Anmelden</button>
         </form>
     {% elif user_rolle == 'stud' %}
-
 
         <!--Bearbeitung erlaubt-->
         {% if edit_mode == True %}
@@ -182,43 +185,45 @@
 
         <!--Nur Inhalte-->
         {% else %}
-            <div>
-                <p class="textBold"> Details: </p>
-                <p>Vorname: {{ user_info.get('vorname', 'Max') }}</p>
-                <p>Nachname: {{ user_info.get('nachname', 'Mustermann') }}</p>
-                <p>Rolle: Student</p>
-                <p>Matrikelnummer: {{ user_info.get('matr_nr', '123456') }}</p>
-                <p>Studiengang: {{ user_info.get('studiengang_name', 'AI') }}</p>
-                <p>Angestrebter Abschluss: {{ user_info.get('abschluss', 'B.Sc') }}</p>
-                <p>Belegtes Seminar: {{ user_info.get('bel_seminar', 'IIS') }}</p>
-                {% if user_info.get('titel') is not none %}
-                    <p>Seminarthema: {{ user_info.get('titel') }}</p>
-                {% endif %}
 
-                <!--Zunächst wird geschaut, ob der folgende Block benötigt wird,
-                also ob schon Bewertungen vorliegen. Danach wird jede Bewertung nochmal einzeln geprüft-->
-                {% if avg_vortrag_bew is not none or aus_bew is not none or sem_leistung is not none%}
-                    <div class="statistikContainer">
-                        {% if avg_vortrag_bew is not none %}
-                            <p>Durchschnittliche Vortragsbewertung: {{ avg_vortrag_bew }}</p>
+            <div class="formColumns">
+
+                    <!-- erste Spalte-->
+                    <div class="formCol">
+                        <p class="textBold"> Details: </p>
+                        <p>Vorname: {{ user_info.get('vorname', 'Max') }}</p>
+                        <p>Nachname: {{ user_info.get('nachname', 'Mustermann') }}</p>
+                        <p>Rolle: Student</p>
+                        <p>Matrikelnummer: {{ user_info.get('matr_nr', '123456') }}</p>
+                        <p>Studiengang: {{ user_info.get('studiengang_name', 'AI') }}</p>
+                        <p>Angestrebter Abschluss: {{ user_info.get('abschluss', 'B.Sc') }}</p>
+                        <p>Belegtes Seminar: {{ user_info.get('bel_seminar', 'IIS') }}</p>
+                        {% if user_info.get('titel') is not none %}
+                            <p>Seminarthema: {{ user_info.get('titel') }}</p>
                         {% endif %}
-                        {% if aus_bew is not none %}
-                            <p>Bewertung d. Ausarbeitung: {{ aus_bew }} </p>
-                        {% endif %}
-                        {% if sem_leistung is not none %}
-                            <p>Gesamte Seminarleistung: {{ sem_leistung }}</p>
-                        {% endif %}
-                        <form action="{{ url_for('bewertungen.ansicht_statistik') }}" method="POST">
-                            <input type="hidden" name="s_id" value="{{ user_info.get('user_id') }}">
-                            <button type="submit" class="link submit">Detailansicht</button>
+
+                        <form action="{{ url_for('auth.edit_profile') }}" method="GET">
+                            <button type="submit" class="link submit">Bearbeiten</button>
                         </form>
                     </div>
-                {% endif %}
 
-                <form action="{{ url_for('auth.edit_profile') }}" method="GET">
-                    <button type="submit" class="link submit">Bearbeiten</button>
-                </form>
-            </div>
+                    <!--Zweite Spalte-->
+                    <div class="formCol">
+                        <!--Es wird geschaut, ob bereits Bewertungen vorliegen, bevor der Block angezeigt wird.-->
+                        {% if avg_vortrag_bew is not none %}
+                            <div class="statistikContainer">
+                                <p>Durchschnittliche Vortragsbewertung: {{ avg_vortrag_bew }}</p>
+                            </div>
+                            <form action="{{ url_for('bewertungen.ansicht_statistik') }}" method="POST">
+                                    <input type="hidden" name="s_id" value="{{ user_info.get('user_id') }}">
+                                    <button type="submit" class="link submit">Detailansicht</button>
+                            </form>
+                        {% endif %}
+
+
+                    </div>
+
+                </div>
         {% endif %}
 
 
