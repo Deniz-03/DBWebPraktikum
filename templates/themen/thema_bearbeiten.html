@@ -18,6 +18,15 @@
         <div class="errorMessage">{{ fehler }}</div>
     {% endif %}
 
+    <!-- Separates Formular für den Sprung zum Studierenden-Profil.
+     Muss AUSSERHALB des Bearbeiten-Formulars stehen, weil verschachtelte
+     <form>-Elemente ungültiges HTML sind (der Browser würde das innere verwerfen).-->
+    {% if student %}
+        <form id="profil_form" action="{{ url_for('auth.stud_profiles') }}" method="POST">
+            <input type="hidden" name="s_id" value="{{ student.s_id }}">
+        </form>
+    {% endif %}
+
     <!-- Alle Felder werden mit bereits gesetzten Attributen geladen -->
     <form method="POST" enctype="multipart/form-data">
 
@@ -79,9 +88,12 @@
                             <input type="text" id="student" name="student" value="{{ student.matr_nr }}"
                                    pattern="\d{6,8}" inputmode="numeric">
                         </div>
-                        <a href="{{ url_for('themen.profile', student_id=student.s_id) }}" class="link">
+                        <!-- Button steht optisch im Bearbeiten-Formular, gehört per form="profil_form"
+                             aber zum obigen Profil-Formular. So wird beim Klick die s_id an auth.stud_profiles
+                             geschickt (Profil öffnen) und NICHT das Thema gespeichert. -->
+                        <button type="submit" form="profil_form" class="link">
                             {{ student.vorname }} {{ student.nachname }}
-                        </a>
+                        </button>
                     {% else %}
                         <input type="text" id="student" value="Kein Student eingetragen" readonly>
                     {% endif %}
@@ -89,11 +101,14 @@
 
                 <div class="inpt">
                     <label for="vorgetragen">Vorgetragen</label>
-                    {% if student %}
+                    {% if student and status == 'Vergeben' %}
                         <select id="vorgetragen" name="vorgetragen">
                             <option value="True" {% if vorgetragen %}selected{% endif %}>vorgetragen</option>
                             <option value="False" {% if not vorgetragen %}selected{% endif %}>nicht vorgetragen</option>
                         </select>
+                    {% elif student and status == 'Abgeschlossen' %}
+                        <input type="text" id="vorgetragen"
+                               value ='{% if vorgetragen %}vorgetragen{% else %}nicht vorgetragen{% endif %}' readonly>
                     {% else %}
                         <input type="text" id="vorgetragen" value="nicht vorgetragen" readonly>
                     {% endif %}

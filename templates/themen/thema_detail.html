@@ -72,9 +72,10 @@
             <div class="inpt">
                 <label>Eingetragener Student</label>
                 {% if rolle == 'doz' and student %}
-                    <a href="{{ url_for('themen.profile', student_id=student.s_id) }}" class="link">
-                        {{ student.vorname }} {{ student.nachname }}
-                    </a>
+                    <form action="{{ url_for('auth.stud_profiles') }}" method="POST" style="display:inline">
+                        <input type="hidden" name="s_id" value="{{ student.s_id }}">
+                        <button type="submit" class="link">{{ student.vorname }} {{ student.nachname }}</button>
+                    </form>
                 {% elif rolle == "stud" and student %}
                     <div class="displayValue">{{ student.vorname }} {{ student.nachname }}</div>
                 {% else %}
@@ -130,7 +131,7 @@
             {% endif %}
         {% endif %}
 
-        {% if thema.vorgetragen and user_id != thema.s_id %}
+        {% if thema.vorgetragen and user_id != thema.s_id and thema.status == 'Vergeben' %}
             <a href="{{ url_for('bewertungen.vortrag_bewerten') }}" class="link">
                 Vortrag bewerten
             </a>

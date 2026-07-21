@@ -2,7 +2,6 @@
 
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 
-from auth.queries import get_user_info
 from themen.queries import (get_dozierenden, thema_anlegen, thema_bearbeiten, get_seminarthema, get_student_by_id,
                             get_dozent_by_id, student_hinzufuegen, get_seminarthemen_by_filter, get_semester,
                             get_status_optionen, get_student_by_matr_nr)
@@ -138,10 +137,16 @@ def themen_bearbeiten(themen_id):
         # Aus dem Thema lesen nicht aus dem Formular
         # Damit kein manipluierter Status ankommen kann
         status = thema_daten['status']
-        # Da False als String übergeben wird wäre bool('False') == True immer True
-        vorgetragen = data.get('vorgetragen') == 'True'
         # formatiere eine matr_nr ohne leerzeichen und Zeilenumbrüche
         matr_nr = data.get('student', '').strip()
+
+        # Vorgetragen Serverseitig absichern
+        if status == 'Vergeben':
+            vorgetragen = data.get('vorgetragen') == 'True'
+        elif status == 'Abgeschlossen':
+            vorgetragen = thema_daten['vorgetragen']
+        else:
+            vorgetragen = False
 
         if student:
             alte_matr_nr = student['matr_nr']
@@ -237,26 +242,6 @@ def themen_bearbeiten(themen_id):
                          vorgetragen=vorgetragen)
 
         return redirect(url_for('themen.thema_detail', themen_id=themen_id))
-
-# Route um die User Seite mittels der ID zu Laden
-@themen_bp.route('/themen/profile/<int:student_id>', methods=['GET'])
-def profile(student_id):
-    user_id, rolle = hole_user_und_rolle()
-    if not user_id:
-        return redirect(url_for('auth.index'))
-
-    # Nur Dozenten dürfen laut Anf 2 die Profile der Studenten sehen
-    if not pruefe_dozent(user_id, rolle):
-        flash('Nur Dozenten haben Zugriff auf das Profil', 'error')
-        return redirect(url_for('themen.themen_uebersicht'))
-
-    student = get_student_by_id(student_id)
-    if not student:
-        flash('Profil nicht gefunden', 'error')
-        return redirect(url_for('themen.themen_uebersicht'))
-
-    user_info = get_user_info(student_id)
-    return render_template('auth/profile.html', view_mode=True, user_info=user_info)
 
 # Route um die Themen Übersicht mit allen Anforderungen aus Anf 7 zu Laden
 @themen_bp.route('/themen/uebersicht', methods=['GET'])
