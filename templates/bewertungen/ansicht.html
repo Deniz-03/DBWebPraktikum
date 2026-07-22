@@ -11,6 +11,7 @@
 
 {% block content %}
 
+<!--Persönliche Daten des Students-->
 {% if user_info %}
 <div class="profilKopf">
     <h2>{{ user_info.get('vorname', '') }} {{ user_info.get('nachname', '') }}</h2>
@@ -25,10 +26,11 @@
 </div>
 {% endif %}
 
+<!--Statistik für Vortragsbewertungen wurde an render_template weitergegeben-->
 {% if v_statistik is defined %}
     <div class="statistikContainer column" xmlns="http://www.w3.org/1999/html">
         <h3 class="statistikTitel">Bewertungen Vorträge:</h3>
-
+            <!--Es ist mind. eine Bewertung vorhanden-->
             {% if v_statistik.anzahl_bewertungen %}
             <table class="statistikTabelle">
                 <tr class="statistikAnzahlZeile"><td class="statistikTabelle">Anzahl Bewertungen:</td>
@@ -52,18 +54,21 @@
                 <tr><td class="statistikTabelle">Beteiligung an Diskussionen:</td>
                     <td class="statistikWert">{{ v_statistik.get('beteiligung', '') }}</td></tr>
             </table>
+            <!--Keine Vortragsbewertungen vorhanden-->
             {% else %}
             <p>Noch keine Vortragsbewertungen vorhanden.</p>
             {% endif %}
     </div>
+<!--Statistik für Vortragsbewertungen wurde nicht an render_template weitergegeben-->
 {% else %}
     <p>Noch keine bewerteten Vorträge</p>
 {% endif %}
 
+<!--Statistik für Ausarbeitungsbewertung wurde an render_template weitergegeben (nur bei Ansicht von Dozenten)-->
 {% if a_statistik is defined %}
     <div class="statistikContainer column ausarbeitungContainer">
         <h3 class="statistikTitel">Bewertung Ausarbeitung:</h3>
-
+        <!--Es gibt eine Bewertung der Ausarbeitung-->
         {% if a_statistik.titel %}
         <table class="statistikTabelle">
             <tr class="statistikAnzahlZeile">
@@ -81,18 +86,22 @@
             <tr><td class="statistikLabel">Schwierigkeitsgrad</td>
                 <td class="statistikWert">{{ a_statistik.get('schwierigkeitsgrad', '') }}</td></tr>
         </table>
+        <!--Es gibt ein Kommentar zur Ausarbeitungsbewertung-->
         {% if a_statistik.get('kommentar') %}
         <p class="kommentarText"><strong>Kommentar:</strong> {{ a_statistik.get('kommentar', '') }}</p>
         {% endif %}
+        <!--Keine Bewertung der Ausarbeitung vorhanden-->
         {% else %}
         <p>Noch keine Bewertung der Ausarbeitung vorhanden.</p>
         {% endif %}
     </div>
 {% endif %}
 
+<!--Statistik für Seminarleistung wurde an render_template weitergegeben (nur bei Ansicht von Dozenten)-->
 {% if l_statistik is defined %}
     <div class="statistikContainer column ausarbeitungContainer">
     <h3 class="statistikTitel">Bewertung Seminarleistung:</h3>
+        <!--Es gibt eine Bewertung der Seminarleistung-->
         {% if l_statistik.note %}
         <table class="statistikTabelle">
             <tr class="statistikAnzahlZeile">
@@ -100,6 +109,7 @@
                 <td class="statistikWert">{{ l_statistik.get('note', '') }}</td>
             </tr>
         </table>
+        <!--Keine Bewertung der Seminarleistung vorhanden-->
         {% else %}
         <p>Noch keine Bewertung der Seminarleistung vorhanden.</p>
         {% endif %}
