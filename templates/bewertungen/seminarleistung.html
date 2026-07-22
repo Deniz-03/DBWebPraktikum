@@ -11,21 +11,20 @@
 
 {% block content %}
 
-{% with messages = get_flashed_messages() %}
-  {% if messages %}
-    <ul class="flashMessages">
-      {% for message in messages %}
-        <li>{{ message }}</li>
-      {% endfor %}
-    </ul>
-  {% endif %}
-{% endwith %}
-
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="{{ category }}Message">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+<!--Keine bewertbaren Seminarthemen vorhanden-->
 {% if not seminarthemen %}
     <p>Aktuell stehen keine Seminarleistungen zur Bewertung zur Verfügung.</p>
+<!--Es gibt mind. ein bewertbares Seminarthema-->
 {% else %}
 <form method="POST" action="{{ url_for('bewertungen.seminarleistung_bewerten') }}" class="column bewertungForm">
-
+    <!--Auswahl des Seminarthemas: alle bewertbaren Seminarthemen werden in einer Dropdownliste angezeigt-->
     <div class="vortragAuswahlDiv column">
         <label for="t_id">Seminarthema auswählen</label>
         <select name="t_id" id="t_id" required>
@@ -35,7 +34,7 @@
             {% endfor %}
         </select>
     </div>
-
+    <!--Auswahl der Note-->
     <div class="vortragAuswahlDiv column">
         <label for="note">Note</label>
         <select name="note" id="note" required>

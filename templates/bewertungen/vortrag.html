@@ -11,21 +11,20 @@
 
 {% block content %}
 
-{% with messages = get_flashed_messages() %}
-  {% if messages %}
-    <ul class="flashMessages">
-      {% for message in messages %}
-        <li>{{ message }}</li>
-      {% endfor %}
-    </ul>
-  {% endif %}
-{% endwith %}
-
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="{{ category }}Message">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+<!--Kein bewertbarer Vortrag vorhanden-->
 {% if not vortraege %}
     <p>Aktuell stehen keine bewertbaren Vorträge zur Verfügung.</p>
+<!--Es gibt mind. einen bewertbaren Vortrag-->
 {% else %}
 <form method="POST" action="{{ url_for('bewertungen.vortrag_bewerten') }}" class="column bewertungForm">
-
+    <!--Auswahl des Vortrags-->
     <div class="vortragAuswahlDiv column">
         <label for="t_id">Vortrag auswählen</label>
         <select name="t_id" id="t_id" required>
@@ -35,16 +34,16 @@
             {% endfor %}
         </select>
     </div>
-
+    <!--Formularabschnitt-->
     <div class="bewertungsTabelle">
-
+    <!--Eingabefelder-->
     <div class="bewertungsZeile">
         <span class="bewertungLabel"></span>
         {% for wert, symbol in skala.items() %}
         <span class="skalaHeaderSymbol">{{ symbol }}</span>
         {% endfor %}
     </div>
-
+    <!--Bewertungskategorien-->
     {% for feld, label in kriterien %}
     <div class="bewertungsZeile">
         <span class="bewertungLabel">{{ label }}</span>
@@ -57,7 +56,7 @@
     {% endfor %}
 
 </div>
-
+    <!--Textfeld für Kommentar-->
     <div class="kommentarDiv column">
         <label for="kommentar">Kommentar (optional)</label>
         <textarea name="kommentar" id="kommentar" rows="4"></textarea>
