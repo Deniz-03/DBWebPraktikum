@@ -71,7 +71,7 @@ def vortrag_bewerten():
 
             erfolg = create_bew_vortrag(data)
             if erfolg: #Nutzer bekommen eine Bestätigung der erfolgreichen Speicherung der Bewertung
-                flash('Bewertung erfolgreich gespeichert.')
+                flash('Bewertung erfolgreich gespeichert.', 'success')
                 return redirect(url_for('themen.themen_uebersicht'))
             else:
                 flash('Bewertung konnte nicht gespeichert werden (evtl. hast du bereits bewertet).')
@@ -168,7 +168,7 @@ def ausarbeitung_bewerten():
 
             erfolg = create_bew_ausarbeitung(data)
             if erfolg: #Dem Dozenten wird bestätigt, dass die Bewertung erfolgreich gespeichert wurde
-                flash('Bewertung erfolgreich gespeichert.')
+                flash('Bewertung erfolgreich gespeichert.', 'success')
                 return redirect(url_for('themen.themen_uebersicht'))
             else:
                 flash('Bewertung konnte nicht gespeichert werden (evtl. hast du bereits bewertet).')
@@ -231,7 +231,7 @@ def seminarleistung_bewerten():
                 erfolg = create_seminarleistung(data)
 
                 if erfolg: #Dem Dozenten wird bestätigt, dass die Note erfolgreich gespeichert wurde
-                    flash('Seminarleistung erfolgreich bewertet.')
+                    flash('Seminarleistung erfolgreich bewertet.', 'success')
                     return redirect(url_for('themen.themen_uebersicht'))
                 else:
                     flash('Seminarleistung konnte nicht gespeichert werden.')
