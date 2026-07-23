@@ -29,7 +29,7 @@ def vortrag_bewerten():
             rolle = get_user_role(int(session.get('user_id', '-1')))
             return render_template('bewertungen/vortrag.html',
                 vortraege=vortraege, kriterien=VORTRAGSKRITERIEN, skala=SKALA_LABELS, rolle=rolle)
-        flash('Bitte zuerst einloggen.')
+        flash('Bitte zuerst einloggen.', 'error')
         return redirect(url_for('auth.login'))
 
     else:
@@ -40,18 +40,18 @@ def vortrag_bewerten():
             # Prüft ob ein Vortrag im Formular gewählt wurde
             t_id_raw = form.get('t_id')
             if not t_id_raw or not t_id_raw.isdigit():
-                flash('Bitte einen Vortrag auswählen.')
+                flash('Bitte einen Vortrag auswählen.', 'error')
                 return redirect(url_for('bewertungen.vortrag_bewerten'))
             t_id = int(t_id_raw)
 
             # Prüft ob der Vortrag vom angemeldeten Nutzer bewertbar ist
             if not ist_vortrag_bewertbar(t_id, int(session.get('user_id', '-1'))):
-                flash('Dieser Vortrag steht aktuell nicht zur Bewertung.')
+                flash('Dieser Vortrag steht aktuell nicht zur Bewertung.', 'error')
                 return redirect(url_for('bewertungen.vortrag_bewerten'))
 
             #Prüft ob der angemeldete Nutzer versucht seinen eigenen Vortrag zu bewerten
             if ist_eigener_vortrag(t_id, int(session.get('user_id', '-1'))):
-                flash('Du kannst deinen eigenen Vortrag nicht bewerten.')
+                flash('Du kannst deinen eigenen Vortrag nicht bewerten.', 'error')
                 return redirect(url_for('bewertungen.vortrag_bewerten'))
 
             data = {'t_id': t_id, 'bewertender_id': int(session.get('user_id', '-1'))}
@@ -60,10 +60,10 @@ def vortrag_bewerten():
             for feld, label in VORTRAGSKRITERIEN:
                 wert = form.get(feld, type=int)
                 if wert not in (1, 2, 3, 4, 5):
-                    flash(f'Bitte "{label}" bewerten.')
+                    flash(f'Bitte "{label}" bewerten.', 'error')
                     vortraege = get_bewertbare_vortraege(exclude_account_id=int(session.get('user_id', '-1')))
                     return render_template('bewertungen/vortrag.html',
-                        ortraege=vortraege, kriterien=VORTRAGSKRITERIEN, skala=SKALA_LABELS, rolle=rolle)
+                        vortraege=vortraege, kriterien=VORTRAGSKRITERIEN, skala=SKALA_LABELS, rolle=rolle)
                 data[feld] = int(wert)
 
             kommentar = form.get('kommentar', '').strip() #Extra Leerzeichen werden entfernt vor der Speicherung
@@ -74,11 +74,11 @@ def vortrag_bewerten():
                 flash('Bewertung erfolgreich gespeichert.', 'success')
                 return redirect(url_for('themen.themen_uebersicht'))
             else:
-                flash('Bewertung konnte nicht gespeichert werden (evtl. hast du bereits bewertet).')
+                flash('Bewertung konnte nicht gespeichert werden (evtl. hast du bereits bewertet).', 'error')
                 vortraege = get_bewertbare_vortraege(exclude_account_id=int(session.get('user_id', '-1')))
                 return render_template('bewertungen/vortrag.html',
                     vortraege=vortraege, kriterien=VORTRAGSKRITERIEN, skala=SKALA_LABELS, rolle=rolle)
-        flash('Bitte zuerst einloggen.')
+        flash('Bitte zuerst einloggen.', 'error')
         return redirect(url_for('auth.login'))
 
 
@@ -101,15 +101,15 @@ def ansicht_statistik():
                     return render_template('bewertungen/ansicht.html',
                         user_info=user_info, v_statistik=v_statistik, a_statistik=a_statistik, l_statistik=l_statistik,
                         rolle=rolle)
-                except ValueError:
-                    flash('Das Konto existiert nicht.')
+                except (ValueError, psycopg.Error):
+                    flash('Das Konto existiert nicht.', 'error')
                     return redirect(url_for('themen.themen_uebersicht'))
             #Studierende sehen immer nur ihre eigenen Statistiken
             user_info = get_user_info(int(session.get('user_id', '-1')))
             v_statistik = get_vortragsstatistiken(int(session.get('user_id', '-1')))
             return render_template('bewertungen/ansicht.html',
                 user_info=user_info, v_statistik=v_statistik, rolle=rolle)
-        flash('Bitte zuerst einloggen.')
+        flash('Bitte zuerst einloggen.', 'error')
         return redirect(url_for('auth.login'))
 
 
@@ -132,7 +132,7 @@ def ausarbeitung_bewerten():
             ausarbeitungen = get_bewertbare_ausarbeitungen(int(session.get('user_id', '-1')))
             return render_template("bewertungen/ausarbeitung.html",
                 ausarbeitungen=ausarbeitungen, kriterien=AUSARBEITUNGSKRITERIEN, skala=SKALA_LABELS, rolle=rolle)
-        flash('Bitte zuerst einloggen.')
+        flash('Bitte zuerst einloggen.', 'error')
         return redirect(url_for('auth.login'))
     else:
         if 'user_id' in session: #Unangemeldete User werden auf die Loginseite zurückgeleitet
@@ -143,13 +143,13 @@ def ausarbeitung_bewerten():
             # Prüft ob eine Ausarbeitung im Formular gewählt wurde
             t_id_raw = form.get('t_id')
             if not t_id_raw or not t_id_raw.isdigit():
-                flash('Bitte eine Ausarbeitung auswählen.')
+                flash('Bitte eine Ausarbeitung auswählen.', 'error')
                 return redirect(url_for('bewertungen.ausarbeitung_bewerten'))
             t_id = int(t_id_raw)
 
             #Prüft ob die Ausarbeitung vom Dozenten bereits bewertet wurde
             if not ist_ausarbeitung_bewertbar(t_id):
-                flash('Diese Ausarbeitung steht aktuell nicht zur Bewertung.')
+                flash('Diese Ausarbeitung steht aktuell nicht zur Bewertung.', 'error')
                 return redirect(url_for('bewertungen.ausarbeitung_bewerten'))
 
             data = {'t_id': t_id, 'bewertender_id': int(session.get('user_id', '-1'))}
@@ -158,9 +158,10 @@ def ausarbeitung_bewerten():
             for feld, label in AUSARBEITUNGSKRITERIEN:
                 wert = form.get(feld, type=int)
                 if wert not in (1, 2, 3, 4, 5):
-                    flash(f'Bitte "{label}" bewerten.')
-                    return render_template('bewertungen/vortrag.html',
-                        ausarbeitungen=ausarbeitungen, kriterien=VORTRAGSKRITERIEN, skala=SKALA_LABELS, rolle=rolle)
+                    flash(f'Bitte "{label}" bewerten.', 'error')
+                    ausarbeitungen = get_bewertbare_ausarbeitungen(int(session.get('user_id', '-1')))
+                    return render_template('bewertungen/ausarbeitung.html',
+                        ausarbeitungen=ausarbeitungen, kriterien=AUSARBEITUNGSKRITERIEN, skala=SKALA_LABELS, rolle=rolle)
                 data[feld] = int(wert)
 
             kommentar = form.get('kommentar', '').strip()
@@ -171,11 +172,11 @@ def ausarbeitung_bewerten():
                 flash('Bewertung erfolgreich gespeichert.', 'success')
                 return redirect(url_for('themen.themen_uebersicht'))
             else:
-                flash('Bewertung konnte nicht gespeichert werden (evtl. hast du bereits bewertet).')
+                flash('Bewertung konnte nicht gespeichert werden (evtl. hast du bereits bewertet).', 'error')
                 ausarbeitungen = get_bewertbare_ausarbeitungen(int(session.get('user_id', '-1')))
-                return render_template('bewertungen/vortrag.html',
-                    ausarbeitungen=ausarbeitungen, kriterien=VORTRAGSKRITERIEN, skala=SKALA_LABELS, rolle=rolle)
-        flash('Bitte zuerst einloggen.')
+                return render_template('bewertungen/ausarbeitung.html',
+                    ausarbeitungen=ausarbeitungen, kriterien=AUSARBEITUNGSKRITERIEN, skala=SKALA_LABELS, rolle=rolle)
+        flash('Bitte zuerst einloggen.', 'error')
         return redirect(url_for('auth.login'))
 
 
@@ -191,9 +192,9 @@ def seminarleistung_bewerten():
                 seminarthemen = get_bewertbare_seminarleistungen(user_id)
                 return render_template('bewertungen/seminarleistung.html',
                     seminarthemen=seminarthemen, noten=ZULAESSIGE_NOTEN, rolle=rolle)
-            flash('Nur Dozenten können die Seminarleistung bewerten.')
+            flash('Nur Dozenten können die Seminarleistung bewerten.', 'error')
             return redirect(url_for('themen.themen_uebersicht'))
-        flash('Bitte zuerst einloggen.')
+        flash('Bitte zuerst einloggen.', 'error')
         return redirect(url_for('auth.login'))
 
     else:
@@ -205,7 +206,7 @@ def seminarleistung_bewerten():
 
                 t_id_raw = form.get('t_id')
                 if not t_id_raw or not t_id_raw.isdigit():
-                    flash('Bitte ein Seminarthema auswählen.')
+                    flash('Bitte ein Seminarthema auswählen.', 'error')
                     return redirect(url_for('bewertungen.seminarleistung_bewerten'))
                 t_id = int(t_id_raw)
 
@@ -216,7 +217,7 @@ def seminarleistung_bewerten():
                     note = None
 
                 if note is None or note not in ZULAESSIGE_NOTEN:
-                    flash('Bitte eine gültige Note auswählen.')
+                    flash('Bitte eine gültige Note auswählen.', 'error')
                     seminarthemen = get_bewertbare_seminarleistungen(user_id)
                     return render_template('bewertungen/seminarleistung.html',
                         seminarthemen=seminarthemen, noten=ZULAESSIGE_NOTEN, rolle=rolle)
@@ -224,7 +225,7 @@ def seminarleistung_bewerten():
                 #Sicherstellen, dass t_id tatsächlich noch serverseitig zulässig ist (auf mehreren Geräten eingeloggt...)
                 zulaessige_ids = [s['t_id'] for s in get_bewertbare_seminarleistungen(user_id)]
                 if t_id not in zulaessige_ids:
-                    flash('Dieses Seminarthema steht aktuell nicht zur Bewertung.')
+                    flash('Dieses Seminarthema steht aktuell nicht zur Bewertung.', 'error')
                     return redirect(url_for('bewertungen.seminarleistung_bewerten'))
 
                 data = {'t_id': t_id, 'note': note}
@@ -234,10 +235,10 @@ def seminarleistung_bewerten():
                     flash('Seminarleistung erfolgreich bewertet.', 'success')
                     return redirect(url_for('themen.themen_uebersicht'))
                 else:
-                    flash('Seminarleistung konnte nicht gespeichert werden.')
+                    flash('Seminarleistung konnte nicht gespeichert werden.', 'error')
 
                 return redirect(url_for('bewertungen.seminarleistung_bewerten'))
-            flash('Nur Dozenten können die Seminarleistung bewerten.')
+            flash('Nur Dozenten können die Seminarleistung bewerten.', 'error')
             return redirect(url_for('themen.themen_uebersicht'))
-        flash('Bitte zuerst einloggen.')
+        flash('Bitte zuerst einloggen.', 'error')
         return redirect(url_for('auth.login'))
