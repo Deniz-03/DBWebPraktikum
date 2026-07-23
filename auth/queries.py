@@ -1,6 +1,7 @@
 #Author Deniz Rahnefeld (409637)
 import db
 from auth.utils import hash_passwort
+from themen.queries import set_free
 
 #Hier wird geguckt, ob ein Account bereits existiert.
 def check_account(data) -> bool:
@@ -75,6 +76,10 @@ def update_user_acc(data, user_id, with_password = False):
 
             themen_id = data.get("seminar_thema", '').strip()
             if themen_id:
+                old_id = get_seminarthema_by_stud(user_id)
+                if old_id:
+                    set_free(old_id)
+
                 cur.execute("UPDATE seminarthema SET s_id = %s, status = 'Vergeben' "
                             "WHERE themen_id = %s ",
                             (user_id,
@@ -228,4 +233,14 @@ def get_all_stud():
                 return result
             return []
 
+#Diese Query gibt das aktuell belegte Seminarthema(id) eines Studenten zurueck.
+# Falls keins belegt ist wird None zurueckgegeben.
+def get_seminarthema_by_stud(user_id) -> int:
+    with db.connect_to_db() as conn:
+        with conn.cursor() as cur:
+            cur.execute("SELECT themen_id FROM seminarthema WHERE s_id = %s", (user_id,))
+            result = cur.fetchone()
+            if result:
+                return int(result.get("themen_id"))
+            return None
 

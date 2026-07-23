@@ -153,6 +153,7 @@ def edit_profile():
             rolle = get_user_role(user_id)
             user_info = get_user_info(user_id)
             email = user_info.get("email", '').strip()
+            seminarthemen = get_free_seminarthemen()
             auth_mode = False
             if user_id := check_password(email, inp_passwort):
                 session['auth'] = True
@@ -163,7 +164,7 @@ def edit_profile():
                 edit_mode = False
                 flash("Passwort falsch!", 'error')
             return render_template("auth/profile.html", user_info=user_info, rolle=rolle,
-                                   edit_mode=edit_mode, auth_mode=auth_mode)
+                                   edit_mode=edit_mode, auth_mode=auth_mode, seminarthemen=seminarthemen)
 
         else:
             flash('Session abgelaufen, oder nicht angemeldet!', 'error')
@@ -222,6 +223,7 @@ def update_user():
             user_id = int(session.get('user_id', '-1'))
             rolle = get_user_role(user_id)
             user_info = get_user_info(user_id)
+            seminarthemen = get_free_seminarthemen()
             if 'auth' in session:
                 if session.get('auth', False): #authentifiziert.
                     data = request.form
@@ -238,11 +240,12 @@ def update_user():
                                 for message in flash_messages:
                                     flash(message, 'error')
                                 return render_template("auth/profile.html", user_info=user_info, rolle=rolle,
-                                                       edit_mode=edit_mode, auth_mode=auth_mode)
+                                                       edit_mode=edit_mode, auth_mode=auth_mode, seminarthemen=seminarthemen)
 
                     else: #Hier werden die neuen Daten gespeichert -> valide Daten und authentifiziert.
                         update_user_acc(data, user_id, with_password)
                         flash("Erfolgreich gespeichert!", 'success')
+                        session['auth'] = False # Wird zurückgesetzt, damit erneute authentifizierung nötig ist.
                         return redirect(url_for('auth.profile'))
 
                 else: #nicht authentifiziert, weil falsches Passwort.
