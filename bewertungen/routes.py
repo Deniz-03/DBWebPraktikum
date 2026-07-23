@@ -72,7 +72,7 @@ def vortrag_bewerten():
             erfolg = create_bew_vortrag(data)
             if erfolg: #Nutzer bekommen eine Bestätigung der erfolgreichen Speicherung der Bewertung
                 flash('Bewertung erfolgreich gespeichert.', 'success')
-                return redirect(url_for('themen.themen_uebersicht'))
+                return redirect(url_for('bewertungen.vortrag_bewerten'))
             else:
                 flash('Bewertung konnte nicht gespeichert werden (evtl. hast du bereits bewertet).', 'error')
                 vortraege = get_bewertbare_vortraege(exclude_account_id=int(session.get('user_id', '-1')))
