@@ -26,8 +26,6 @@ def get_seminarleistung_for_display(s_id):
     :param s_id:
     :return: int oder None
     """
-    try:
-        d = get_seminarleistung(s_id).get('note', None)
-    except AttributeError:
+    if get_seminarleistung(s_id) is None:
         return None
-    return d
+    return get_seminarleistung(s_id).get('note', None)
