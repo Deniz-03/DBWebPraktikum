@@ -51,6 +51,10 @@ def create_bew_vortrag(data):
                         data.get("verknuepfung"),
                         data.get("diskussion"),
                         data.get("beteiligung"),
+                        #Hier wird der eingegebene Kommentar bewusst nicht mit Regex geprüft, da eine zu strikte Überprüfung
+                        #legitime Kommentare blockieren könnte, aber eine entspannte Überprüfung wird gut getarnte
+                        #Injections/Scripts eh nicht effektiv verhindern. Lediglich werden parametrisierte Queries
+                        #verwendet um diese Gefahr zu vermindern
                         data.get("kommentar") or None,)
                     )
                 conn.commit()
@@ -231,6 +235,10 @@ def create_bew_ausarbeitung(data):
                     data.get("sprachliche_gestaltung"),
                     data.get("inhalt"),
                     data.get("schwierigkeitsgrad"),
+                    # Hier wird der eingegebene Kommentar bewusst nicht mit Regex geprüft, da eine zu strikte Überprüfung
+                    # legitime Kommentare blockieren könnte, aber eine entspannte Überprüfung wird gut getarnte
+                    # Injections/Scripts eh nicht effektiv verhindern. Lediglich werden parametrisierte Queries
+                    # verwendet um diese Gefahr zu vermindern
                     data.get("kommentar") or None,)
                     )
                 conn.commit()
@@ -428,6 +436,4 @@ def get_seminarleistung(s_id):
                 (s_id,)
             )
             result = cur.fetchone()
-            if result is None:
-                return None
             return result
