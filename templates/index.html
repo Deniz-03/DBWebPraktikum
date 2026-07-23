@@ -8,6 +8,10 @@
 {% block content %}
     <p class="text1">
         Willkommen beim Seminarplaner! <br/>
-        Logge dich ein oder registriere dich in wenigen Sekunden, um direkt loszulegen.
+        {% if user_rolle %}
+            Schön, dass Sie da sind!
+        {% else %}
+            Logge dich ein oder registriere dich in wenigen Sekunden, um direkt loszulegen.
+        {% endif %}
     </p>
 {% endblock %}
