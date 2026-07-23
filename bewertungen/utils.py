@@ -26,4 +26,6 @@ def get_seminarleistung_for_display(s_id):
     :param s_id:
     :return: int oder None
     """
+    if get_seminarleistung(s_id).get('note', None) is None:
+        return None
     return get_seminarleistung(s_id)
