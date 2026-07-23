@@ -5,12 +5,9 @@
 {% block title %}Seminarthema anlegen{% endblock %}
 {% block header %}Seminarthema anlegen{% endblock %}
 
-<!--Sidebar wird hier nicht benötigt-->
-{% block spezNav %}
-{% endblock %}
-
-<!--Sorgt dafür, dass der contentDiv die gesamte Breite ausnutzt, wenn die Sidebar nicht verwendet wird-->
-{% block contentClass %}fullWidth{% endblock %}
+{% if 'user_id' in session %}
+    {% set user_rolle = rolle %}
+{% endif %}
 
 {% block content %}
 
@@ -32,13 +29,14 @@
                      name="titel" → Flask greift per request.form.get('titel') darauf zu -->
                 <div class="inpt">
                     <label for="titel">Titel</label>
-                    <input type="text" name="titel" id="titel" placeholder="Titel des Themas" required>
+                    <input type="text" name="titel" id="titel" value='{{ titel or '' }}' placeholder="Titel des Themas" required>
                 </div>
 
                 <!-- Pflichtfeld: Oberbegriff des Seminarthemas -->
                 <div class="inpt">
                     <label for="oberbegriff">Oberbegriff</label>
-                    <input type="text" name="oberbegriff" id="oberbegriff" placeholder="Oberbegriff des Themas" required>
+                    <input type="text" name="oberbegriff" id="oberbegriff" value='{{ oberbegriff or ''   }}'
+                            placeholder="Oberbegriff des Themas" required>
                 </div>
 
                 <!-- Pflichtfeld: Dozent-Dropdown wird dynamisch aus der DB befüllt
@@ -62,7 +60,7 @@
                 <!-- Optionales Feld: Semester als Zahl, z.B. 20251 für SoSe 2025 -->
                 <div class="inpt">
                     <label for="semester">Semester</label>
-                    <input type="number" name="semester" id="semester" placeholder="3">
+                    <input type="number" name="semester" id="semester" value='{{ semester or '' }}' placeholder="3">
                 </div>
 
                 <!-- Status wird beim Anlegen automatisch auf Frei gesetzt (Default in DB) -->
@@ -88,7 +86,8 @@
         <!-- Pflichtfeld: Beschreibung als mehrzeiliges Textfeld -->
         <div class="inpt">
             <label for="beschreibung">Beschreibung</label>
-            <textarea name="beschreibung" id="beschreibung" rows="5" placeholder="Beschreibung des Themas" required></textarea>
+            <textarea name="beschreibung" id="beschreibung" rows="5" placeholder="Beschreibung des Themas"
+                      required>{{ beschreibung or '' }}</textarea>
         </div>
 
         <button type="submit" class="link submit">Seminarthema anlegen</button>

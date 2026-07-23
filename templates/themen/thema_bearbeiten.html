@@ -13,13 +13,13 @@
 
 {% block content %}
 
-    <!-- Gibt Fehler aus falls eines der Pflichtfelder nicht ausgefüllt/Inhalt entfernt wurde -->
+    <!-- Gibt Fehler aus, falls eines der Pflichtfelder nicht ausgefüllt/Inhalt entfernt wurde -->
     {% if fehler %}
         <div class="errorMessage">{{ fehler }}</div>
     {% endif %}
 
     <!-- Separates Formular für den Sprung zum Studierenden-Profil.
-     Muss AUSSERHALB des Bearbeiten-Formulars stehen, weil verschachtelte
+     Muss außerhalb des Bearbeiten-Formulars stehen, weil verschachtelte
      <form>-Elemente ungültiges HTML sind (der Browser würde das innere verwerfen).-->
     {% if student %}
         <form id="profil_form" action="{{ url_for('auth.stud_profiles') }}" method="POST">
