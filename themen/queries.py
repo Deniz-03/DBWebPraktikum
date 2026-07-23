@@ -155,6 +155,14 @@ def get_status_optionen():
             cur.execute("SELECT unnest(enum_range(NULL::STATUS_TYPE)) AS status")
             return cur.fetchall()
 
+# Setzt das Seminarthema auf Frei wenn die s_id eines Studenten rausgenommen wird.
+def set_free(themen_id):
+    with db.connect_to_db() as conn:
+        with conn.cursor() as cur:
+            cur.execute("UPDATE seminarhema SET s_id = NULL, status = 'Frei'"
+                        "WHERE themen_id = %s",
+                        (themen_id,))
+
 
 
 

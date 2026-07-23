@@ -5,7 +5,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash
 from themen.queries import (get_dozierenden, thema_anlegen, thema_bearbeiten, get_seminarthema, get_student_by_id,
                             get_dozent_by_id, student_hinzufuegen, get_seminarthemen_by_filter, get_semester,
                             get_status_optionen, get_student_by_matr_nr)
-from themen.utils import validiere_thema_form, pruefe_dozent, pruefe_student,\
+from themen.utils import validiere_thema_form, pruefe_dozent, pruefe_student, \
     hole_user_und_rolle, speichere_pdf, check_status, check_matr_nr, thema_belegen_status_pruefen, \
     thema_belegen_s_id_pruefen
 
@@ -26,7 +26,8 @@ def themen_neu():
         eingeloggter_dozent = user_id
         return render_template('themen/thema_anlegen.html',
                                 dozierenden = dozierenden,
-                                eingeloggter_dozent = eingeloggter_dozent,)
+                                eingeloggter_dozent = eingeloggter_dozent,
+                               rolle=rolle)
 
     # Auslesen des Formulars und Speichern des Seminarthemas in der DB
     if request.method == 'POST':
@@ -51,7 +52,8 @@ def themen_neu():
                                    semester=semester,
                                    fehler = fehler,
                                    dozierenden = dozierenden,
-                                   eingeloggter_dozent = eingeloggter_dozent,)
+                                   eingeloggter_dozent = eingeloggter_dozent,
+                                   rolle=rolle)
 
         # request.files.get('pdf') holt die hochgeladene Datei aus dem Formular
         pdf = request.files.get('pdf')
@@ -69,7 +71,8 @@ def themen_neu():
                                    semester=semester,
                                    fehler=fehler,
                                    dozierenden=dozierenden,
-                                   eingeloggter_dozent=eingeloggter_dozent, )
+                                   eingeloggter_dozent=eingeloggter_dozent,
+                                   rolle=rolle)
 
         pdf_pfad = speichere_pdf(pdf)
 
@@ -188,6 +191,12 @@ def themen_bearbeiten(themen_id):
                                         dozierenden=dozierenden,
                                         vorgetragen=vorgetragen)
 
+        elif not matr_nr and thema_daten['status'] != 'Abgeschlossen':
+            # Studenten-Feld wurde geleert → Zuweisung aufheben
+            s_id_neu = None
+            student_neu = None
+            vorgetragen = False
+
         # Status ergibt sich aus der Belegung, 'Abgeschlossen' bleibt aber immer bestehen
         if thema_daten['status'] != 'Abgeschlossen':
             if s_id_neu:
@@ -295,6 +304,7 @@ def thema_detail(themen_id):
         return redirect(url_for('themen.themen_uebersicht'))
 
     if request.method == 'GET':
+
         s_id = data['s_id']
         d_id = data['d_id']
 
