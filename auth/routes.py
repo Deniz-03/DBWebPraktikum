@@ -118,10 +118,12 @@ def profile():
 
             if rolle == "stud":
                 avg_vortrag_bew = get_bew_vortrag_for_display(user_id)
+                anz_bew = get_einfache_vortragsstatistik(user_id).get("anzahl_bewertungen", None)
                 return render_template("auth/profile.html",
                                         user_info=user_info,
                                         rolle=rolle,
-                                        avg_vortrag_bew=avg_vortrag_bew)
+                                        avg_vortrag_bew=avg_vortrag_bew,
+                                        anz_bew=anz_bew)
             else:
                 return render_template("auth/profile.html", user_info=user_info, rolle=rolle)
         else:
@@ -194,12 +196,14 @@ def stud_profiles():
                 if s_id > 0:
                     user_info = get_user_info(s_id)
                     avg_vortrag_bew = get_bew_vortrag_for_display(s_id)
+                    anz_bew = get_einfache_vortragsstatistik(s_id).get("anzahl_bewertungen", None)
                     aus_bew = get_bew_ausarbeitung_for_display(s_id)
                     sem_leistung = get_seminarleistung_for_display(s_id)
                     return render_template('auth/profile.html',
                                            view_mode=True,
                                            user_info=user_info, #Das sind die Infos des ausgewählten Studis
                                            avg_vortrag_bew = avg_vortrag_bew,
+                                           anz_bew = anz_bew,
                                            aus_bew =  aus_bew,
                                            sem_leistung = sem_leistung,
                                            rolle=rolle) #Hier handelt es sich um die Rolle des Dozenten

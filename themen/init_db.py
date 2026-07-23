@@ -22,7 +22,9 @@ with db.connect_to_db() as conn:
                     "s_id INT NULL,"
                     "semester INT,"
                     "pdf_pfad VARCHAR(255),"
-                    "vorgetragen BOOLEAN NOT NULL DEFAULT false,"
+                    # vorgetragen zählt die Anzahl der zu diesem Thema gehaltenen Vorträge (0 = noch keiner).
+                    # Jede Zahl >= 1 steht für einen eigenständigen Vortrag, der einzeln bewertet werden kann (ANF 6).
+                    "vorgetragen INTEGER NOT NULL DEFAULT 0,"
                     "FOREIGN KEY (d_id) REFERENCES dozierende(d_id) ON DELETE CASCADE,"
                     "FOREIGN KEY (s_id) REFERENCES studierende(s_id) ON DELETE SET NULL)")
 

@@ -22,9 +22,9 @@ def is_seminar_vorgetragen(themen_id):
 def create_bew_vortrag(data):
     """
     Erstellt eine neue Bewertung mittels Angabe einer Dict
-    :param data: Dict mit Keys: 't_id', 'bewertender_id', 'foliengestaltung', 'sprachliche_praesentation',
-    'stil', 'zeitliche_gestaltung', 'verstaendnis', 'inhalt', 'verknuepfung', 'diskussion', 'beteiligung',
-    evtl. 'kommentar'
+    :param data: Dict mit Keys: 't_id', 'vortrag_nr', 'bewertender_id', 'foliengestaltung',
+    'sprachliche_praesentation', 'stil', 'zeitliche_gestaltung', 'verstaendnis', 'inhalt', 'verknuepfung',
+    'diskussion', 'beteiligung', evtl. 'kommentar'
     :return: True oder 'bereits_bewertet'"""
     with db.connect_to_db() as conn:
         with conn.cursor() as cur:
@@ -36,11 +36,12 @@ def create_bew_vortrag(data):
             try:
                 cur.execute(
                     "INSERT INTO bew_vortrag ("
-                    "t_id, bewertender_id, foliengestaltung, sprachliche_praesentation, "
+                    "t_id, vortrag_nr, bewertender_id, foliengestaltung, sprachliche_praesentation, "
                     "stil, zeitliche_gestaltung, verstaendnis, inhalt, verknuepfung, "
                     "diskussion, beteiligung, kommentar) "
-                    "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+                    "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
                     (data.get("t_id"),
+                        data.get("vortrag_nr"),
                         data.get("bewertender_id"),
                         data.get("foliengestaltung"),
                         data.get("sprachliche_praesentation"),
@@ -66,40 +67,45 @@ def create_bew_vortrag(data):
 
 def get_bewertbare_vortraege(exclude_account_id=None):
     """
-    Gibt alle Seminarthemen aus, die bewertbar (status='Vergeben' und vorgetragen=True) sind.
-    Zusätzlich werden Seminarthemen die dem angegebenen Nutzer zugeweiesen sind ausgefiltert, da er diese nicht
-    bewerten darf.
+    Gibt alle bewertbaren Vorträge aus (status='Vergeben' und vorgetragen>0).
+    Da ein Thema mehrere Vorträge haben kann (ANF 6), wird jedes Thema mittels generate_series in seine einzelnen
+    Vorträge 1..vorgetragen aufgefächert. Zusätzlich werden Vorträge, die dem angegebenen Nutzer gehören oder von
+    ihm bereits bewertet wurden, ausgefiltert.
     :param exclude_account_id: account_id des Nutzers
-    :return: Liste von Dicts mit Keys: 'themen_id', 'titel', 'vorname', 'nachname'
+    :return: Liste von Dicts mit Keys: 't_id', 'vortrag_nr', 'titel', 'vorname', 'nachname'
     """
     with db.connect_to_db() as conn:
         with conn.cursor() as cur:
             query = """
-                SELECT st.themen_id, st.titel, s.vorname, s.nachname
+                SELECT st.themen_id, gs.nr AS vortrag_nr, st.titel, s.vorname, s.nachname
                 FROM seminarthema st
                 JOIN studierende s ON st.s_id = s.s_id
-                WHERE st.status = 'Vergeben' AND st.vorgetragen = TRUE
+                CROSS JOIN LATERAL generate_series(1, st.vorgetragen) AS gs(nr)
+                WHERE st.status = 'Vergeben' AND st.vorgetragen > 0
             """
             params = []
             if exclude_account_id is not None:
                 query += " AND st.s_id != %s"
-                query += " AND st.themen_id NOT IN (SELECT t_id FROM bew_vortrag WHERE bewertender_id = %s)"
+                query += (" AND NOT EXISTS (SELECT 1 FROM bew_vortrag bv "
+                          "WHERE bv.t_id = st.themen_id AND bv.vortrag_nr = gs.nr AND bv.bewertender_id = %s)")
                 params.extend([exclude_account_id, exclude_account_id])
-            query += " ORDER BY s.nachname, s.vorname"
+            query += " ORDER BY s.nachname, s.vorname, gs.nr"
 
             cur.execute(query, params)
             rows = cur.fetchall()
             return [
-                {'t_id': r['themen_id'], 'titel': r['titel'], 'vorname': r['vorname'],
-                    'nachname': r['nachname']}
+                {'t_id': r['themen_id'], 'vortrag_nr': r['vortrag_nr'], 'titel': r['titel'],
+                    'vorname': r['vorname'], 'nachname': r['nachname']}
                 for r in rows
             ]
 
-def ist_vortrag_bewertbar(t_id, account_id=None):
+def ist_vortrag_bewertbar(t_id, vortrag_nr, account_id=None):
     """
-    Hilfsfunktion um zu prüfen, ob ein Seminarthema vergeben sowie vorgetragen wurde. Zusätzlich werden Seminarthemen
-    ausgefiltert, dessen Vorträge vom angegebenen Nutzer bereits bewertet wurden
+    Hilfsfunktion um zu prüfen, ob ein konkreter Vortrag eines Seminarthemas bewertbar ist. Der Vortrag muss
+    existieren (1 <= vortrag_nr <= vorgetragen), das Thema muss vergeben sein und der Nutzer darf diesen Vortrag
+    noch nicht bewertet haben.
     :param t_id: themen_id des Seminarthemas
+    :param vortrag_nr: Nummer des Vortrags innerhalb des Themas
     :param account_id: account_id des Nutzers
     :return: Boolean
     """
@@ -107,13 +113,15 @@ def ist_vortrag_bewertbar(t_id, account_id=None):
         with conn.cursor() as cur:
             cur.execute(
                 """
-            SELECT 1 FROM seminarthema
-            WHERE themen_id = %s AND status = 'Vergeben' AND vorgetragen = TRUE
-            AND themen_id NOT IN (
-                SELECT t_id FROM bew_vortrag WHERE bewertender_id = %s
+            SELECT 1 FROM seminarthema st
+            WHERE st.themen_id = %s AND st.status = 'Vergeben'
+            AND %s BETWEEN 1 AND st.vorgetragen
+            AND NOT EXISTS (
+                SELECT 1 FROM bew_vortrag bv
+                WHERE bv.t_id = st.themen_id AND bv.vortrag_nr = %s AND bv.bewertender_id = %s
             )
             """,
-            (t_id, account_id)
+            (t_id, vortrag_nr, vortrag_nr, account_id)
             )
             return cur.fetchone() is not None
 

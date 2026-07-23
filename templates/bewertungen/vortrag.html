@@ -26,11 +26,12 @@
 <form method="POST" action="{{ url_for('bewertungen.vortrag_bewerten') }}" class="column bewertungForm">
     <!--Auswahl des Vortrags-->
     <div class="vortragAuswahlDiv column">
-        <label for="t_id">Vortrag auswählen</label>
-        <select name="t_id" id="t_id" required>
+        <label for="vortrag">Vortrag auswählen</label>
+        <select name="vortrag" id="vortrag" required>
             <option value="" disabled selected>Bitte wählen</option>
+            {# Ein Thema kann mehrere Vorträge haben (ANF 6): value kodiert t_id und Vortragsnummer als "t_id-nr". #}
             {% for v in vortraege %}
-            <option value="{{ v.get('t_id', '') }}">{{ v.get('titel', '') }} — {{ v.get('vorname', '') }} {{ v.get('nachname', '') }}</option>
+            <option value="{{ v.get('t_id', '') }}-{{ v.get('vortrag_nr', '') }}">{{ v.get('titel', '') }} — {{ v.get('vorname', '') }} {{ v.get('nachname', '') }} (Vortrag {{ v.get('vortrag_nr', '') }})</option>
             {% endfor %}
         </select>
     </div>

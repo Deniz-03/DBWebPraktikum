@@ -100,17 +100,15 @@
                 </div>
 
                 <div class="inpt">
-                    <label for="vorgetragen">Vorgetragen</label>
+                    <!-- Anzahl der gehaltenen Vorträge (0 = keiner). Jeder Vortrag ist einzeln bewertbar. -->
+                    <label for="vorgetragen">Gehaltene Vorträge</label>
                     {% if student and status == 'Vergeben' %}
-                        <select id="vorgetragen" name="vorgetragen">
-                            <option value="True" {% if vorgetragen %}selected{% endif %}>vorgetragen</option>
-                            <option value="False" {% if not vorgetragen %}selected{% endif %}>nicht vorgetragen</option>
-                        </select>
+                        <input type="number" id="vorgetragen" name="vorgetragen" min="0"
+                               value="{{ vorgetragen }}">
                     {% elif student and status == 'Abgeschlossen' %}
-                        <input type="text" id="vorgetragen"
-                               value ='{% if vorgetragen %}vorgetragen{% else %}nicht vorgetragen{% endif %}' readonly>
+                        <input type="text" id="vorgetragen" value="{{ vorgetragen }}" readonly>
                     {% else %}
-                        <input type="text" id="vorgetragen" value="nicht vorgetragen" readonly>
+                        <input type="text" id="vorgetragen" value="0" readonly>
                     {% endif %}
                 </div>
             </div>
