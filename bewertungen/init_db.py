@@ -13,6 +13,9 @@ with db.connect_to_db() as conn:
 
         cur.execute("CREATE TABLE bew_vortrag (bv_id SERIAL PRIMARY KEY,"
                     "t_id INT NOT NULL,"
+                    # vortrag_nr gibt an, welcher der mehreren Vorträge eines Themas bewertet wird (ANF 6).
+                    # Zulässig sind Werte von 1 bis seminarthema.vorgetragen (in der Anwendung geprüft).
+                    "vortrag_nr SMALLINT NOT NULL,"
                     "bewertender_id INT NOT NULL,"
                     "foliengestaltung SMALLINT NOT NULL,"
                     "sprachliche_praesentation SMALLINT NOT NULL,"
@@ -26,7 +29,8 @@ with db.connect_to_db() as conn:
                     "kommentar TEXT,"
                     "FOREIGN KEY (t_id) REFERENCES seminarthema(themen_id) ON DELETE CASCADE,"
                     "FOREIGN KEY (bewertender_id) REFERENCES account(id) ON DELETE CASCADE,"
-                    "CONSTRAINT eine_bewertung_pro_acc UNIQUE (t_id, bewertender_id),"
+                    "CONSTRAINT eine_bewertung_pro_acc UNIQUE (t_id, vortrag_nr, bewertender_id),"
+                    "CONSTRAINT chk_vortrag_nr CHECK (vortrag_nr >= 1),"
                     "CONSTRAINT chk_foliengestaltung CHECK (foliengestaltung BETWEEN 1 AND 5),"
                     "CONSTRAINT chk_sprachliche_praesentation CHECK (sprachliche_praesentation BETWEEN 1 AND 5),"
                     "CONSTRAINT chk_stil CHECK (stil BETWEEN 1 AND 5),"

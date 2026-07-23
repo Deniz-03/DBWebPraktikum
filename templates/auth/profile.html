@@ -43,6 +43,7 @@
             {% if avg_vortrag_bew is not none or aus_bew is not none or sem_leistung is not none %}
                 <div class="statistikContainer">
                     {% if avg_vortrag_bew is not none %}
+                        <p>Anzahl der Bewertungen: {{ anz_bew }}</p>
                         <p>Durchschnittliche Vortragsbewertung: {{ avg_vortrag_bew }}</p>
                     {% endif %}
                     {% if aus_bew is not none %}
@@ -210,9 +211,11 @@
 
                     <!--Zweite Spalte-->
                     <div class="formCol">
+                    <!--TODO For Schleife durch Bewewertungen pro Seminarthema-->
                         <!--Es wird geschaut, ob bereits Bewertungen vorliegen, bevor der Block angezeigt wird.-->
                         {% if avg_vortrag_bew is not none %}
                             <div class="statistikContainer">
+                                <p>Anzahl der Bewertungen: {{ anz_bew }}</p>
                                 <p>Durchschnittliche Vortragsbewertung: {{ avg_vortrag_bew }}</p>
                             </div>
                             <form action="{{ url_for('bewertungen.ansicht_statistik') }}" method="POST">

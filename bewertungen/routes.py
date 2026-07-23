@@ -37,15 +37,19 @@ def vortrag_bewerten():
             form = request.form
             rolle = get_user_role(int(session.get('user_id', '-1')))
 
-            # Prüft ob ein Vortrag im Formular gewählt wurde
-            t_id_raw = form.get('t_id')
-            if not t_id_raw or not t_id_raw.isdigit():
+            # Prüft ob ein Vortrag im Formular gewählt wurde.
+            # Da ein Thema mehrere Vorträge haben kann (ANF 6), kodiert das Auswahlfeld beide Angaben
+            # als "t_id-vortrag_nr" (z.B. "5-2" = zweiter Vortrag von Thema 5).
+            auswahl = form.get('vortrag', '')
+            t_id_raw, _, nr_raw = auswahl.partition('-')
+            if not t_id_raw.isdigit() or not nr_raw.isdigit():
                 flash('Bitte einen Vortrag auswählen.', 'error')
                 return redirect(url_for('bewertungen.vortrag_bewerten'))
             t_id = int(t_id_raw)
+            vortrag_nr = int(nr_raw)
 
             # Prüft ob der Vortrag vom angemeldeten Nutzer bewertbar ist
-            if not ist_vortrag_bewertbar(t_id, int(session.get('user_id', '-1'))):
+            if not ist_vortrag_bewertbar(t_id, vortrag_nr, int(session.get('user_id', '-1'))):
                 flash('Dieser Vortrag steht aktuell nicht zur Bewertung.', 'error')
                 return redirect(url_for('bewertungen.vortrag_bewerten'))
 
@@ -54,7 +58,7 @@ def vortrag_bewerten():
                 flash('Du kannst deinen eigenen Vortrag nicht bewerten.', 'error')
                 return redirect(url_for('bewertungen.vortrag_bewerten'))
 
-            data = {'t_id': t_id, 'bewertender_id': int(session.get('user_id', '-1'))}
+            data = {'t_id': t_id, 'vortrag_nr': vortrag_nr, 'bewertender_id': int(session.get('user_id', '-1'))}
 
             #Prüft ob zu jedem Kriterium eine Bewertung angegeben wurde
             for feld, label in VORTRAGSKRITERIEN:

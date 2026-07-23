@@ -143,13 +143,18 @@ def themen_bearbeiten(themen_id):
         # formatiere eine matr_nr ohne leerzeichen und Zeilenumbrüche
         matr_nr = data.get('student', '').strip()
 
-        # Vorgetragen Serverseitig absichern
+        # Vorgetragen serverseitig absichern.
+        # vorgetragen ist die Anzahl der gehaltenen Vorträge (0 = keiner). Jede Zahl >= 1 ermöglicht
+        # einen weiteren einzeln bewertbaren Vortrag (ANF 6).
         if status == 'Vergeben':
-            vorgetragen = data.get('vorgetragen') == 'True'
+            # Bei fehlendem/ungültigem (z.B. per DevTools manipuliertem) Wert wird der bisher
+            # gespeicherte Stand beibehalten, statt ihn auf 0 zurückzusetzen.
+            vorgetragen_raw = data.get('vorgetragen', '')
+            vorgetragen = int(vorgetragen_raw) if vorgetragen_raw.isdigit() else thema_daten['vorgetragen']
         elif status == 'Abgeschlossen':
             vorgetragen = thema_daten['vorgetragen']
         else:
-            vorgetragen = False
+            vorgetragen = 0
 
         if student:
             alte_matr_nr = student['matr_nr']
@@ -195,7 +200,7 @@ def themen_bearbeiten(themen_id):
             # Studenten-Feld wurde geleert → Zuweisung aufheben
             s_id_neu = None
             student_neu = None
-            vorgetragen = False
+            vorgetragen = 0
 
         # Status ergibt sich aus der Belegung, 'Abgeschlossen' bleibt aber immer bestehen
         if thema_daten['status'] != 'Abgeschlossen':
