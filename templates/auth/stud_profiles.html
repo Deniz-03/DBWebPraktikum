@@ -13,17 +13,22 @@
             {% endfor %}
         {% endif %}
     {% endwith %}
-
-    <div>
-        <ul class="scrollList">
-            {% for stud in stud_infos %}
-                    <li>
-                            <form action="{{ url_for('auth.stud_profiles') }}", method="POST">
-                                <input type="hidden" name="s_id" value="{{ stud.get('s_id') }}">
-                                <button type="submit" class="link submit">Student:in: {{ stud.get('vorname') }} {{ stud.get('nachname') }}</button>
-                            </form>
-                    </li>
-            {% endfor %}
-        </ul>
-    </div>
+    {% if stud_infos != [] %}
+        <div>
+            <ul class="scrollList">
+                {% for stud in stud_infos %}
+                        <li>
+                                <form action="{{ url_for('auth.stud_profiles') }}", method="POST">
+                                    <input type="hidden" name="s_id" value="{{ stud.get('s_id') }}">
+                                    <button type="submit" class="link submit">Student:in: {{ stud.get('vorname') }} {{ stud.get('nachname') }}</button>
+                                </form>
+                        </li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% else %}
+        <div>
+            Aktuell sind keine Studierenden im System hinterlegt.
+        </div>
+    {% endif %}
 {% endblock %}

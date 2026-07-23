@@ -226,6 +226,6 @@ def get_all_stud():
 
             if result:
                 return result
-            return None
+            return []
 
 
