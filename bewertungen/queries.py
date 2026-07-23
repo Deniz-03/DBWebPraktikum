@@ -436,4 +436,6 @@ def get_seminarleistung(s_id):
                 (s_id,)
             )
             result = cur.fetchone()
-            return result
+            if result:
+                return result
+            return None
