@@ -109,9 +109,8 @@ def register():
 
 
 
-@auth_bp.route('/profile', methods=['GET', 'POST'])
+@auth_bp.route('/profile', methods=['GET'])
 def profile():
-    if request.method == 'GET':
         if 'user_id' in session:
             user_id = int(session.get('user_id', '-1'))
             rolle = get_user_role(user_id)
@@ -127,10 +126,6 @@ def profile():
                 return render_template("auth/profile.html", user_info=user_info, rolle=rolle)
         else:
             return render_template("auth/profile.html")
-
-    else:
-        #TODO Authentifikation hinzufügen
-        return render_template("auth/profile.html")
 
 @auth_bp.route('/profile/edit', methods=['GET', 'POST'])
 def edit_profile():
