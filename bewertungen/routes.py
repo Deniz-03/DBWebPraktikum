@@ -37,9 +37,7 @@ def vortrag_bewerten():
             form = request.form
             rolle = get_user_role(int(session.get('user_id', '-1')))
 
-            # Prüft ob ein Vortrag im Formular gewählt wurde.
-            # Da ein Thema mehrere Vorträge haben kann (ANF 6), kodiert das Auswahlfeld beide Angaben
-            # als "t_id-vortrag_nr" (z.B. "5-2" = zweiter Vortrag von Thema 5).
+            #Prüft ob ein Vortrag im Formular gewählt wurde und teilt die themen_id von der vortrag_nr
             auswahl = form.get('vortrag', '')
             t_id_raw, _, nr_raw = auswahl.partition('-')
             if not t_id_raw.isdigit() or not nr_raw.isdigit():
@@ -48,7 +46,7 @@ def vortrag_bewerten():
             t_id = int(t_id_raw)
             vortrag_nr = int(nr_raw)
 
-            # Prüft ob der Vortrag vom angemeldeten Nutzer bewertbar ist
+            #Prüft ob der Vortrag vom angemeldeten Nutzer bewertbar ist
             if not ist_vortrag_bewertbar(t_id, vortrag_nr, int(session.get('user_id', '-1'))):
                 flash('Dieser Vortrag steht aktuell nicht zur Bewertung.', 'error')
                 return redirect(url_for('bewertungen.vortrag_bewerten'))

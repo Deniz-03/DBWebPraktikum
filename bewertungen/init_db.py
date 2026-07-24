@@ -13,8 +13,6 @@ with db.connect_to_db() as conn:
 
         cur.execute("CREATE TABLE bew_vortrag (bv_id SERIAL PRIMARY KEY,"
                     "t_id INT NOT NULL,"
-                    # vortrag_nr gibt an, welcher der mehreren Vorträge eines Themas bewertet wird (ANF 6).
-                    # Zulässig sind Werte von 1 bis seminarthema.vorgetragen (in der Anwendung geprüft).
                     "vortrag_nr SMALLINT NOT NULL,"
                     "bewertender_id INT NOT NULL,"
                     "foliengestaltung SMALLINT NOT NULL,"

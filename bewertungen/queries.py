@@ -68,7 +68,7 @@ def create_bew_vortrag(data):
 def get_bewertbare_vortraege(exclude_account_id=None):
     """
     Gibt alle bewertbaren Vorträge aus (status='Vergeben' und vorgetragen>0).
-    Da ein Thema mehrere Vorträge haben kann (ANF 6), wird jedes Thema mittels generate_series in seine einzelnen
+    Da ein Thema mehrere Vorträge haben kann, wird jedes Thema mittels generate_series in seine einzelnen
     Vorträge 1..vorgetragen aufgefächert. Zusätzlich werden Vorträge, die dem angegebenen Nutzer gehören oder von
     ihm bereits bewertet wurden, ausgefiltert.
     :param exclude_account_id: account_id des Nutzers
