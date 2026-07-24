@@ -32,9 +32,9 @@ def themen_neu():
     # Auslesen des Formulars und Speichern des Seminarthemas in der DB
     if request.method == 'POST':
         data = request.form
-        titel = data.get('titel')
-        oberbegriff = data.get('oberbegriff')
-        beschreibung = data.get('beschreibung')
+        titel = data.get('titel', '').strip()
+        oberbegriff = data.get('oberbegriff', '').strip()
+        beschreibung = data.get('beschreibung', '').strip()
         d_id = data.get('d_id')
         semester = data.get('semester') or None
 
@@ -133,10 +133,10 @@ def themen_bearbeiten(themen_id):
     # Post Methode um bearbeitete Felder zu Speichern
     if request.method == 'POST':
         data = request.form
-        titel = data.get('titel')
+        titel = data.get('titel', '').strip()
         d_id = data.get('d_id')
-        oberbegriff = data.get('oberbegriff')
-        beschreibung = data.get('beschreibung')
+        oberbegriff = data.get('oberbegriff', '').strip()
+        beschreibung = data.get('beschreibung', '').strip()
         semester = data.get('semester') or None
         # Aus dem Thema lesen nicht aus dem Formular
         # Damit kein manipluierter Status ankommen kann
@@ -179,7 +179,8 @@ def themen_bearbeiten(themen_id):
                                        status=status,
                                        dozierenden=dozierenden,
                                        vorgetragen=vorgetragen,
-                                       rolle=rolle)
+                                       rolle=rolle,
+                                       pdf_pfad=thema_daten['pdf_pfad'])
             else:
                 student_neu = get_student_by_matr_nr(matr_nr)
                 s_id_neu = student_neu['s_id']
@@ -197,7 +198,8 @@ def themen_bearbeiten(themen_id):
                                         status=status,
                                         dozierenden=dozierenden,
                                         vorgetragen=vorgetragen,
-                                       rolle=rolle)
+                                       rolle=rolle,
+                                       pdf_pfad=thema_daten['pdf_pfad'])
 
         elif not matr_nr and thema_daten['status'] != 'Abgeschlossen':
             # Studenten-Feld wurde geleert → Zuweisung aufheben
@@ -226,7 +228,8 @@ def themen_bearbeiten(themen_id):
                                    status=status,
                                    dozierenden=dozierenden,
                                    vorgetragen=vorgetragen,
-                                   rolle=rolle)
+                                   rolle=rolle,
+                                   pdf_pfad=thema_daten['pdf_pfad'])
 
         # Ziehen der/des PDF Files/File
         pdf = request.files.get('pdf')
@@ -246,7 +249,8 @@ def themen_bearbeiten(themen_id):
                                    vorgetragen=vorgetragen,
                                    student=student_neu,
                                    dozierenden=dozierenden,
-                                   rolle=rolle)
+                                   rolle=rolle,
+                                   pdf_pfad=thema_daten['pdf_pfad'])
 
         neuer_pdf_pfad = speichere_pdf(pdf)
         if neuer_pdf_pfad:
@@ -258,6 +262,7 @@ def themen_bearbeiten(themen_id):
         thema_bearbeiten(themen_id, titel, d_id, oberbegriff, beschreibung, s_id_neu, status, semester, pdf_pfad,
                          vorgetragen=vorgetragen)
 
+        flash('Änderungen erfolgreich gespeichert.', 'success')
         return redirect(url_for('themen.thema_detail', themen_id=themen_id))
 
 # Route um die Themen Übersicht mit allen Anforderungen aus Anf 7 zu Laden

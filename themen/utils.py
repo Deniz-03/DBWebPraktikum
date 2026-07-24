@@ -44,18 +44,20 @@ def ist_gueltige_dozent_id(d_id, dozierenden_liste):
     else:
         return False
 
-# Semester ist optional, muss aber falls angegeben eine ganze Zahl sein
+# Semester ist optional, muss aber, falls angegeben eine Zahl zwischen 1 und 10 sein
 def ist_gueltiges_semester(semester):
     if semester is None or semester == '':
         return True  # optional, leer ist erlaubt
 
-    # Schauen ob sich der String in einen int umwandeln lässt
+    # Schauen ob sich der String in einen int umwandeln lässt und zwischen semester 1 und 10 liegt
     # Da Kommazahlen direkt über ValueError laufe, muss dies nicht weiter abgedeckt werden
     try:
-        int(semester)
-        return True
+        if 1 <= int(semester) <= 10:
+            return True
     except (TypeError, ValueError):
         return False
+
+    return False
 
 # Prüft ob eine hochgeladene Datei wirklich ein PDF ist (anhand der Dateiendung)
 ERLAUBTE_PDF_ENDUNG = '.pdf'
@@ -83,7 +85,7 @@ def validiere_thema_form(titel, oberbegriff, beschreibung, d_id, semester, pdf_d
         return 'Bitte einen gültigen Dozenten auswählen'
 
     if not ist_gueltiges_semester(semester):
-        return 'Semester muss eine ganze Zahl sein'
+        return 'Semester muss eine ganze Zahl zwischen 1 und 10 sein'
 
     if not ist_gueltiges_pdf(pdf_dateiname):
         return 'Nur PDF Dateien sind möglich'
