@@ -121,7 +121,7 @@
                 Thema bearbeiten
             </a>
 
-            {% if thema.status == 'Vergeben' %}
+            {% if thema.status == 'Vergeben' and user_id == dozent.d_id %}
                 <a href="{{ url_for('bewertungen.seminarleistung_bewerten') }}" class="link">
                     Seminarleistung bewerten
                 </a>

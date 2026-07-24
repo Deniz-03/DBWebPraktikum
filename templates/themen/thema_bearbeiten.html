@@ -93,7 +93,8 @@
                             {{ student.vorname }} {{ student.nachname }}
                         </button>
                     {% else %}
-                        <input type="text" id="student" value="Kein Student eingetragen" readonly>
+                        <input type="text" id="student" name="student" value=""
+                        pattern="\d{6,8}" inputmode="numeric" placeholder="Matrikelnummer">
                     {% endif %}
                 </div>
 
