@@ -80,7 +80,7 @@ def themen_neu():
         thema_anlegen(titel, d_id, oberbegriff, beschreibung, semester=semester, pdf_pfad=pdf_pfad,)
 
         # Weiterleiten
-        return redirect(url_for('themen.themen_uebersicht')) # URL funktioniert wenn anf 4 fertig ist
+        return redirect(url_for('themen.themen_uebersicht'))
 
 # Post und Get Methode zum Bearbeiten eines Seminarthemas
 # Es wird durch <int:theme_id> die Themen_id direkt extrahiert und an die Funktion übergeben
