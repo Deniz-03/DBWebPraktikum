@@ -127,7 +127,8 @@ def themen_bearbeiten(themen_id):
                         semester=semester,
                         pdf_pfad=pdf,
                         dozierenden=dozierenden,
-                        vorgetragen=vorgetragen)
+                        vorgetragen=vorgetragen,
+                        rolle=rolle)
 
     # Post Methode um bearbeitete Felder zu Speichern
     if request.method == 'POST':
@@ -172,7 +173,8 @@ def themen_bearbeiten(themen_id):
                                        semester=semester,
                                        status=status,
                                        dozierenden=dozierenden,
-                                       vorgetragen=vorgetragen)
+                                       vorgetragen=vorgetragen,
+                                       rolle=rolle)
             else:
                 student_neu = get_student_by_matr_nr(matr_nr)
                 s_id_neu = student_neu['s_id']
@@ -189,7 +191,8 @@ def themen_bearbeiten(themen_id):
                                         semester=semester,
                                         status=status,
                                         dozierenden=dozierenden,
-                                        vorgetragen=vorgetragen)
+                                        vorgetragen=vorgetragen,
+                                       rolle=rolle)
 
         elif not matr_nr and thema_daten['status'] != 'Abgeschlossen':
             # Studenten-Feld wurde geleert → Zuweisung aufheben
@@ -217,8 +220,8 @@ def themen_bearbeiten(themen_id):
                                    semester=semester,
                                    status=status,
                                    dozierenden=dozierenden,
-                                   vorgetragen=vorgetragen
-                                   )
+                                   vorgetragen=vorgetragen,
+                                   rolle=rolle)
 
         # Ziehen der/des PDF Files/File
         pdf = request.files.get('pdf')
@@ -237,8 +240,8 @@ def themen_bearbeiten(themen_id):
                                    status=status,
                                    vorgetragen=vorgetragen,
                                    student=student_neu,
-                                   dozierenden=dozierenden
-                                   )
+                                   dozierenden=dozierenden,
+                                   rolle=rolle)
 
         neuer_pdf_pfad = speichere_pdf(pdf)
         if neuer_pdf_pfad:

@@ -159,7 +159,7 @@ def get_status_optionen():
 def set_free(themen_id):
     with db.connect_to_db() as conn:
         with conn.cursor() as cur:
-            cur.execute("UPDATE seminarhema SET s_id = NULL, status = 'Frei'"
+            cur.execute("UPDATE seminarthema SET s_id = NULL, status = 'Frei'"
                         "WHERE themen_id = %s",
                         (themen_id,))
 
