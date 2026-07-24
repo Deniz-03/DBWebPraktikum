@@ -5,11 +5,9 @@
 {% block title %}Seminarthema bearbeiten{% endblock %}
 {% block header %}Seminarthema bearbeiten{% endblock %}
 
-<!--Sidebar wird hier nicht benötigt-->
-{% block spezNav %}
-{% endblock %}
-
-{% block contentClass %}fullWidth{% endblock %}
+{% if 'user_id' in session %}
+    {% set user_rolle = rolle %}
+{% endif %}
 
 {% block content %}
 
