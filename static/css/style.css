@@ -368,9 +368,9 @@
     align-items: flex-start; /* Boxen sind nur so hoch wie ihr Inhalt */
 }
 
-/* Linke Filterbox mit fester Breite */
+/* Linke Filterbox mit fester Breite. */
 .filterBox {
-    width: 300px;
+    width: 260px;
     flex-shrink: 0;          /* Verhindert das Zusammenquetschen der Filterfelder */
     justify-content: flex-start;
 }
@@ -386,6 +386,14 @@
     flex: 1;
     min-width: 0;            /* Verhindert Überlaufen bei breitem Tabelleninhalt */
     justify-content: flex-start;
+}
+
+/* Die Themenliste hat neben der Sidebar weniger Platz -> etwas kompaktere Zellen */
+.resultBox .table th,
+.resultBox .table td {
+    padding: 10px 10px;
+    font-size: 15px;
+    word-break: break-word; /* lange Titel brechen um statt die Tabelle zu verbreitern */
 }
 
 .bewertungsTabelle {

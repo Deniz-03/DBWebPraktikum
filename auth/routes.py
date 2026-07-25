@@ -73,25 +73,30 @@ def register():
         return render_template("auth/register.html", values={}, seminarthemen=seminarthemen)
     else:
         data = request.form
-        seminarthemen = get_free_seminarthemen()
 
+        #Seminarthemen werden immer frisch neu geladen,
+        # da in der Zwischenzeit jemand das Seminar belegt haben könnte.
+        #Dies dient hauptsächlich der UX, da sowieso geprüft wird, ob das ausgewählte Thema belegt ist.
 
         empty_input_found, leere_felder = check_register_input(data)
         if empty_input_found:
             for feld in leere_felder:
                 flash(f'Das Feld {feld} ist leer!', 'error')
+                seminarthemen = get_free_seminarthemen()
             return render_template('auth/register.html', values=data, seminarthemen=seminarthemen)
 
         valid_input, flash_messages = validate_register(data)
         if not valid_input:
             for message in flash_messages:
                 flash(message, 'error')
+                seminarthemen = get_free_seminarthemen()
             return render_template("auth/register.html", values=data, seminarthemen=seminarthemen)
 
         #Hier wird geguckt, ob ein Seminarthema ausgewählt wurde und ob dieses bereits belegt wurde.
         if data.get("seminar_thema", '').strip():
             if is_seminar_occupied(data.get('seminar_thema')):
                 flash("Seminar ist bereits belegt!", 'error')
+                seminarthemen = get_free_seminarthemen()
                 return render_template("auth/register.html", values=data, seminarthemen=seminarthemen)
 
         #Ab hier ist der Input validiert.
@@ -100,10 +105,12 @@ def register():
         # und ansonsten wird er erstellt.
         if check_account(data):
             flash('Account existiert bereits!', 'error')
+            seminarthemen = get_free_seminarthemen()
             return render_template("auth/register.html", values=data, seminarthemen=seminarthemen)
         else:
             create_user(data)
             flash('Account erfolgreich erstellt!', 'success')
+            seminarthemen = get_free_seminarthemen()
         return render_template("auth/register.html", values={}, seminarthemen=seminarthemen)
 
 
@@ -268,6 +275,6 @@ def update_user():
 
         else: #nicht angemeldet.
             flash('Session abgelaufen oder nicht angemeldet!', 'error')
-            return render_template('auth.profile')
+            return render_template('auth/profile.html')
 
 
