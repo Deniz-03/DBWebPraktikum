@@ -138,6 +138,10 @@ def ausarbeitung_bewerten():
         return redirect(url_for('auth.login'))
     else:
         if 'user_id' in session: #Unangemeldete User werden auf die Loginseite zurückgeleitet
+            user_id = int(session.get('user_id', '-1'))
+            rolle = get_user_role(user_id)
+            if not pruefe_dozent(user_id, rolle):  #Studenten werden auf die Loginseite zurückgeleitet
+                return render_template("index.html")
             form = request.form
             rolle = get_user_role(int(session.get('user_id', '-1')))
             ausarbeitungen = get_bewertbare_ausarbeitungen(int(session.get('user_id', '-1')))
@@ -190,12 +194,11 @@ def seminarleistung_bewerten():
         if 'user_id' in session: #Unangemeldete User werden auf die Loginseite zurückgeleitet
             user_id = int(session.get('user_id', '-1'))
             rolle = get_user_role(user_id)
-            if rolle == 'doz': #Studierende werden an die Themenübersicht Seite weitergeleitet
-                seminarthemen = get_bewertbare_seminarleistungen(user_id)
-                return render_template('bewertungen/seminarleistung.html',
-                    seminarthemen=seminarthemen, noten=ZULAESSIGE_NOTEN, rolle=rolle)
-            flash('Nur Dozenten können die Seminarleistung bewerten.', 'error')
-            return redirect(url_for('themen.themen_uebersicht'))
+            if not pruefe_dozent(user_id, rolle):  #Studenten werden auf die Loginseite zurückgeleitet
+                return render_template("index.html")
+            seminarthemen = get_bewertbare_seminarleistungen(user_id)
+            return render_template('bewertungen/seminarleistung.html',
+                seminarthemen=seminarthemen, noten=ZULAESSIGE_NOTEN, rolle=rolle)
         flash('Bitte zuerst einloggen.', 'error')
         return redirect(url_for('auth.login'))
 
@@ -203,44 +206,43 @@ def seminarleistung_bewerten():
         if 'user_id' in session: #Unangemeldete User werden auf die Loginseite zurückgeleitet
             user_id = int(session.get('user_id', '-1'))
             rolle = get_user_role(user_id)
-            if rolle == 'doz': #Studierende werden an die Themenübersicht Seite weitergeleitet
-                form = request.form
+            if not pruefe_dozent(user_id, rolle):  #Studenten werden auf die Loginseite zurückgeleitet
+                return render_template("index.html")
+            form = request.form
 
-                t_id_raw = form.get('t_id')
-                if not t_id_raw or not t_id_raw.isdigit():
-                    flash('Bitte ein Seminarthema auswählen.', 'error')
-                    return redirect(url_for('bewertungen.seminarleistung_bewerten'))
-                t_id = int(t_id_raw)
-
-                note_raw = form.get('note')
-                try: #String aus der request form umwandeln
-                    note = float(note_raw)
-                except (TypeError, ValueError): #Flasche Datentypen/Werte werden als unzulässig abgefangen
-                    note = None
-
-                if note is None or note not in ZULAESSIGE_NOTEN:
-                    flash('Bitte eine gültige Note auswählen.', 'error')
-                    seminarthemen = get_bewertbare_seminarleistungen(user_id)
-                    return render_template('bewertungen/seminarleistung.html',
-                        seminarthemen=seminarthemen, noten=ZULAESSIGE_NOTEN, rolle=rolle)
-
-                #Sicherstellen, dass t_id tatsächlich noch serverseitig zulässig ist (auf mehreren Geräten eingeloggt...)
-                zulaessige_ids = [s['t_id'] for s in get_bewertbare_seminarleistungen(user_id)]
-                if t_id not in zulaessige_ids:
-                    flash('Dieses Seminarthema steht aktuell nicht zur Bewertung.', 'error')
-                    return redirect(url_for('bewertungen.seminarleistung_bewerten'))
-
-                data = {'t_id': t_id, 'note': note}
-                erfolg = create_seminarleistung(data)
-
-                if erfolg: #Dem Dozenten wird bestätigt, dass die Note erfolgreich gespeichert wurde
-                    flash('Seminarleistung erfolgreich bewertet.', 'success')
-                    return redirect(url_for('themen.themen_uebersicht'))
-                else:
-                    flash('Seminarleistung konnte nicht gespeichert werden.', 'error')
-
+            t_id_raw = form.get('t_id')
+            if not t_id_raw or not t_id_raw.isdigit():
+                flash('Bitte ein Seminarthema auswählen.', 'error')
                 return redirect(url_for('bewertungen.seminarleistung_bewerten'))
-            flash('Nur Dozenten können die Seminarleistung bewerten.', 'error')
-            return redirect(url_for('themen.themen_uebersicht'))
+            t_id = int(t_id_raw)
+
+            note_raw = form.get('note')
+            try: #String aus der request form umwandeln
+                note = float(note_raw)
+            except (TypeError, ValueError): #Flasche Datentypen/Werte werden als unzulässig abgefangen
+                note = None
+
+            if note is None or note not in ZULAESSIGE_NOTEN:
+                flash('Bitte eine gültige Note auswählen.', 'error')
+                seminarthemen = get_bewertbare_seminarleistungen(user_id)
+                return render_template('bewertungen/seminarleistung.html',
+                    seminarthemen=seminarthemen, noten=ZULAESSIGE_NOTEN, rolle=rolle)
+
+            #Sicherstellen, dass t_id tatsächlich noch serverseitig zulässig ist (auf mehreren Geräten eingeloggt...)
+            zulaessige_ids = [s['t_id'] for s in get_bewertbare_seminarleistungen(user_id)]
+            if t_id not in zulaessige_ids:
+                flash('Dieses Seminarthema steht aktuell nicht zur Bewertung.', 'error')
+                return redirect(url_for('bewertungen.seminarleistung_bewerten'))
+
+            data = {'t_id': t_id, 'note': note}
+            erfolg = create_seminarleistung(data)
+
+            if erfolg: #Dem Dozenten wird bestätigt, dass die Note erfolgreich gespeichert wurde
+                flash('Seminarleistung erfolgreich bewertet.', 'success')
+                return redirect(url_for('themen.themen_uebersicht'))
+            else:
+                flash('Seminarleistung konnte nicht gespeichert werden.', 'error')
+
+            return redirect(url_for('bewertungen.seminarleistung_bewerten'))
         flash('Bitte zuerst einloggen.', 'error')
         return redirect(url_for('auth.login'))
