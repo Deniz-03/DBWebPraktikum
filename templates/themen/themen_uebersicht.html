@@ -5,11 +5,10 @@
 {% block title %}Themen Übersicht{% endblock %}
 {% block header %}Themen Übersicht{% endblock %}
 
-<!--Sidebar wird hier nicht benötigt-->
-{% block spezNav %}
-{% endblock %}
-
-{% block contentClass %}fullWidth{% endblock %}
+<!-- Wird für die Links in der Sidebar benötigt -->
+{% if 'user_id' in session %}
+    {% set user_rolle = rolle %}
+{% endif %}
 
 {% block content %}
 

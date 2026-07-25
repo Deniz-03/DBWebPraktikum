@@ -156,7 +156,7 @@ def validate_login(data)-> tuple[bool, list]:
 
     if not re.match(pass_pattern, passwort):                                    #Passwort
         valid_input = False
-        flash_messages.append("Passwort ist nicht im passenden Format.")
+        flash_messages.append("Passwort ist falsch.")
 
     return valid_input, flash_messages
 
