@@ -144,6 +144,9 @@ def edit_profile():
         if 'user_id' in session:
             user_id = int(session.get('user_id', '-1'))
             rolle = get_user_role(user_id)
+            if rolle != 'stud':
+                flash('Diese Funktion steht nur Studierenden zur Verfügung.', 'error')
+                return redirect(url_for('auth.profile'))
             user_info = get_user_info(user_id)
             edit_mode = False
             auth_mode = True
@@ -160,6 +163,9 @@ def edit_profile():
             user_id = int(session.get('user_id', '-1'))
             inp_passwort = data.get("passwort", '')
             rolle = get_user_role(user_id)
+            if rolle != 'stud':
+                flash('Diese Funktion steht nur Studierenden zur Verfügung.', 'error')
+                return redirect(url_for('auth.profile'))
             user_info = get_user_info(user_id)
             email = user_info.get("email", '').strip()
             seminarthemen = get_free_seminarthemen()
@@ -199,28 +205,28 @@ def stud_profiles():
             rolle = get_user_role(user_id)
             if rolle == 'doz':
                 data = request.form
-                s_id = int(data.get("s_id", '-1'))
-                if s_id > 0:
-                    user_info = get_user_info(s_id)
-                    avg_vortrag_bew = get_bew_vortrag_for_display(s_id)
-                    anz_bew = get_einfache_vortragsstatistik(s_id).get("anzahl_bewertungen", None)
-                    aus_bew = get_bew_ausarbeitung_for_display(s_id)
-                    sem_leistung = get_seminarleistung_for_display(s_id)
-                    return render_template('auth/profile.html',
-                                           view_mode=True,
-                                           user_info=user_info, #Das sind die Infos des ausgewählten Studis
-                                           avg_vortrag_bew = avg_vortrag_bew,
-                                           anz_bew = anz_bew,
-                                           aus_bew =  aus_bew,
-                                           sem_leistung = sem_leistung,
-                                           rolle=rolle) #Hier handelt es sich um die Rolle des Dozenten
-                else:
+                s_id_raw = data.get("s_id", '-1')
+                if not s_id_raw.isdigit() or get_user_role(int(s_id_raw)) != 'stud': #Bei unngültige s_id (also auch d_id nicht erlaubt)
                     flash("Fehler bei der Auswahl, versuche es später erneut.", "error")
-                    return render_template("auth/stud_profiles.html")
+                    return redirect(url_for('auth.stud_profiles'))
+                s_id = int(s_id_raw)
+                user_info = get_user_info(s_id)
+                avg_vortrag_bew = get_bew_vortrag_for_display(s_id)
+                anz_bew = get_einfache_vortragsstatistik(s_id).get("anzahl_bewertungen", None)
+                aus_bew = get_bew_ausarbeitung_for_display(s_id)
+                sem_leistung = get_seminarleistung_for_display(s_id)
+                return render_template('auth/profile.html',
+                                        view_mode=True,
+                                        user_info=user_info, #Das sind die Infos des ausgewählten Studis
+                                        avg_vortrag_bew = avg_vortrag_bew,
+                                        anz_bew = anz_bew,
+                                        aus_bew =  aus_bew,
+                                        sem_leistung = sem_leistung,
+                                        rolle=rolle) #Hier handelt es sich um die Rolle des Dozenten
             else:
                 return redirect(url_for('auth.index'))
         else:
-            redirect(url_for('auth.index'))
+            return redirect(url_for('auth.index'))
 
 
 @auth_bp.route('/update_user', methods=['GET', 'POST'])
@@ -233,6 +239,9 @@ def update_user():
         if 'user_id' in session: #angemeldet
             user_id = int(session.get('user_id', '-1'))
             rolle = get_user_role(user_id)
+            if rolle != 'stud':
+                flash('Diese Funktion steht nur Studierenden zur Verfügung.', 'error')
+                return redirect(url_for('auth.profile'))
             user_info = get_user_info(user_id)
             seminarthemen = get_free_seminarthemen()
             if 'auth' in session:

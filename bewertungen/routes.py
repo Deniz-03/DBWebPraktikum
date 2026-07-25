@@ -154,7 +154,7 @@ def ausarbeitung_bewerten():
             t_id = int(t_id_raw)
 
             #Prüft ob die Ausarbeitung vom Dozenten bereits bewertet wurde
-            if not ist_ausarbeitung_bewertbar(t_id):
+            if not ist_ausarbeitung_bewertbar(t_id, user_id):
                 flash('Diese Ausarbeitung steht aktuell nicht zur Bewertung.', 'error')
                 return redirect(url_for('bewertungen.ausarbeitung_bewerten'))
 
