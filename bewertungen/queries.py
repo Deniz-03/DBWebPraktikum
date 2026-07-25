@@ -281,21 +281,22 @@ def get_bewertbare_ausarbeitungen(d_id):
                 for r in rows
             ]
 
-def ist_ausarbeitung_bewertbar(t_id):
+def ist_ausarbeitung_bewertbar(t_id, d_id):
     """Gibt True aus wenn ein Seminarthema status:'Vergeben' hat und noch nicht bewertet wurde, sonst False.
     :param t_id: themen_id des Seminarthemas
+    :param d_id: d_id des Dozenten
     :return: Boolean"""
     with db.connect_to_db() as conn:
         with conn.cursor() as cur:
             cur.execute(
                 """
             SELECT 1 FROM seminarthema
-            WHERE themen_id = %s AND status = 'Vergeben'
+            WHERE themen_id = %s AND d_id = %s AND status = 'Vergeben'
             AND themen_id NOT IN (
                 SELECT t_id FROM bew_ausarbeitung
             )
             """,
-            (t_id,)
+            (t_id, d_id)
             )
             return cur.fetchone() is not None
 
