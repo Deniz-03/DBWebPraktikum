@@ -310,7 +310,7 @@
     box-shadow: 0 0 4px rgba(56, 5, 163, 0.2);
 }
 
-/* Reine Anzeige eines Wertes – gleicher Look wie .inpt input, aber nicht editierbar */
+/* Reine Anzeige eines Wertes, gleicher Look wie .inpt input, aber nicht editierbar */
 .inpt .displayValue {
     padding: 12px;
     font-size: 15px;

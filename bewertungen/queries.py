@@ -99,7 +99,7 @@ def get_bewertbare_vortraege(exclude_account_id):
                 for r in rows
             ]
 
-def ist_vortrag_bewertbar(t_id, vortrag_nr, account_id=None):
+def ist_vortrag_bewertbar(t_id, vortrag_nr, account_id):
     """
     Hilfsfunktion um zu prüfen, ob ein konkreter Vortrag eines Seminarthemas bewertbar ist. Der Vortrag muss
     existieren (1 <= vortrag_nr <= vorgetragen), das Thema muss vergeben sein und der Nutzer darf diesen Vortrag
