@@ -25,7 +25,7 @@ SKALA_LABELS = {1: '--', 2: '-', 3: 'o', 4: '+', 5: '++'}
 def vortrag_bewerten():
     if request.method == 'GET':
         if 'user_id' in session:  #Unangemeldete User werden auf die Loginseite zurückgeleitet
-            vortraege = get_bewertbare_vortraege(exclude_account_id=int(session.get('user_id', '-1')))
+            vortraege = get_bewertbare_vortraege(int(session.get('user_id', '-1')))
             rolle = get_user_role(int(session.get('user_id', '-1')))
             return render_template('bewertungen/vortrag.html',
                 vortraege=vortraege, kriterien=VORTRAGSKRITERIEN, skala=SKALA_LABELS, rolle=rolle)
@@ -146,7 +146,7 @@ def ausarbeitung_bewerten():
             rolle = get_user_role(int(session.get('user_id', '-1')))
             ausarbeitungen = get_bewertbare_ausarbeitungen(int(session.get('user_id', '-1')))
 
-            # Prüft ob eine Ausarbeitung im Formular gewählt wurde
+            #Prüft ob eine Ausarbeitung im Formular gewählt wurde
             t_id_raw = form.get('t_id')
             if not t_id_raw or not t_id_raw.isdigit():
                 flash('Bitte eine Ausarbeitung auswählen.', 'error')
@@ -160,7 +160,7 @@ def ausarbeitung_bewerten():
 
             data = {'t_id': t_id, 'bewertender_id': int(session.get('user_id', '-1'))}
 
-            # Prüft ob zu jedem Kriterium eine Bewertung angegeben wurde, fehlende Kriterien werden dem Nutzer gemeldet
+            #Prüft ob zu jedem Kriterium eine Bewertung angegeben wurde, fehlende Kriterien werden dem Nutzer gemeldet
             for feld, label in AUSARBEITUNGSKRITERIEN:
                 wert = form.get(feld, type=int)
                 if wert not in (1, 2, 3, 4, 5):
@@ -217,7 +217,7 @@ def seminarleistung_bewerten():
             t_id = int(t_id_raw)
 
             note_raw = form.get('note')
-            try: #String aus der request form umwandeln
+            try: #String aus der request form zu float umwandeln
                 note = float(note_raw)
             except (TypeError, ValueError): #Flasche Datentypen/Werte werden als unzulässig abgefangen
                 note = None
@@ -228,7 +228,7 @@ def seminarleistung_bewerten():
                 return render_template('bewertungen/seminarleistung.html',
                     seminarthemen=seminarthemen, noten=ZULAESSIGE_NOTEN, rolle=rolle)
 
-            #Sicherstellen, dass t_id tatsächlich noch serverseitig zulässig ist (auf mehreren Geräten eingeloggt...)
+            #Sicherstellen, dass t_id tatsächlich noch serverseitig zulässig ist
             zulaessige_ids = [s['t_id'] for s in get_bewertbare_seminarleistungen(user_id)]
             if t_id not in zulaessige_ids:
                 flash('Dieses Seminarthema steht aktuell nicht zur Bewertung.', 'error')

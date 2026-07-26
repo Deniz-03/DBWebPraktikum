@@ -467,7 +467,7 @@ input[type="radio"]:hover {
 
 .statistikAnzahlZeile td {
     padding-bottom: 14px;
-    border-bottom: 1px solid #ddd;
+    border-bottom: 1px solid #ddd; /*Die Anzahl Zeile wird klar abgegrenzt*/
 }
 
 .statistikLabel {

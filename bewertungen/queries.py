@@ -65,7 +65,7 @@ def create_bew_vortrag(data):
                 conn.rollback()
                 return "bereits_bewertet"
 
-def get_bewertbare_vortraege(exclude_account_id=None):
+def get_bewertbare_vortraege(exclude_account_id):
     """
     Gibt alle bewertbaren Vorträge aus (status='Vergeben' und vorgetragen>0).
     Da ein Thema mehrere Vorträge haben kann, wird jedes Thema mittels generate_series in seine einzelnen
@@ -76,22 +76,22 @@ def get_bewertbare_vortraege(exclude_account_id=None):
     """
     with db.connect_to_db() as conn:
         with conn.cursor() as cur:
-            query = """
+            cur.execute(
+                """
                 SELECT st.themen_id, gs.nr AS vortrag_nr, st.titel, s.vorname, s.nachname
                 FROM seminarthema st
                 JOIN studierende s ON st.s_id = s.s_id
                 CROSS JOIN LATERAL generate_series(1, st.vorgetragen) AS gs(nr)
-                WHERE st.status = 'Vergeben' AND st.vorgetragen > 0
-            """
-            params = []
-            if exclude_account_id is not None:
-                query += " AND st.s_id != %s"
-                query += (" AND NOT EXISTS (SELECT 1 FROM bew_vortrag bv "
-                          "WHERE bv.t_id = st.themen_id AND bv.vortrag_nr = gs.nr AND bv.bewertender_id = %s)")
-                params.extend([exclude_account_id, exclude_account_id])
-            query += " ORDER BY s.nachname, s.vorname, gs.nr"
+                WHERE st.status = 'Vergeben' AND st.vorgetragen > 0 AND st.s_id != %s
+                AND NOT EXISTS (
+                    SELECT 1 FROM bew_vortrag bv 
+                    WHERE bv.t_id = st.themen_id AND bv.vortrag_nr = gs.nr AND bv.bewertender_id = %s
+                    )
+                ORDER BY s.nachname, s.vorname, gs.nr
+                """,
+                (exclude_account_id, exclude_account_id),
+            )
 
-            cur.execute(query, params)
             rows = cur.fetchall()
             return [
                 {'t_id': r['themen_id'], 'vortrag_nr': r['vortrag_nr'], 'titel': r['titel'],
@@ -113,14 +113,14 @@ def ist_vortrag_bewertbar(t_id, vortrag_nr, account_id=None):
         with conn.cursor() as cur:
             cur.execute(
                 """
-            SELECT 1 FROM seminarthema st
-            WHERE st.themen_id = %s AND st.status = 'Vergeben'
-            AND %s BETWEEN 1 AND st.vorgetragen
-            AND NOT EXISTS (
-                SELECT 1 FROM bew_vortrag bv
-                WHERE bv.t_id = st.themen_id AND bv.vortrag_nr = %s AND bv.bewertender_id = %s
-            )
-            """,
+                SELECT 1 FROM seminarthema st
+                WHERE st.themen_id = %s AND st.status = 'Vergeben'
+                AND %s BETWEEN 1 AND st.vorgetragen
+                AND NOT EXISTS (
+                    SELECT 1 FROM bew_vortrag bv
+                    WHERE bv.t_id = st.themen_id AND bv.vortrag_nr = %s AND bv.bewertender_id = %s
+                )
+                """,
             (t_id, vortrag_nr, vortrag_nr, account_id)
             )
             return cur.fetchone() is not None
@@ -290,13 +290,13 @@ def ist_ausarbeitung_bewertbar(t_id, d_id):
         with conn.cursor() as cur:
             cur.execute(
                 """
-            SELECT 1 FROM seminarthema
-            WHERE themen_id = %s AND d_id = %s AND status = 'Vergeben'
-            AND themen_id NOT IN (
-                SELECT t_id FROM bew_ausarbeitung
-            )
-            """,
-            (t_id, d_id)
+                SELECT 1 FROM seminarthema
+                WHERE themen_id = %s AND d_id = %s AND status = 'Vergeben'
+                AND themen_id NOT IN (
+                    SELECT t_id FROM bew_ausarbeitung
+                )
+                """,
+                (t_id, d_id,)
             )
             return cur.fetchone() is not None
 
@@ -383,13 +383,13 @@ def create_seminarleistung(data):
                     INSERT INTO seminarleistung (t_id, note)
                     VALUES (%s, %s)
                     """,
-                    (data['t_id'], data['note'])
+                    (data.get('t_id'), data.get('note'),)
                 )
                 cur.execute(
                     """
                     UPDATE seminarthema SET status = 'Abgeschlossen' WHERE themen_id = %s
                     """,
-                    (data['t_id'],)
+                    (data.get('t_id'),)
                 )
                 conn.commit()
                 return True
